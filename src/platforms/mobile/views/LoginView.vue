@@ -4,17 +4,14 @@ import { useRouter } from 'vue-router'
 import { loginUser, saveAuthData, ApiError } from '@core/services/api'
 import { useValidation } from '@core/composables/useValidation'
 
-
 const router = useRouter()
 const { validateEmail, validateRequired } = useValidation()
 
-// Estado del formulario
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
 
-// Función para mostrar/ocultar error
 const showError = (message: string) => {
   errorMessage.value = message
 }
@@ -23,11 +20,14 @@ const hideError = () => {
   errorMessage.value = ''
 }
 
-// Submit del formulario
+const getRedirectPath = (): string => {
+  const isMobile = window.innerWidth < 768
+  return isMobile ? '/principal' : '/dashboard'
+}
+
 const handleSubmit = async () => {
   hideError()
   
-  // Validaciones
   if (!validateRequired(email.value)) {
     showError('Por favor, introduce tu email')
     return
@@ -43,7 +43,6 @@ const handleSubmit = async () => {
     return
   }
   
-  // Login
   isLoading.value = true
   
   try {
@@ -51,8 +50,7 @@ const handleSubmit = async () => {
     saveAuthData(data)
     console.log('Login exitoso')
     
-    // Redirigir a principal
-    router.push('/principal')
+    router.push(getRedirectPath())
   } catch (error) {
     if (error instanceof ApiError) {
       showError(error.message)
@@ -64,12 +62,10 @@ const handleSubmit = async () => {
   }
 }
 
-// Navegación a registro
 const goToRegister = () => {
   router.push('/register')
 }
 
-// Social login (placeholder)
 const handleSocialLogin = (provider: string) => {
   console.log(`${provider} login clicked`)
   alert(`${provider} login no implementado aún`)
@@ -176,8 +172,6 @@ const handleSocialLogin = (provider: string) => {
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
-
-
 
 .auth-screen {
   background: $white;
@@ -387,8 +381,6 @@ const handleSocialLogin = (provider: string) => {
     }
   }
 }
-
-// === RESPONSIVE ===
 
 @include height-small {
   .auth-header {
