@@ -12,7 +12,13 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
+      '@core': fileURLToPath(new URL('./src/core', import.meta.url)),
+      '@ui': fileURLToPath(new URL('./src/ui', import.meta.url)),
+      '@platforms': fileURLToPath(new URL('./src/platforms', import.meta.url)),
+      '@mobile': fileURLToPath(new URL('./src/platforms/mobile', import.meta.url)),
+      '@desktop': fileURLToPath(new URL('./src/platforms/desktop', import.meta.url))
     },
   },
   server: {
