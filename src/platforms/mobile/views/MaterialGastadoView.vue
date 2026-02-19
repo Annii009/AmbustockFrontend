@@ -5,6 +5,7 @@ import {
   getMateriales,
   getServicios,
   getAmbulancias,
+  getUsuarios,
   saveReposicionData,
   type MaterialProducto,
   type MaterialSeleccionado,
@@ -19,6 +20,7 @@ const router = useRouter()
 const allMateriales = ref<MaterialProducto[]>([])
 const allServicios = ref<Servicio[]>([])
 const allAmbulancias = ref<Ambulancia[]>([])
+const allResponsables = ref<string[]>([])  // ← AÑADIDO
 
 const searchMaterial = ref('')
 const searchServicio = ref('')
@@ -31,11 +33,33 @@ const showServicioAutocomplete = ref(false)
 
 const isLoading = ref(true)
 
+// ── Autocomplete responsable ──────────────────────────────────────────────────
+const sugerenciasResponsable = computed(() => {
+  const query = nombreResponsable.value.trim().toLowerCase()
+  if (query.length < 2) return []
+  return allResponsables.value.filter(nombre =>
+    nombre.toLowerCase().includes(query)
+  )
+})
+
+const mostrarSugerenciasResponsable = computed(() =>
+  sugerenciasResponsable.value.length > 0 && nombreResponsable.value.trim().length >= 2
+)
+
+const seleccionarResponsable = (nombre: string) => {
+  nombreResponsable.value = nombre
+}
+
+const cerrarSugerenciasResponsable = () => {
+  // El timeout da tiempo al mousedown de seleccionarResponsable
+  setTimeout(() => {}, 150)
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Computed
 const materialesFiltrados = computed(() => {
   const query = searchMaterial.value.trim().toLowerCase()
   if (query.length === 0) return []
-  
   return allMateriales.value
     .filter(m => m.nombreProducto.toLowerCase().includes(query))
     .slice(0, 5)
@@ -44,7 +68,6 @@ const materialesFiltrados = computed(() => {
 const serviciosFiltrados = computed(() => {
   const query = searchServicio.value.trim().toLowerCase()
   if (query.length === 0) return []
-  
   return allServicios.value
     .filter(s => s.nombreServicio.toLowerCase().includes(query))
     .slice(0, 5)
@@ -66,17 +89,19 @@ const isFormValid = computed(() => {
 const cargarDatos = async () => {
   try {
     isLoading.value = true
-    
-    const [materiales, servicios, ambulancias] = await Promise.all([
+
+    const [materiales, servicios, ambulancias, usuarios] = await Promise.all([
       getMateriales(),
       getServicios(),
-      getAmbulancias()
+      getAmbulancias(),
+      getUsuarios()           // ← AÑADIDO
     ])
-    
+
     allMateriales.value = materiales
     allServicios.value = servicios
     allAmbulancias.value = ambulancias
-    
+    allResponsables.value = usuarios.map(u => u.nombreUsuario)  // ← AÑADIDO
+
   } catch (error) {
     console.error('Error al cargar datos:', error)
     if (error instanceof ApiError) {
@@ -90,14 +115,9 @@ const cargarDatos = async () => {
 // Materiales
 const agregarMaterial = (material: MaterialProducto) => {
   const existe = materialesSeleccionados.value.find(m => m.idMaterial === material.idMaterial)
-  
   if (!existe) {
-    materialesSeleccionados.value.push({
-      ...material,
-      cantidad: 1
-    })
+    materialesSeleccionados.value.push({ ...material, cantidad: 1 })
   }
-  
   searchMaterial.value = ''
   showMaterialAutocomplete.value = false
 }
@@ -105,10 +125,7 @@ const agregarMaterial = (material: MaterialProducto) => {
 const cambiarCantidad = (index: number, delta: number) => {
   const material = materialesSeleccionados.value[index]
   material.cantidad += delta
-  
-  if (material.cantidad < 1) {
-    material.cantidad = 1
-  }
+  if (material.cantidad < 1) material.cantidad = 1
 }
 
 const eliminarMaterial = (index: number) => {
@@ -122,14 +139,10 @@ const seleccionarMaterialAutocomplete = (material: MaterialProducto) => {
 const agregarMaterialPorBoton = () => {
   const query = searchMaterial.value.trim()
   if (!query) return
-  
-  const material = allMateriales.value.find(m => 
+  const material = allMateriales.value.find(m =>
     m.nombreProducto.toLowerCase() === query.toLowerCase()
   )
-  
-  if (material) {
-    agregarMaterial(material)
-  }
+  if (material) agregarMaterial(material)
 }
 
 // Servicios
@@ -154,19 +167,18 @@ const goBack = () => {
 
 const continuar = () => {
   if (!isFormValid.value || !ambulanciaSeleccionada.value) return
-  
+
   const data = {
     materiales: materialesSeleccionados.value,
     servicio: searchServicio.value.trim(),
     responsable: nombreResponsable.value.trim(),
     ambulancia: ambulanciaSeleccionada.value
   }
-  
+
   saveReposicionData(data)
   router.push('/sugerencias')
 }
 
-// Inicializar
 onMounted(() => {
   cargarDatos()
 })
@@ -188,33 +200,24 @@ onMounted(() => {
       <h1>MATERIAL GASTADO DEL SERVICIO</h1>
 
       <div v-if="isLoading" class="loading">Cargando datos...</div>
-      
+
       <template v-else>
         <h2>Material gastado</h2>
         <p class="subtitle">Seleccione o busque el material</p>
 
         <!-- Búsqueda de material -->
         <div class="search-container">
-          <input 
-            type="text" 
+          <input
+            type="text"
             v-model="searchMaterial"
             @input="onSearchMaterialChange"
-            placeholder="Buscar material" 
+            placeholder="Buscar material"
             autocomplete="off"
           >
-          <button class="btn-add" @click="agregarMaterialPorBoton">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          
-          <div 
-            class="autocomplete-list" 
-            :class="{ show: showMaterialAutocomplete }"
-          >
-            <div 
-              v-for="material in materialesFiltrados" 
+
+          <div class="autocomplete-list" :class="{ show: showMaterialAutocomplete }">
+            <div
+              v-for="material in materialesFiltrados"
               :key="material.idMaterial"
               class="autocomplete-item"
               @click="seleccionarMaterialAutocomplete(material)"
@@ -226,8 +229,8 @@ onMounted(() => {
 
         <!-- Lista de materiales seleccionados -->
         <div class="material-list">
-          <div 
-            v-for="(material, index) in materialesSeleccionados" 
+          <div
+            v-for="(material, index) in materialesSeleccionados"
             :key="material.idMaterial"
             class="material-item"
           >
@@ -259,8 +262,8 @@ onMounted(() => {
         <h3 class="section-title">Ambulancia</h3>
         <select v-model="ambulanciaSeleccionadaId" class="select-input">
           <option :value="null">Selecciona una ambulancia</option>
-          <option 
-            v-for="ambulancia in allAmbulancias" 
+          <option
+            v-for="ambulancia in allAmbulancias"
             :key="ambulancia.idAmbulancia"
             :value="ambulancia.idAmbulancia"
           >
@@ -271,20 +274,16 @@ onMounted(() => {
         <!-- Servicio -->
         <h3 class="section-title">Servicio donde se ha gastado el material</h3>
         <div class="search-container">
-          <input 
-            type="text" 
+          <input
+            type="text"
             v-model="searchServicio"
             @input="onSearchServicioChange"
-            placeholder="Ej: Cementerio día 31" 
+            placeholder="Ej: Cementerio día 31"
             autocomplete="off"
           >
-          
-          <div 
-            class="autocomplete-list" 
-            :class="{ show: showServicioAutocomplete }"
-          >
-            <div 
-              v-for="servicio in serviciosFiltrados" 
+          <div class="autocomplete-list" :class="{ show: showServicioAutocomplete }">
+            <div
+              v-for="servicio in serviciosFiltrados"
               :key="servicio.idServicio"
               class="autocomplete-item"
               @click="seleccionarServicioAutocomplete(servicio)"
@@ -294,18 +293,32 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Responsable -->
+        <!-- Responsable con autocomplete -->
         <h3 class="section-title">Persona que realiza la reposición</h3>
-        <input 
-          type="text" 
-          v-model="nombreResponsable"
-          placeholder="Ingrese nombre completo" 
-          class="text-input"
-        >
+        <div class="autocomplete-wrapper">
+          <input
+            type="text"
+            v-model="nombreResponsable"
+            placeholder="Ingrese nombre completo"
+            class="text-input"
+            autocomplete="off"
+            @blur="cerrarSugerenciasResponsable"
+          >
+          <ul v-if="mostrarSugerenciasResponsable" class="responsable-list">
+            <li
+              v-for="(nombre, i) in sugerenciasResponsable"
+              :key="i"
+              class="responsable-item"
+              @mousedown.prevent="seleccionarResponsable(nombre)"
+            >
+              {{ nombre }}
+            </li>
+          </ul>
+        </div>
 
         <!-- Botón continuar -->
-        <button 
-          class="btn-continue" 
+        <button
+          class="btn-continue"
           :disabled="!isFormValid"
           @click="continuar"
         >
@@ -350,16 +363,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   svg {
     width: 24px;
     height: 24px;
     color: $primary-red;
   }
-  
-  &:hover {
-    opacity: 0.7;
-  }
+
+  &:hover { opacity: 0.7; }
 }
 
 .logo {
@@ -403,7 +414,7 @@ h2 {
 .search-container {
   position: relative;
   margin-bottom: 20px;
-  
+
   input {
     width: 100%;
     padding: 14px 50px 14px 16px;
@@ -411,7 +422,8 @@ h2 {
     border-radius: 12px;
     font-size: 15px;
     transition: border-color 0.3s;
-    
+    box-sizing: border-box;
+
     &:focus {
       outline: none;
       border-color: $primary-red;
@@ -419,34 +431,9 @@ h2 {
   }
 }
 
-.btn-add {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  background-color: $primary-red;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
-  
-  &:hover {
-    background-color: $primary-red-hover;
-  }
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    color: $white;
-  }
-}
 
-// Autocomplete
+
+// Autocomplete genérico (materiales y servicios)
 .autocomplete-list {
   position: absolute;
   top: 100%;
@@ -461,25 +448,18 @@ h2 {
   display: none;
   z-index: 10;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  
-  &.show {
-    display: block;
-  }
+
+  &.show { display: block; }
 }
 
 .autocomplete-item {
   padding: 12px 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
   font-size: 15px;
-  
-  &:hover {
-    background-color: $autocomplete-hover;
-  }
-  
-  &:active {
-    background-color: $autocomplete-active;
-  }
+  transition: background-color 0.2s;
+
+  &:hover { background-color: $autocomplete-hover; }
+  &:active { background-color: $autocomplete-active; }
 }
 
 // Material list
@@ -523,11 +503,9 @@ h2 {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  
-  &:hover {
-    background-color: $qty-btn-hover;
-  }
-  
+
+  &:hover { background-color: $qty-btn-hover; }
+
   svg {
     width: 16px;
     height: 16px;
@@ -551,11 +529,9 @@ h2 {
   align-items: center;
   justify-content: center;
   color: $delete-color;
-  
-  &:hover {
-    opacity: 0.7;
-  }
-  
+
+  &:hover { opacity: 0.7; }
+
   svg {
     width: 20px;
     height: 20px;
@@ -573,7 +549,8 @@ h2 {
   margin-bottom: 20px;
   background-color: $white;
   transition: border-color 0.3s;
-  
+  box-sizing: border-box;
+
   &:focus {
     outline: none;
     border-color: $primary-red;
@@ -590,8 +567,41 @@ h2 {
   padding-right: 40px;
 }
 
-.text-input {
+// ── Autocomplete responsable ──
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
   margin-bottom: 30px;
+
+  // Quita el margin-bottom del input heredado
+  .text-input { margin-bottom: 0; }
+}
+
+.responsable-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: $autocomplete-bg;
+  border: 2px solid $autocomplete-border;
+  border-radius: 0 0 12px 12px;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.responsable-item {
+  padding: 12px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover { background-color: $autocomplete-hover; }
+  &:active { background-color: $autocomplete-active; }
 }
 
 // Continue button
@@ -603,30 +613,22 @@ h2 {
   font-size: 16px;
   background-color: #c4a4a4;
   color: $white;
-  
+
   &:not(:disabled) {
     background-color: $primary-red;
-    
+
     &:hover {
       background-color: $primary-red-hover;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(139, 46, 46, 0.3);
     }
   }
-  
-  &:disabled {
-    cursor: not-allowed;
-  }
+
+  &:disabled { cursor: not-allowed; }
 }
 
-// Responsive
 @media (max-width: 480px) {
-  .container {
-    padding: 15px;
-  }
-
-  h1 {
-    font-size: 18px;
-  }
+  .container { padding: 15px; }
+  h1 { font-size: 18px; }
 }
 </style>

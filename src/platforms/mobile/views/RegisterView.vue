@@ -7,14 +7,22 @@ import { useValidation } from '@core/composables/useValidation'
 const router = useRouter()
 const { validateEmail, validateRequired } = useValidation()
 
-// Estado del formulario
 const nombreResponsable = ref('')
 const email = ref('')
 const password = ref('')
+const rol = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
 
-// Función para mostrar/ocultar error
+// Roles hardcodeados hasta que el back tenga el endpoint
+const roles = ref<string[]>([
+  'Sanitario',
+  'Técnico de emergencias',
+  'Operador',
+  'Supervisor',
+  'Administrador'
+])
+
 const showError = (message: string) => {
   errorMessage.value = message
 }
@@ -23,52 +31,67 @@ const hideError = () => {
   errorMessage.value = ''
 }
 
-// Submit del formulario
+const goBack = () => {
+  const isMobile = window.innerWidth < 768
+
+  if (window.history.length > 2) {
+    router.back()
+    return
+  }
+
+  if (isMobile) {
+    router.push('/welcome')
+  } else {
+    router.push('/landing')
+  }
+}
+
 const handleSubmit = async () => {
   hideError()
-  
-  // Validaciones
+
   if (!validateRequired(nombreResponsable.value)) {
     showError('Por favor, introduce tu nombre')
     return
   }
-  
+
   if (!validateRequired(email.value)) {
     showError('Por favor, introduce tu email')
     return
   }
-  
+
   if (!validateEmail(email.value)) {
     showError('Por favor, introduce un email válido')
     return
   }
-  
+
   if (!validateRequired(password.value)) {
     showError('Por favor, introduce una contraseña')
     return
   }
-  
+
   if (password.value.length < 6) {
     showError('La contraseña debe tener al menos 6 caracteres')
     return
   }
-  
-  // Registro
+
+  if (!validateRequired(rol.value)) {
+    showError('Por favor, selecciona tu rol')
+    return
+  }
+
   isLoading.value = true
-  
+
   try {
-    const data = await registerUser(nombreResponsable.value, email.value, password.value)
-    
-    console.log('Registro exitoso')
-    
-    // Guardar token si lo devuelve
+    const data = await registerUser(nombreResponsable.value, email.value, password.value, rol.value)
+    console.log('Registro exitoso', data)
+
     if (data.token) {
       localStorage.setItem('authToken', data.token)
       localStorage.setItem('token', data.token)
     }
-    
-    // Redirigir a login
-    router.push('/login')
+
+    const isMobile = window.innerWidth < 768
+    router.push(isMobile ? '/principal' : '/dashboard')
   } catch (error) {
     if (error instanceof ApiError) {
       showError(error.message)
@@ -80,12 +103,10 @@ const handleSubmit = async () => {
   }
 }
 
-// Navegación a login
 const goToLogin = () => {
   router.push('/login')
 }
 
-// Social login (placeholder)
 const handleSocialLogin = (provider: string) => {
   console.log(`${provider} login clicked`)
   alert(`${provider} login no implementado aún`)
@@ -95,6 +116,18 @@ const handleSocialLogin = (provider: string) => {
 <template>
   <div class="auth-screen">
     <div class="container">
+
+      <!-- Botón retroceso esquina superior izquierda -->
+      <button
+        type="button"
+        class="back-btn"
+        @click="goBack"
+        :disabled="isLoading"
+        aria-label="Volver"
+      >
+        ‹
+      </button>
+
       <div class="auth-header">
         <h1>¡BIENVENIDO!</h1>
         <img src="/logo1Rojo.png" alt="AmbuStock Logo" class="logo" />
@@ -106,11 +139,11 @@ const handleSocialLogin = (provider: string) => {
         <form @submit.prevent="handleSubmit" class="auth-form">
           <div class="form-group">
             <label for="registerNombre">Nombre</label>
-            <input 
+            <input
               v-model="nombreResponsable"
-              type="text" 
-              id="registerNombre" 
-              placeholder="Adam Smith"
+              type="text"
+              id="registerNombre"
+              placeholder="Ej: Juan Pérez García"
               :disabled="isLoading"
               autocomplete="name"
             />
@@ -118,45 +151,70 @@ const handleSocialLogin = (provider: string) => {
 
           <div class="form-group">
             <label for="registerEmail">Email</label>
-            <input 
+            <input
               v-model="email"
-              type="email" 
-              id="registerEmail" 
-              placeholder="adamsmith@gmail.com"
+              type="email"
+              id="registerEmail"
+              placeholder="juan.perez@ambustock.local"
               :disabled="isLoading"
               autocomplete="email"
             />
           </div>
 
           <div class="form-group">
-            <label for="registerPassword">Password</label>
-            <input 
+            <label for="registerPassword">Contraseña</label>
+            <input
               v-model="password"
-              type="password" 
-              id="registerPassword" 
-              placeholder="••••••••••••"
+              type="password"
+              id="registerPassword"
+              placeholder="Mínimo 6 caracteres"
               :disabled="isLoading"
               autocomplete="new-password"
             />
+          </div>
+
+          <!-- Selector de rol -->
+          <div class="form-group">
+            <label for="registerRol">Rol</label>
+            <div class="select-wrapper">
+              <select
+                v-model="rol"
+                id="registerRol"
+                :disabled="isLoading"
+                :class="{ placeholder: !rol }"
+              >
+                <option value="" disabled hidden>
+                  Selecciona tu rol
+                </option>
+                <option
+                  v-for="rolOption in roles"
+                  :key="rolOption"
+                  :value="rolOption"
+                >
+                  {{ rolOption }}
+                </option>
+              </select>
+              <span class="select-arrow">›</span>
+            </div>
           </div>
 
           <div v-if="errorMessage" class="error-message show">
             {{ errorMessage }}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             class="btn btn-primary"
             :class="{ loading: isLoading }"
             :disabled="isLoading"
           >
-            Siguiente
+            Crear cuenta
           </button>
         </form>
 
         <div class="social-login">
-          <button 
-            class="social-btn google-btn" 
+          <button
+            class="social-btn google-btn"
             type="button"
             @click="handleSocialLogin('Google')"
             :disabled="isLoading"
@@ -168,8 +226,8 @@ const handleSocialLogin = (provider: string) => {
               <path fill="#FFF" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
             </svg>
           </button>
-          <button 
-            class="social-btn apple-btn" 
+          <button
+            class="social-btn apple-btn"
             type="button"
             @click="handleSocialLogin('Apple')"
             :disabled="isLoading"
@@ -178,8 +236,8 @@ const handleSocialLogin = (provider: string) => {
               <path fill="#FFF" d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08l.05-.05M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
             </svg>
           </button>
-          <button 
-            class="social-btn facebook-btn" 
+          <button
+            class="social-btn facebook-btn"
             type="button"
             @click="handleSocialLogin('Facebook')"
             :disabled="isLoading"
@@ -192,7 +250,7 @@ const handleSocialLogin = (provider: string) => {
 
         <div class="footer-link">
           <span>
-            ¿Ya tienes cuenta? 
+            ¿Ya tienes cuenta?
             <a @click.prevent="goToLogin" href="#">Iniciar sesión</a>
           </span>
         </div>
@@ -204,7 +262,6 @@ const handleSocialLogin = (provider: string) => {
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
-
 
 .auth-screen {
   background: $white;
@@ -229,11 +286,45 @@ const handleSocialLogin = (provider: string) => {
   position: relative;
 }
 
+.back-btn {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: $text-dark;
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  padding: 0;
+  z-index: 10;
+
+  &:hover:not(:disabled) {
+    background: $menu-item-hover;
+  }
+
+  &:active:not(:disabled) {
+    background: $menu-item-active;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
 .auth-header {
   text-align: center;
   padding: 40px 30px 20px;
   flex-shrink: 0;
-  
+
   h1 {
     font-family: $font-display;
     font-size: 18px;
@@ -256,7 +347,7 @@ const handleSocialLogin = (provider: string) => {
 .auth-content {
   @include glassmorphism;
   border-radius: $border-radius-card $border-radius-card 0 0;
-  box-shadow: 
+  box-shadow:
     0 -8px 32px rgba(0, 0, 0, 0.1),
     0 -4px 12px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -285,7 +376,7 @@ const handleSocialLogin = (provider: string) => {
 
 .form-group {
   margin-bottom: 20px;
-  
+
   label {
     display: block;
     font-family: $font-primary;
@@ -294,9 +385,56 @@ const handleSocialLogin = (provider: string) => {
     color: $text-dark;
     margin-bottom: 8px;
   }
-  
+
   input {
     @include input-base;
+  }
+}
+
+// Select personalizado
+.select-wrapper {
+  position: relative;
+  width: 100%;
+
+  select {
+    @include input-base;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 40px;
+    background-color: $input-bg;
+    color: $text-dark;
+
+    &.placeholder {
+      color: $placeholder-color;
+    }
+
+    &:disabled {
+      background-color: $input-disabled-bg;
+      cursor: not-allowed;
+      color: $text-gray;
+    }
+
+    option {
+      color: $text-dark;
+      background-color: $select-bg;
+
+      &:disabled {
+        color: $placeholder-color;
+      }
+    }
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 20px;
+    color: $text-gray;
+    pointer-events: none;
+    line-height: 1;
   }
 }
 
@@ -311,7 +449,7 @@ const handleSocialLogin = (provider: string) => {
   font-size: 13px;
   font-weight: $font-semibold;
   margin-bottom: 20px;
-  
+
   &.show {
     display: block;
   }
@@ -329,20 +467,20 @@ const handleSocialLogin = (provider: string) => {
   background: $primary-red;
   color: $white;
   box-shadow: $shadow-button;
-  
+
   &:hover:not(:disabled) {
     background: $primary-red-hover;
     transform: translateY(-2px);
     box-shadow: $shadow-button-hover;
   }
-  
+
   &:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: 0 2px 8px rgba(137, 29, 26, 0.25);
   }
-  
+
   &:disabled {
-    background: #CCCCCC;
+    background: $btn-disabled-bg;
     cursor: not-allowed;
     transform: none;
   }
@@ -367,21 +505,21 @@ const handleSocialLogin = (provider: string) => {
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
-  
+
   &:hover:not(:disabled) {
     transform: scale(1.08);
     background: $social-btn-hover;
   }
-  
+
   &:active:not(:disabled) {
     transform: scale(0.98);
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   svg {
     width: 26px;
     height: 26px;
@@ -396,17 +534,17 @@ const handleSocialLogin = (provider: string) => {
   color: $text-gray;
   margin-top: auto;
   padding-top: 30px;
-  
+
   a {
     color: $link-red;
     text-decoration: none;
     font-weight: $font-bold;
     cursor: pointer;
-    
+
     &:hover {
       text-decoration: underline;
     }
-    
+
     &:focus-visible {
       outline: 2px solid $link-red;
       outline-offset: 2px;
@@ -415,53 +553,55 @@ const handleSocialLogin = (provider: string) => {
   }
 }
 
-// === RESPONSIVE ===
-
 @include height-small {
   .auth-header {
     padding: 30px 25px 15px;
-    
+
     h1 {
       font-size: 16px;
       margin-bottom: 25px;
     }
   }
-  
+
   .logo {
     width: 200px;
   }
-  
+
   .auth-content {
     padding: 35px 25px 25px;
   }
-  
+
   .auth-title {
     font-size: 20px;
     margin-bottom: 20px;
   }
-  
+
   .form-group {
     margin-bottom: 16px;
-    
+
     input {
       height: $input-height-small;
     }
   }
-  
+
+  .select-wrapper select {
+    height: $input-height-small;
+  }
+
   .btn {
     height: 52px;
     font-size: 16px;
   }
-  
+
   .social-login {
     margin: 25px 0;
     gap: 15px;
   }
-  
+
   .social-btn {
     width: $social-btn-size-small;
     height: $social-btn-size-small;
-    
+
     svg {
       width: 22px;
       height: 22px;
@@ -472,36 +612,41 @@ const handleSocialLogin = (provider: string) => {
 @include height-large {
   .auth-header {
     padding: 50px 35px 25px;
-    
+
     h1 {
       font-size: 20px;
       margin-bottom: 35px;
     }
   }
-  
+
   .logo {
     width: 260px;
   }
-  
+
   .auth-content {
     padding: 45px 35px 35px;
   }
-  
+
   .auth-title {
     font-size: 24px;
     margin-bottom: 30px;
   }
-  
+
   .form-group input {
     height: $input-height-large;
     font-size: 16px;
   }
-  
+
+  .select-wrapper select {
+    height: $input-height-large;
+    font-size: 16px;
+  }
+
   .btn {
     height: 60px;
     font-size: 18px;
   }
-  
+
   .social-login {
     margin: 35px 0;
   }

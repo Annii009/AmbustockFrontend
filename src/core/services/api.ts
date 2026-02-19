@@ -2,7 +2,7 @@
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Interfaces
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 // Auth
 export interface LoginRequest {
@@ -23,6 +23,7 @@ export interface RegisterRequest {
   nombreResponsable: string;
   email: string;
   password: string;
+  rol: string; // ← AÑADIDO
 }
 
 export interface RegisterResponse {
@@ -173,7 +174,14 @@ export interface ReposicionCompletaData extends ReposicionData {
   fotos?: FotoSeleccionada[];
 }
 
-// Error handling
+// Responsable
+export interface Responsable {
+  idResponsable: number;
+  nombreResponsable: string;
+  fechaServicio?: string;
+}
+
+// ─── Error handling ───────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -182,7 +190,7 @@ export class ApiError extends Error {
   }
 }
 
-// Helper functions
+// ─── Helper functions ─────────────────────────────────────────────────────────
 
 function getAuthHeaders(token: string): HeadersInit {
   return {
@@ -200,7 +208,7 @@ async function handleResponse<T>(response: Response, errorMessage: string): Prom
   return response.json();
 }
 
-// Autenticación
+// ─── Autenticación ────────────────────────────────────────────────────────────
 
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
   try {
@@ -226,10 +234,12 @@ export async function loginUser(email: string, password: string): Promise<LoginR
   }
 }
 
+// ← ACTUALIZADO: acepta rol como cuarto parámetro
 export async function registerUser(
   nombreResponsable: string,
   email: string,
-  password: string
+  password: string,
+  rol: string
 ): Promise<RegisterResponse> {
   try {
     const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -238,7 +248,7 @@ export async function registerUser(
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ nombreResponsable, email, password })
+      body: JSON.stringify({ nombreResponsable, email, password, rol })
     });
 
     return handleResponse<RegisterResponse>(response, 'Error al registrar usuario');
@@ -313,7 +323,7 @@ export function getNombreUsuario(): string {
   return nombre ? nombre.toUpperCase() : 'USUARIO';
 }
 
-// Ambulancias
+// ─── Ambulancias ──────────────────────────────────────────────────────────────
 
 export async function getAmbulancias(): Promise<Ambulancia[]> {
   const token = getAuthToken();
@@ -357,7 +367,7 @@ export function getAmbulanciaSeleccionada(): number | null {
   return id ? parseInt(id, 10) : null;
 }
 
-// Servicios
+// ─── Servicios ────────────────────────────────────────────────────────────────
 
 export async function getServicios(): Promise<Servicio[]> {
   const token = getAuthToken();
@@ -385,7 +395,7 @@ export function getServicioSeleccionado(): number | null {
   return id ? parseInt(id, 10) : null;
 }
 
-// Materiales
+// ─── Materiales ───────────────────────────────────────────────────────────────
 
 export async function getMateriales(): Promise<MaterialProducto[]> {
   const token = getAuthToken();
@@ -404,7 +414,7 @@ export async function getMateriales(): Promise<MaterialProducto[]> {
   }
 }
 
-// Revisiones
+// ─── Revisiones ───────────────────────────────────────────────────────────────
 
 export async function getRevisionAmbulancia(ambulanciaId: number): Promise<RevisionData> {
   const token = getAuthToken();
@@ -416,7 +426,7 @@ export async function getRevisionAmbulancia(ambulanciaId: number): Promise<Revis
       headers: getAuthHeaders(token)
     });
 
-    return handleResponse<RevisionData>(response, `Error al obtener revisión`);
+    return handleResponse<RevisionData>(response, 'Error al obtener revisión');
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(0, 'Error de conexión con el servidor');
@@ -485,7 +495,7 @@ export function limpiarDatosRevision(): void {
   keysToRemove.forEach(key => localStorage.removeItem(key));
 }
 
-// Reposiciones
+// ─── Reposiciones ─────────────────────────────────────────────────────────────
 
 export async function guardarReposicion(reposicion: Reposicion): Promise<any> {
   const token = getAuthToken();
@@ -513,7 +523,6 @@ export async function getHistorialReposiciones(): Promise<ReposicionDetalle[]> {
 
     if (response.ok) return response.json();
 
-    // Fallback a localStorage
     return JSON.parse(localStorage.getItem('historialReposiciones') || '[]');
   } catch {
     return JSON.parse(localStorage.getItem('historialReposiciones') || '[]');
@@ -558,7 +567,6 @@ export async function confirmarReposicion(id: number, materiales: any[]): Promis
 
     if (!response.ok) throw new ApiError(response.status, 'Error al confirmar reposición');
   } catch {
-    // Fallback a localStorage
     let historial = JSON.parse(localStorage.getItem('historialReposiciones') || '[]');
     const index = historial.findIndex((r: any) => r.id == id || r.idReposicion == id);
 
@@ -602,7 +610,7 @@ export function limpiarDatosReposicion(): void {
   keysToRemove.forEach(key => localStorage.removeItem(key));
 }
 
-// Usuarios/Responsables
+// ─── Usuarios / Responsables ──────────────────────────────────────────────────
 
 export async function getUsuarios(): Promise<UsuarioResponsable[]> {
   const token = getAuthToken();
@@ -666,7 +674,30 @@ export async function eliminarUsuario(id: number): Promise<void> {
   if (!response.ok) throw new ApiError(response.status, 'Error al eliminar usuario');
 }
 
-// Utilidades
+// ← AÑADIDO: busca responsables por nombre (para el autocomplete)
+export async function searchResponsables(query: string): Promise<string[]> {
+  const token = getAuthToken();
+  if (!token) throw new ApiError(401, 'No hay token de autenticación');
+
+  try {
+    const response = await fetch(
+      `${API_URL}/api/Responsable/search?q=${encodeURIComponent(query)}`,
+      {
+        method: 'GET',
+        headers: getAuthHeaders(token)
+      }
+    );
+
+    const data = await handleResponse<Responsable[]>(response, 'Error al buscar responsables');
+    // El back devuelve [{ idResponsable: 1, nombreResponsable: "Juan..." }, ...]
+    return data.map((r) => r.nombreResponsable);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(0, 'Error de conexión con el servidor');
+  }
+}
+
+// ─── Utilidades ───────────────────────────────────────────────────────────────
 
 export function saveNombreResponsable(nombre: string): void {
   localStorage.setItem('nombreResponsable', nombre);
@@ -704,7 +735,7 @@ export function obtenerEstadoReposicion(reposicion: any): { texto: string; clase
       'sin-realizar': { texto: 'Sin realizar', clase: 'sin-realizar' },
       'urgente': { texto: 'Urgente', clase: 'urgente' }
     };
-    
+
     if (estados[estadoLower]) return estados[estadoLower];
   }
 
@@ -720,7 +751,7 @@ export function obtenerEstadoRevision(revision: Revision): { texto: string; clas
       'urgente': { texto: 'Urgente', clase: 'urgente' },
       'sin-realizar': { texto: 'Pendiente', clase: 'sin-realizar' }
     };
-    
+
     if (estados[estadoLower]) return estados[estadoLower];
   }
 
