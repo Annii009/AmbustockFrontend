@@ -764,3 +764,4 @@ export function obtenerEstadoRevision(revision: Revision): { texto: string; clas
 
   return { texto: 'completada', clase: 'completada' };
 }
+

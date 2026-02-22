@@ -1,47 +1,38 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useTheme } from '@core/composables/useTheme'
 import { logout, getUsuario } from '@core/services/api'
 
+
 const router = useRouter()
-const { isDarkTheme, toggleTheme } = useTheme()
+
 
 // Estado del menú y modal
 const isMenuOpen = ref(false)
 const isLogoutModalOpen = ref(false)
 
-// Logo dinámico según tema
-const logoSrc = computed(() => {
-  return isDarkTheme.value ? '/logo2Blanco.png' : '/logo2Rojo.png'
-})
-
-// Iconos de tema
-const themeIcon = computed(() => {
-  return isDarkTheme.value ? 'moon' : 'sun'
-})
-
-const themeText = computed(() => {
-  return isDarkTheme.value ? 'Tema oscuro' : 'Tema claro'
-})
 
 // Toggle menu
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
+
 const closeMenu = () => {
   isMenuOpen.value = false
 }
+
 
 // Navegación
 const goToRevision = () => {
   router.push('/seleccion-ambulancia')
 }
 
+
 const goToMaterialGastado = () => {
   router.push('/material-gastado')
 }
+
 
 const goToPerfil = () => {
   closeMenu()
@@ -54,20 +45,24 @@ const goToPerfil = () => {
   }
 }
 
+
 // Logout
 const showLogoutModal = () => {
   closeMenu()
   isLogoutModalOpen.value = true
 }
 
+
 const closeLogoutModal = () => {
   isLogoutModalOpen.value = false
 }
+
 
 const confirmLogout = () => {
   logout()
   router.push('/')
 }
+
 
 // Cerrar modal con ESC
 const handleKeydown = (e: KeyboardEvent) => {
@@ -76,6 +71,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+
 // Click fuera del modal
 const handleModalClick = (e: MouseEvent) => {
   if ((e.target as HTMLElement).classList.contains('modal-overlay')) {
@@ -83,6 +79,7 @@ const handleModalClick = (e: MouseEvent) => {
   }
 }
 </script>
+
 
 <template>
   <div class="principal-view">
@@ -95,30 +92,6 @@ const handleModalClick = (e: MouseEvent) => {
       </button>
       
       <div class="dropdown-menu" :class="{ show: isMenuOpen }">
-        <div class="menu-item" @click="toggleTheme">
-          <div class="theme-icon">
-            <svg v-if="themeIcon === 'sun'" class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
-            <svg v-else class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </div>
-          <span>{{ themeText }}</span>
-          <label class="toggle-switch">
-            <input type="checkbox" :checked="isDarkTheme" @change="toggleTheme">
-            <span class="slider"></span>
-          </label>
-        </div>
-        
         <div class="menu-item" @click="goToPerfil">
           <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -138,14 +111,16 @@ const handleModalClick = (e: MouseEvent) => {
       </div>
     </div>
 
+
     <!-- Contenido principal -->
     <div class="container">
-      <img :src="logoSrc" alt="AmbuStock Logo" class="logo">
+      <img src="/logo2Rojo.png" alt="AmbuStock Logo" class="logo">
       <h1>BIENVENIDO A AMBUSTOCK</h1>
       <p class="subtitle">Un servicio de revisión de ambulancias cómodo y sencillo</p>
       <button class="btn btn-primary" @click="goToRevision">Empezar revisión</button>
       <button class="btn btn-secondary" @click="goToMaterialGastado">Material gastado</button>
     </div>
+
 
     <!-- Modal de confirmación cerrar sesión -->
     <div 
@@ -167,9 +142,11 @@ const handleModalClick = (e: MouseEvent) => {
   </div>
 </template>
 
+
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
+
 
 .principal-view {
   min-height: 100vh;
@@ -182,12 +159,14 @@ const handleModalClick = (e: MouseEvent) => {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+
 // Menú hamburguesa
 .menu-container {
   position: absolute;
   top: 20px;
   right: 20px;
 }
+
 
 .menu-button {
   background: none;
@@ -208,9 +187,11 @@ const handleModalClick = (e: MouseEvent) => {
   }
 }
 
+
 :global(body.dark-theme) .menu-button .dot {
   background-color: $white;
 }
+
 
 .dropdown-menu {
   position: absolute;
@@ -231,10 +212,12 @@ const handleModalClick = (e: MouseEvent) => {
   }
 }
 
+
 :global(body.dark-theme) .dropdown-menu {
   background-color: $dark-card-bg;
   box-shadow: $dropdown-shadow-dark;
 }
+
 
 .menu-item {
   display: flex;
@@ -254,9 +237,11 @@ const handleModalClick = (e: MouseEvent) => {
   }
 }
 
+
 :global(body.dark-theme) .menu-item:hover {
   background-color: $dark-hover-bg;
 }
+
 
 .menu-item-danger {
   color: $error-text;
@@ -266,9 +251,11 @@ const handleModalClick = (e: MouseEvent) => {
   }
 }
 
+
 :global(body.dark-theme) .menu-item-danger:hover {
   background-color: #3d2020;
 }
+
 
 .menu-icon {
   width: 20px;
@@ -276,51 +263,6 @@ const handleModalClick = (e: MouseEvent) => {
   flex-shrink: 0;
 }
 
-// Toggle switch
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-  
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  border-radius: 24px;
-  transition: 0.4s;
-  
-  &:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: $white;
-    border-radius: 50%;
-    transition: 0.4s;
-  }
-}
-
-input:checked + .slider {
-  background-color: $primary-red;
-  
-  &:before {
-    transform: translateX(20px);
-  }
-}
 
 // Contenido principal
 .container {
@@ -329,11 +271,13 @@ input:checked + .slider {
   width: 100%;
 }
 
+
 .logo {
   width: 200px;
   margin-bottom: 40px;
   transition: opacity 0.3s ease;
 }
+
 
 h1 {
   font-size: 24px;
@@ -343,9 +287,11 @@ h1 {
   transition: color 0.4s ease;
 }
 
+
 :global(body.dark-theme) h1 {
   color: $dark-text;
 }
+
 
 .subtitle {
   font-size: 14px;
@@ -355,9 +301,11 @@ h1 {
   transition: color 0.4s ease;
 }
 
+
 :global(body.dark-theme) .subtitle {
   color: $dark-text-secondary;
 }
+
 
 .btn {
   @include button-base;
@@ -366,6 +314,7 @@ h1 {
   font-size: 16px;
   margin-bottom: 16px;
 }
+
 
 .btn-primary {
   background-color: $primary-red;
@@ -376,9 +325,11 @@ h1 {
   }
 }
 
+
 .btn-secondary {
   @include button-secondary;
 }
+
 
 // Modal
 .modal-overlay {
@@ -399,6 +350,7 @@ h1 {
   }
 }
 
+
 .modal-content {
   background-color: $modal-bg;
   border-radius: 20px;
@@ -409,10 +361,12 @@ h1 {
   @include slideIn;
 }
 
+
 :global(body.dark-theme) .modal-content {
   background-color: $dark-card-bg;
   color: $dark-text;
 }
+
 
 .modal-title {
   font-size: 20px;
@@ -423,15 +377,18 @@ h1 {
   color: $text-dark;
 }
 
+
 :global(body.dark-theme) .modal-title {
   color: $dark-text;
 }
+
 
 .modal-buttons {
   display: flex;
   gap: 15px;
   justify-content: center;
 }
+
 
 .btn-cancelar,
 .btn-confirmar {
@@ -449,6 +406,7 @@ h1 {
   }
 }
 
+
 .btn-cancelar {
   background-color: $primary-red;
   color: $white;
@@ -459,6 +417,7 @@ h1 {
     box-shadow: 0 4px 12px rgba(139, 46, 46, 0.3);
   }
 }
+
 
 .btn-confirmar {
   background-color: transparent;
@@ -473,6 +432,7 @@ h1 {
   }
 }
 
+
 :global(body.dark-theme) .btn-confirmar {
   color: $dark-red;
   border-color: $dark-red;
@@ -482,6 +442,7 @@ h1 {
     color: $white;
   }
 }
+
 
 // Responsive
 @media (max-width: 480px) {

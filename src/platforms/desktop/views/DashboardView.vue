@@ -7,7 +7,7 @@
       </div>
 
       <div class="quick-actions">
-        <button @click="navigateTo('/dashboard/inspection')" class="action-card action-red">
+        <button @click="navigateTo('/principal/revision')" class="action-card action-red">
           <div class="action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -15,11 +15,11 @@
               <path d="m9 12 2 2 4-4"/>
             </svg>
           </div>
-          <h3 class="action-title">Nueva Inspección</h3>
+          <h3 class="action-title">Nueva Revisión</h3>
           <p class="action-text">Iniciar revisión completa de ambulancia</p>
         </button>
 
-        <button @click="navigateTo('/dashboard/replenishment')" class="action-card action-gray">
+        <button @click="navigateTo('/principal/reposicion')" class="action-card action-gray">
           <div class="action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -31,7 +31,7 @@
           <p class="action-text">Gestionar material gastado y pedidos</p>
         </button>
 
-        <button @click="navigateTo('/dashboard/history')" class="action-card action-green">
+        <button @click="navigateTo('/principal/history')" class="action-card action-green">
           <div class="action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 3v5h5"/>
@@ -157,12 +157,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  getUsuario, 
-  getHistorialRevisiones, 
+import {
+  getUsuario,
+  getHistorialRevisiones,
   obtenerEstadoRevision,
   type Usuario,
-  type Revision 
+  type Revision
 } from '@/core/services/api'
 
 interface Activity {
@@ -220,11 +220,11 @@ const calcularTiempoTranscurrido = (fechaISO: string): string => {
   const fecha = new Date(fechaISO)
   const ahora = new Date()
   const diff = ahora.getTime() - fecha.getTime()
-  
+
   const minutos = Math.floor(diff / 60000)
   const horas = Math.floor(minutos / 60)
   const dias = Math.floor(horas / 24)
-  
+
   if (dias > 0) return `Hace ${dias} día${dias > 1 ? 's' : ''}`
   if (horas > 0) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`
   if (minutos > 0) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`
@@ -235,7 +235,7 @@ const cargarActividades = async () => {
   try {
     const revisiones = await getHistorialRevisiones()
     const ultimasRevisiones = revisiones.slice(0, 5)
-    
+
     activities.value = ultimasRevisiones.map((revision: Revision) => {
       const estado = obtenerEstadoRevision(revision)
       return {
@@ -257,28 +257,28 @@ const cargarEstadisticas = async () => {
   try {
     statsLoading.value = true
     const revisiones = await getHistorialRevisiones()
-    
+
     const ahora = new Date()
     const mesActual = ahora.getMonth()
     const añoActual = ahora.getFullYear()
-    
+
     const revisionesMes = revisiones.filter((r: Revision) => {
       const fecha = new Date(r.fechaRevision)
       return fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual
     })
-    
+
     totalInspecciones.value = revisionesMes.length
-    
+
     inspeccionesAprobadas.value = revisionesMes.filter((r: Revision) => {
       const estado = obtenerEstadoRevision(r)
       return estado.clase === 'completada'
     }).length
-    
+
     alertasPendientes.value = revisionesMes.filter((r: Revision) => {
       const estado = obtenerEstadoRevision(r)
       return estado.clase === 'urgente' || estado.clase === 'pendiente'
     }).length
-    
+
   } catch (error) {
     console.error('Error cargando estadísticas:', error)
   } finally {
@@ -289,12 +289,12 @@ const cargarEstadisticas = async () => {
 onMounted(async () => {
   loading.value = true
   user.value = getUsuario()
-  
+
   await Promise.all([
     cargarActividades(),
     cargarEstadisticas()
   ])
-  
+
   loading.value = false
 })
 </script>
@@ -416,17 +416,9 @@ onMounted(async () => {
   width: 32px;
   height: 32px;
 
-  &.green {
-    color: #71b48d;
-  }
-
-  &.red {
-    color: #891d1a;
-  }
-
-  &.gray {
-    color: #5e657b;
-  }
+  &.green { color: #71b48d; }
+  &.red   { color: #891d1a; }
+  &.gray  { color: #5e657b; }
 }
 
 .stat-badge {

@@ -17,6 +17,8 @@ const showModalCerrarSesion = ref(false)
 // Verificar permisos de administrador
 const verificarPermisos = () => {
   const usuario = getUsuario()
+  console.log('Usuario:', usuario)
+  console.log('isAdmin:', isAdmin())
   
   if (!usuario) {
     router.push('/login')

@@ -81,9 +81,15 @@ const mobileRoutes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/detalle-reposicion/:id',
-    name: 'detalle-reposicion',
-    component: () => import('@mobile/views/DetalleReposicionView.vue'),
+    path: '/perfil-admin',
+    name: 'perfil-admin',
+    component: () => import('@mobile/views/PerfilAdminView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/lista-responsables',
+    name: 'lista-responsables',
+    component: () => import('@mobile/views/ListaResponsablesView.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -96,6 +102,12 @@ const mobileRoutes = [
     path: '/ver-revisiones',
     name: 'ver-revisiones',
     component: () => import('@mobile/views/VerRevisionesView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/detalle-reposicion/:id',
+    name: 'detalle-reposicion',
+    component: () => import('@mobile/views/DetalleReposicionView.vue'),
     meta: { requiresAuth: true }
   }
 ]

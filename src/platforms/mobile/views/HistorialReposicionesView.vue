@@ -5,8 +5,10 @@ import {
   getHistorialReposiciones,
   obtenerEstadoReposicion,
   formatearFechaLarga,
+  isAdmin,
   type ReposicionDetalle
 } from '@core/services/api'
+
 
 const router = useRouter()
 
@@ -78,8 +80,13 @@ const verDetalle = (id: number) => {
 
 // Navegación
 const goBack = () => {
-  router.push('/perfil')
+  if (isAdmin()) {
+    router.push('/perfil-admin')
+  } else {
+    router.push('/perfil')
+  }
 }
+
 
 // Inicializar
 onMounted(() => {

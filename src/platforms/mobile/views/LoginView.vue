@@ -22,7 +22,7 @@ const hideError = () => {
 
 const getRedirectPath = (): string => {
   const isMobile = window.innerWidth < 768
-  return isMobile ? '/principal' : '/dashboard'
+  return isMobile ? '/principal' : '/principal'
 }
 
 const goBack = () => {
