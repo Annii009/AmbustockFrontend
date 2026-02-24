@@ -7,7 +7,7 @@
       </div>
 
       <div class="quick-actions">
-        <button @click="navigateTo('/principal/revision')" class="action-card action-red">
+        <button @click="navigateTo('/principal/seleccion-ambulancia')" class="action-card action-red">
           <div class="action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -31,7 +31,7 @@
           <p class="action-text">Gestionar material gastado y pedidos</p>
         </button>
 
-        <button @click="navigateTo('/principal/history')" class="action-card action-green">
+        <button @click="navigateTo('/principal/historial')" class="action-card action-green">
           <div class="action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 3v5h5"/>
@@ -134,12 +134,10 @@
                 <p class="detail-label">Correo Electrónico</p>
                 <p class="detail-value">{{ user.email }}</p>
               </div>
-
               <div class="profile-detail">
                 <p class="detail-label">Rol</p>
                 <p class="detail-value">{{ user.rol }}</p>
               </div>
-
               <div class="profile-detail no-border">
                 <p class="detail-label">ID Usuario</p>
                 <p class="detail-value">#{{ user.usuarioId }}</p>
@@ -175,15 +173,15 @@ interface Activity {
 }
 
 const router = useRouter()
-const user = ref<Usuario | null>(null)
-const activities = ref<Activity[]>([])
-const loading = ref(true)
+const user         = ref<Usuario | null>(null)
+const activities   = ref<Activity[]>([])
+const loading      = ref(true)
 const statsLoading = ref(true)
 
-const totalInspecciones = ref(0)
+const totalInspecciones    = ref(0)
 const inspeccionesAprobadas = ref(0)
-const alertasPendientes = ref(0)
-const tiempoPromedio = ref('18min')
+const alertasPendientes    = ref(0)
+const tiempoPromedio       = ref('18min')
 
 const firstName = computed(() => {
   if (!user.value) return ''
@@ -202,49 +200,45 @@ const porcentajeAprobadas = computed(() => {
   return Math.round((inspeccionesAprobadas.value / totalInspecciones.value) * 100)
 })
 
-const navigateTo = (path: string) => {
-  router.push(path)
-}
+const navigateTo = (path: string) => router.push(path)
 
 const getColorFromEstado = (clase: string): string => {
   const colores: Record<string, string> = {
-    'completada': '#71b48d',
-    'pendiente': '#f59e0b',
-    'urgente': '#891d1a',
+    'completada':   '#71b48d',
+    'pendiente':    '#f59e0b',
+    'urgente':      '#891d1a',
     'sin-realizar': '#5e657b'
   }
   return colores[clase] || '#5e657b'
 }
 
 const calcularTiempoTranscurrido = (fechaISO: string): string => {
-  const fecha = new Date(fechaISO)
-  const ahora = new Date()
-  const diff = ahora.getTime() - fecha.getTime()
-
+  const fecha   = new Date(fechaISO)
+  const ahora   = new Date()
+  const diff    = ahora.getTime() - fecha.getTime()
   const minutos = Math.floor(diff / 60000)
-  const horas = Math.floor(minutos / 60)
-  const dias = Math.floor(horas / 24)
+  const horas   = Math.floor(minutos / 60)
+  const dias    = Math.floor(horas / 24)
 
-  if (dias > 0) return `Hace ${dias} día${dias > 1 ? 's' : ''}`
-  if (horas > 0) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`
+  if (dias > 0)    return `Hace ${dias} día${dias > 1 ? 's' : ''}`
+  if (horas > 0)   return `Hace ${horas} hora${horas > 1 ? 's' : ''}`
   if (minutos > 0) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`
   return 'Hace un momento'
 }
 
 const cargarActividades = async () => {
   try {
-    const revisiones = await getHistorialRevisiones()
+    const revisiones      = await getHistorialRevisiones()
     const ultimasRevisiones = revisiones.slice(0, 5)
-
     activities.value = ultimasRevisiones.map((revision: Revision) => {
       const estado = obtenerEstadoRevision(revision)
       return {
-        id: `AMB-${String(revision.idRevision).padStart(3, '0')}`,
+        id:               `AMB-${String(revision.idRevision).padStart(3, '0')}`,
         nombreAmbulancia: revision.nombreAmbulancia || revision.matricula,
-        status: estado.texto,
-        time: calcularTiempoTranscurrido(revision.fechaRevision),
-        color: getColorFromEstado(estado.clase),
-        clase: estado.clase
+        status:           estado.texto,
+        time:             calcularTiempoTranscurrido(revision.fechaRevision),
+        color:            getColorFromEstado(estado.clase),
+        clase:            estado.clase
       }
     })
   } catch (error) {
@@ -256,11 +250,10 @@ const cargarActividades = async () => {
 const cargarEstadisticas = async () => {
   try {
     statsLoading.value = true
-    const revisiones = await getHistorialRevisiones()
-
-    const ahora = new Date()
-    const mesActual = ahora.getMonth()
-    const añoActual = ahora.getFullYear()
+    const revisiones   = await getHistorialRevisiones()
+    const ahora        = new Date()
+    const mesActual    = ahora.getMonth()
+    const añoActual    = ahora.getFullYear()
 
     const revisionesMes = revisiones.filter((r: Revision) => {
       const fecha = new Date(r.fechaRevision)
@@ -269,14 +262,13 @@ const cargarEstadisticas = async () => {
 
     totalInspecciones.value = revisionesMes.length
 
-    inspeccionesAprobadas.value = revisionesMes.filter((r: Revision) => {
-      const estado = obtenerEstadoRevision(r)
-      return estado.clase === 'completada'
-    }).length
+    inspeccionesAprobadas.value = revisionesMes.filter((r: Revision) =>
+      obtenerEstadoRevision(r).clase === 'completada'
+    ).length
 
     alertasPendientes.value = revisionesMes.filter((r: Revision) => {
-      const estado = obtenerEstadoRevision(r)
-      return estado.clase === 'urgente' || estado.clase === 'pendiente'
+      const clase = obtenerEstadoRevision(r).clase
+      return clase === 'urgente' || clase === 'pendiente'
     }).length
 
   } catch (error) {
@@ -288,13 +280,8 @@ const cargarEstadisticas = async () => {
 
 onMounted(async () => {
   loading.value = true
-  user.value = getUsuario()
-
-  await Promise.all([
-    cargarActividades(),
-    cargarEstadisticas()
-  ])
-
+  user.value    = getUsuario()
+  await Promise.all([cargarActividades(), cargarEstadisticas()])
   loading.value = false
 })
 </script>
@@ -311,9 +298,7 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.header {
-  margin-bottom: 3rem;
-}
+.header { margin-bottom: 3rem; }
 
 .title {
   font-family: 'Bebas Neue', sans-serif;
@@ -349,17 +334,9 @@ onMounted(async () => {
     transform: scale(1.02);
   }
 
-  &.action-red {
-    background: linear-gradient(135deg, #891d1a, #6b1515);
-  }
-
-  &.action-gray {
-    background: linear-gradient(135deg, #5e657b, #4a5061);
-  }
-
-  &.action-green {
-    background: linear-gradient(135deg, #71b48d, #5a9371);
-  }
+  &.action-red   { background: linear-gradient(135deg, #891d1a, #6b1515); }
+  &.action-gray  { background: linear-gradient(135deg, #5e657b, #4a5061); }
+  &.action-green { background: linear-gradient(135deg, #71b48d, #5a9371); }
 }
 
 .action-icon {
@@ -372,11 +349,7 @@ onMounted(async () => {
   justify-content: center;
   margin-bottom: 1.5rem;
 
-  svg {
-    width: 32px;
-    height: 32px;
-    color: white;
-  }
+  svg { width: 32px; height: 32px; color: white; }
 }
 
 .action-title {
@@ -415,7 +388,6 @@ onMounted(async () => {
 .stat-icon {
   width: 32px;
   height: 32px;
-
   &.green { color: #71b48d; }
   &.red   { color: #891d1a; }
   &.gray  { color: #5e657b; }
@@ -427,15 +399,8 @@ onMounted(async () => {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
 
-  &.green {
-    color: #71b48d;
-    background: #71b48d0d;
-  }
-
-  &.red {
-    color: #891d1a;
-    background: #891d1a0d;
-  }
+  &.green { color: #71b48d; background: #71b48d0d; }
+  &.red   { color: #891d1a; background: #891d1a0d; }
 }
 
 .stat-value {
@@ -488,9 +453,7 @@ onMounted(async () => {
   border: 1px solid #00050033;
   transition: box-shadow 0.2s;
 
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
+  &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
 }
 
 .activity-info {
@@ -513,17 +476,8 @@ onMounted(async () => {
   }
 }
 
-.activity-id {
-  font-size: 15px;
-  font-weight: 600;
-  color: #210706;
-}
-
-.activity-time {
-  font-size: 13px;
-  color: #210706;
-  opacity: 0.6;
-}
+.activity-id   { font-size: 15px; font-weight: 600; color: #210706; }
+.activity-time { font-size: 13px; color: #210706; opacity: 0.6; }
 
 .activity-status {
   padding: 0.25rem 0.75rem;
@@ -569,18 +523,8 @@ onMounted(async () => {
   }
 }
 
-.profile-name {
-  font-size: 20px;
-  font-weight: 600;
-  color: #210706;
-  margin-bottom: 0.25rem;
-}
-
-.profile-role {
-  font-size: 14px;
-  color: #210706;
-  opacity: 0.6;
-}
+.profile-name  { font-size: 20px; font-weight: 600; color: #210706; margin-bottom: 0.25rem; }
+.profile-role  { font-size: 14px; color: #210706; opacity: 0.6; }
 
 .profile-details {
   display: flex;
@@ -591,25 +535,11 @@ onMounted(async () => {
 .profile-detail {
   padding-bottom: 1rem;
   border-bottom: 1px solid #00050033;
-
-  &.no-border {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
+  &.no-border { border-bottom: none; padding-bottom: 0; }
 }
 
-.detail-label {
-  font-size: 13px;
-  color: #210706;
-  opacity: 0.6;
-  margin-bottom: 0.25rem;
-}
-
-.detail-value {
-  font-size: 15px;
-  color: #210706;
-  font-weight: 500;
-}
+.detail-label  { font-size: 13px; color: #210706; opacity: 0.6; margin-bottom: 0.25rem; }
+.detail-value  { font-size: 15px; color: #210706; font-weight: 500; }
 
 .edit-profile-btn {
   width: 100%;
@@ -624,9 +554,6 @@ onMounted(async () => {
   transition: all 0.3s;
   margin-top: 0.5rem;
 
-  &:hover {
-    background: #891d1a;
-    color: white;
-  }
+  &:hover { background: #891d1a; color: white; }
 }
 </style>

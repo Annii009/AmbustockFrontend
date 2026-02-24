@@ -1,13 +1,11 @@
 <template>
   <aside class="sidebar" :class="{ 'sidebar--open': isOpen }">
-    <!-- Logo -->
     <div class="sidebar__logo">
       <img src="/logo1Rojo.png" alt="AmbuStock" class="layout__topbar-logo" />
     </div>
 
     <div class="sidebar__divider" />
 
-    <!-- Navigation -->
     <nav class="sidebar__nav">
       <router-link
         v-for="item in navItems"
@@ -22,7 +20,6 @@
       </router-link>
     </nav>
 
-    <!-- Bottom: user + logout -->
     <div class="sidebar__footer">
       <div class="sidebar__user">
         <div class="sidebar__avatar">
@@ -45,7 +42,6 @@
         Cerrar Sesión
       </button>
 
-      <!-- Mobile close -->
       <button class="sidebar__close" @click="$emit('close')">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
@@ -61,17 +57,12 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUsuario } from '@/core/services/api'
 
-defineProps<{
-  isOpen?: boolean
-}>()
-
-defineEmits<{
-  close: []
-}>()
+defineProps<{ isOpen?: boolean }>()
+defineEmits<{ close: [] }>()
 
 const router = useRouter()
 
-const user = computed(() => getUsuario())
+const user     = computed(() => getUsuario())
 const userName = computed(() => {
   const u = user.value
   if (!u) return 'Usuario Demo'
@@ -82,15 +73,16 @@ const userRole = computed(() => user.value?.rol || 'Inspector')
 const navItems = [
   {
     path: '/principal',
-    label: 'Principal',
+    label: 'Dashboard',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>`
   },
   {
-    path: '/principal/revision',
-    label: 'Nueva Revisión',
+    // ✅ Arranca el wizard desde el paso 1, no desde revisión
+    path: '/principal/seleccion-ambulancia',
+    label: 'Nueva Inspección',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
       <rect x="9" y="3" width="6" height="4" rx="1"/>
@@ -107,7 +99,8 @@ const navItems = [
     </svg>`
   },
   {
-    path: '/principal/history',
+    // ✅ Consistente con el router (/historial, no /history)
+    path: '/principal/historial',
     label: 'Historial',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M3 3v5h5"/>
@@ -144,9 +137,7 @@ const handleLogout = () => {
     transition: left 0.3s ease;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 
-    &--open {
-      left: 0;
-    }
+    &--open { left: 0; }
   }
 }
 
@@ -154,12 +145,7 @@ const handleLogout = () => {
   padding: 1.75rem 1.5rem 1.5rem;
   display: flex;
   align-items: center;
-
-  img {
-    height: 56px;
-    width: auto;
-    object-fit: contain;
-  }
+  img { height: 56px; width: auto; object-fit: contain; }
 }
 
 .sidebar__divider {
@@ -197,32 +183,19 @@ const handleLogout = () => {
     flex-shrink: 0;
     opacity: 0.7;
     transition: opacity 0.2s;
-
-    :deep(svg) {
-      width: 22px;
-      height: 22px;
-    }
+    :deep(svg) { width: 22px; height: 22px; }
   }
 
   &:hover {
     background: #f3f4f6;
-
-    .sidebar__nav-icon {
-      opacity: 1;
-    }
+    .sidebar__nav-icon { opacity: 1; }
   }
 
   &--active {
     background: #891d1a;
     color: white;
-
-    .sidebar__nav-icon {
-      opacity: 1;
-    }
-
-    &:hover {
-      background: #6b1515;
-    }
+    .sidebar__nav-icon { opacity: 1; }
+    &:hover { background: #6b1515; }
   }
 }
 
@@ -252,17 +225,10 @@ const handleLogout = () => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
-  svg {
-    width: 22px;
-    height: 22px;
-    fill: white;
-  }
+  svg { width: 22px; height: 22px; fill: white; }
 }
 
-.sidebar__user-info {
-  overflow: hidden;
-}
+.sidebar__user-info { overflow: hidden; }
 
 .sidebar__user-name {
   font-size: 14px;
@@ -295,16 +261,8 @@ const handleLogout = () => {
   text-align: left;
   transition: background 0.2s, color 0.2s;
 
-  svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    background: #891d1a1a;
-    color: #891d1a;
-  }
+  svg { width: 20px; height: 20px; flex-shrink: 0; }
+  &:hover { background: #891d1a1a; color: #891d1a; }
 }
 
 .sidebar__close {
@@ -321,17 +279,9 @@ const handleLogout = () => {
   margin: 0 auto;
   transition: background 0.2s;
 
-  svg {
-    width: 18px;
-    height: 18px;
-  }
+  svg { width: 18px; height: 18px; }
+  &:hover { background: #f3f4f6; }
 
-  &:hover {
-    background: #f3f4f6;
-  }
-
-  @media (max-width: 768px) {
-    display: flex;
-  }
+  @media (max-width: 768px) { display: flex; }
 }
 </style>
