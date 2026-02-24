@@ -496,20 +496,40 @@ export function limpiarDatosRevision(): void {
 }
 
 // ─── Reposiciones ─────────────────────────────────────────────────────────────
+export async function guardarReposicion(reposicion: any): Promise<any> {
+    const token = getAuthToken();
+    if (!token) throw new ApiError(401, 'No hay token de autenticación');
 
-export async function guardarReposicion(reposicion: Reposicion): Promise<any> {
-  const token = getAuthToken();
-  if (!token) throw new ApiError(401, 'No hay token de autenticación');
+    const fotosBase64: string[] = [];
+    if (reposicion.fotos && reposicion.fotos.length > 0) {
+        for (const foto of reposicion.fotos) {
+            const dataUrl = foto.dataUrl as string;
+            fotosBase64.push(dataUrl.split(',')[1]);
+        }
+    }
 
-  const response = await fetch(`${API_URL}/api/Reposicion`, {
-    method: 'POST',
-    headers: getAuthHeaders(token),
-    body: JSON.stringify(reposicion)
-  });
+    const dto = {
+        nombreResponsable: reposicion.nombreResponsable,
+        nombresMateriales: reposicion.materiales.map((m: any) => m.nombreProducto),
+        cantidad: reposicion.materiales.reduce(
+            (acc: number, m: any) => acc + (m.cantidad || m.cantidadFaltante || 1), 0
+        ),
+        comentarios: reposicion.comentarios || null,
+        fotosBase64: fotosBase64 
+    };
 
-  if (!response.ok) throw new Error('Error al guardar en backend');
-  return response.json();
+    const response = await fetch(`${API_URL}/api/Reposicion`, {
+        method: 'POST',
+        headers: getAuthHeaders(token),
+        body: JSON.stringify(dto)
+    });
+
+    if (!response.ok) throw new Error('Error al guardar en backend');
+    return response.json();
 }
+
+
+
 
 export async function getHistorialReposiciones(): Promise<ReposicionDetalle[]> {
   const token = getAuthToken();

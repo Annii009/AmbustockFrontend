@@ -7,6 +7,7 @@ import {
   getAmbulancias,
   getUsuarios,
   saveReposicionData,
+  saveAmbulanciaSeleccionada,
   type MaterialProducto,
   type MaterialSeleccionado,
   type Servicio,
@@ -16,11 +17,10 @@ import {
 
 const router = useRouter()
 
-// Estado
 const allMateriales = ref<MaterialProducto[]>([])
 const allServicios = ref<Servicio[]>([])
 const allAmbulancias = ref<Ambulancia[]>([])
-const allResponsables = ref<string[]>([])  // ← AÑADIDO
+const allResponsables = ref<string[]>([])
 
 const searchMaterial = ref('')
 const searchServicio = ref('')
@@ -33,7 +33,6 @@ const showServicioAutocomplete = ref(false)
 
 const isLoading = ref(true)
 
-// ── Autocomplete responsable ──────────────────────────────────────────────────
 const sugerenciasResponsable = computed(() => {
   const query = nombreResponsable.value.trim().toLowerCase()
   if (query.length < 2) return []
@@ -51,12 +50,9 @@ const seleccionarResponsable = (nombre: string) => {
 }
 
 const cerrarSugerenciasResponsable = () => {
-  // El timeout da tiempo al mousedown de seleccionarResponsable
   setTimeout(() => {}, 150)
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
-// Computed
 const materialesFiltrados = computed(() => {
   const query = searchMaterial.value.trim().toLowerCase()
   if (query.length === 0) return []
@@ -85,23 +81,19 @@ const isFormValid = computed(() => {
          ambulanciaSeleccionadaId.value !== null
 })
 
-// Cargar datos
 const cargarDatos = async () => {
   try {
     isLoading.value = true
-
     const [materiales, servicios, ambulancias, usuarios] = await Promise.all([
       getMateriales(),
       getServicios(),
       getAmbulancias(),
-      getUsuarios()           // ← AÑADIDO
+      getUsuarios()
     ])
-
     allMateriales.value = materiales
     allServicios.value = servicios
     allAmbulancias.value = ambulancias
-    allResponsables.value = usuarios.map(u => u.nombreUsuario)  // ← AÑADIDO
-
+    allResponsables.value = usuarios.map(u => u.nombreUsuario)
   } catch (error) {
     console.error('Error al cargar datos:', error)
     if (error instanceof ApiError) {
@@ -112,7 +104,6 @@ const cargarDatos = async () => {
   }
 }
 
-// Materiales
 const agregarMaterial = (material: MaterialProducto) => {
   const existe = materialesSeleccionados.value.find(m => m.idMaterial === material.idMaterial)
   if (!existe) {
@@ -145,13 +136,11 @@ const agregarMaterialPorBoton = () => {
   if (material) agregarMaterial(material)
 }
 
-// Servicios
 const seleccionarServicioAutocomplete = (servicio: Servicio) => {
   searchServicio.value = servicio.nombreServicio
   showServicioAutocomplete.value = false
 }
 
-// Watch para autocomplete
 const onSearchMaterialChange = () => {
   showMaterialAutocomplete.value = materialesFiltrados.value.length > 0
 }
@@ -160,7 +149,6 @@ const onSearchServicioChange = () => {
   showServicioAutocomplete.value = serviciosFiltrados.value.length > 0
 }
 
-// Navegación
 const goBack = () => {
   router.push('/principal')
 }
@@ -176,6 +164,7 @@ const continuar = () => {
   }
 
   saveReposicionData(data)
+  saveAmbulanciaSeleccionada(ambulanciaSeleccionadaId.value!)  // ← AÑADIDO
   router.push('/sugerencias')
 }
 
@@ -183,6 +172,7 @@ onMounted(() => {
   cargarDatos()
 })
 </script>
+
 
 <template>
   <div class="material-gastado-view">
