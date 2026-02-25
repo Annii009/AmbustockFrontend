@@ -2,14 +2,14 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAmbulancias, saveAmbulanciaSeleccionada, type Ambulancia, ApiError } from '@core/services/api'
-import DesktopInspectionLayout from '../layouts/DesktopInspectionLayout.vue' // ✅ fix 1
+import DesktopInspectionLayout from '../layouts/DesktopInspectionLayout.vue'
 
 const router = useRouter()
 
-const ambulancias            = ref<Ambulancia[]>([])
+const ambulancias = ref<Ambulancia[]>([])
 const ambulanciaSeleccionada = ref<number | null>(null)
-const isLoading              = ref(true)
-const error                  = ref<string | null>(null)
+const isLoading = ref(true)
+const error = ref<string | null>(null)
 
 const isContinueDisabled = computed(() => !ambulanciaSeleccionada.value)
 
@@ -20,7 +20,7 @@ const ambulanciaLabel = computed(() => {
 })
 
 const formatearTextoAmbulancia = (a: Ambulancia): string => {
-  if (a.nombre?.trim())    return a.nombre.trim()
+  if (a.nombre?.trim()) return a.nombre.trim()
   if (a.matricula?.trim()) return `Ambulancia ${a.matricula.trim()}`
   return `Ambulancia #${a.idAmbulancia}`
 }
@@ -37,10 +37,11 @@ const cargarAmbulancias = async () => {
   }
 }
 
+const goBack = () => router.push('/principal')
 const continuar = () => {
   if (ambulanciaSeleccionada.value) {
     saveAmbulanciaSeleccionada(ambulanciaSeleccionada.value)
-    router.push('/principal/tipo-servicio') // ✅ fix 2
+    router.push('/principal/tipo-servicio')
   }
 }
 
@@ -48,52 +49,45 @@ onMounted(() => cargarAmbulancias())
 </script>
 
 <template>
-  <DesktopInspectionLayout
-    :current-step="1"
-    :ambulancia-label="ambulanciaLabel"
-    :progress="0"
-  >
-    <div class="step-card">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <rect x="1" y="3" width="15" height="13" rx="1"/>
-            <path d="M16 8h4l3 3v5h-7V8z"/>
-            <circle cx="5.5" cy="18.5" r="2.5"/>
-            <circle cx="18.5" cy="18.5" r="2.5"/>
-          </svg>
-        </div>
-        <div>
-          <h2>SELECCIÓN DE AMBULANCIA</h2>
-          <p>Selecciona la unidad que vas a inspeccionar</p>
-        </div>
-      </div>
+  <DesktopInspectionLayout :current-step="1" :ambulancia-label="ambulanciaLabel" :progress="0">
+    <div class="step-wrapper">
+      <div class="step-card">
 
-      <div class="card-body">
-        <label for="ambulancia">Ambulancia <span class="required">*</span></label>
-        <div class="select-wrapper">
-          <select
-            id="ambulancia"
-            v-model="ambulanciaSeleccionada"
-            class="custom-select"
-            :class="{ loading: isLoading }"
-            :disabled="isLoading || !!error"
-          >
-            <option v-if="isLoading"   value="">Cargando...</option>
-            <option v-else-if="error"  value="">{{ error }}</option>
-            <option v-else             value="">Seleccionar unidad</option>
-            <option
-              v-for="amb in ambulancias"
-              :key="amb.idAmbulancia"
-              :value="amb.idAmbulancia"
-            >
-              {{ formatearTextoAmbulancia(amb) }}
-            </option>
-          </select>
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13" rx="1" />
+              <path d="M16 8h4l3 3v5h-7V8z" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+          </div>
+          <div>
+            <h2>SELECCIÓN DE AMBULANCIA</h2>
+            <p>Selecciona la unidad que vas a inspeccionar</p>
+          </div>
         </div>
-        <button class="btn-continuar" :disabled="isContinueDisabled" @click="continuar">
-          Continuar
-        </button>
+
+        <div class="card-body">
+          <label for="ambulancia">Ambulancia <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select id="ambulancia" v-model="ambulanciaSeleccionada" class="custom-select"
+              :class="{ loading: isLoading }" :disabled="isLoading || !!error">
+              <option v-if="isLoading" value="">Cargando...</option>
+              <option v-else-if="error" value="">{{ error }}</option>
+              <option v-else value="">Seleccionar unidad</option>
+              <option v-for="amb in ambulancias" :key="amb.idAmbulancia" :value="amb.idAmbulancia">
+                {{ formatearTextoAmbulancia(amb) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-atras" @click="goBack">Atrás</button>
+            <button class="btn-continuar" :disabled="isContinueDisabled" @click="continuar">Continuar</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </DesktopInspectionLayout>
@@ -103,46 +97,154 @@ onMounted(() => cargarAmbulancias())
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 48px 24px;
+  box-sizing: border-box;
+}
+
 .step-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.07);
-  max-width: 580px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.09);
+  width: 100%;
+  max-width: 560px;
   overflow: hidden;
 }
+
 .card-header {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 22px 26px;
   border-bottom: 1px solid #f0f1f4;
-  h2 { font-size: 17px; font-weight: 700; color: #1a1d23; margin: 0 0 3px; }
-  p  { font-size: 13px; color: #9aa0ad; margin: 0; }
+
+  h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1d23;
+    margin: 0 0 3px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #9aa0ad;
+    margin: 0;
+  }
 }
+
 .card-icon {
-  width: 46px; height: 46px; border-radius: 50%; background: $primary-red;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  svg { width: 20px; height: 20px; }
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: $primary-red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
-.card-body { padding: 26px; }
-label { display: block; font-size: 13.5px; font-weight: 600; color: #2d3342; margin-bottom: 8px; }
-.required { color: $primary-red; }
-.select-wrapper { margin-bottom: 22px; }
+
+.card-body {
+  padding: 26px;
+}
+
+label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2d3342;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: $primary-red;
+}
+
+.select-wrapper {
+  margin-bottom: 22px;
+}
+
 .custom-select {
-  width: 100%; padding: 12px 40px 12px 14px; font-size: 14.5px;
-  border: 1.5px solid #d1d5de; border-radius: 8px; background: #fff;
-  color: #2d3342; appearance: none; cursor: pointer; transition: border-color 0.2s;
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  font-size: 14.5px;
+  border: 1.5px solid #d1d5de;
+  border-radius: 8px;
+  background: #fff;
+  color: #2d3342;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 14px center;
-  &:focus    { outline: none; border-color: $primary-red; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
-  &.loading  { color: #aaa; background-image: none; }
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-red;
+    box-shadow: 0 0 0 3px rgba(137, 29, 26, 0.07);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.loading {
+    color: #aaa;
+    background-image: none;
+  }
 }
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-atras {
+  flex: 1;
+  padding: 13px;
+  background: #fff;
+  color: $primary-red;
+  border: 1.5px solid $primary-red;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(137, 29, 26, 0.05);
+  }
+}
+
 .btn-continuar {
   @include button-base;
-  width: 100%; padding: 13px; background: $primary-red; color: #fff;
-  font-size: 15px; font-weight: 600; border-radius: 8px;
-  &:not(:disabled):hover { background: $primary-red-hover; }
-  &:disabled { background: #d0d4dc; cursor: not-allowed; }
+  flex: 1;
+  padding: 13px;
+  background: $primary-red;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+
+  &:not(:disabled):hover {
+    background: $primary-red-hover;
+  }
+
+  &:disabled {
+    background: #d0d4dc;
+    cursor: not-allowed;
+  }
 }
 </style>

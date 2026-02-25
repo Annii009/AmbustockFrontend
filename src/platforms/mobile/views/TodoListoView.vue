@@ -58,7 +58,7 @@ onMounted(() => {
 
 
 .todo-listo-view {
-  background: linear-gradient(135deg, $success-gradient-start 0%, $success-gradient-end 100%);
+  background: #F8F6F6;
   min-height: 100vh;
   display: flex;
   align-items: center;
