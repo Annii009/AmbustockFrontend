@@ -1,42 +1,43 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { saveNombreResponsable, getUsuarios } from '@core/services/api'
+import { saveNombreResponsable, searchResponsables } from '@core/services/api'
 
 const router = useRouter()
 
-const nombreResponsable    = ref('')
-const todosLosResponsables = ref<string[]>([])
-const isSearching          = ref(false)
+const nombreResponsable = ref('')
+const sugerencias = ref<string[]>([])
+const isSearching = ref(false)
 
-onMounted(async () => {
-  isSearching.value = true
-  try {
-    const usuarios = await getUsuarios()
-    todosLosResponsables.value = usuarios.map(u => u.nombreUsuario)
-  } catch (error) {
-    console.error('Error cargando responsables', error)
-  } finally {
-    isSearching.value = false
-  }
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(nombreResponsable, (val) => {
+  const q = val.trim()
+  if (q.length < 2) { sugerencias.value = []; return }
+
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(async () => {
+    isSearching.value = true
+    try {
+      sugerencias.value = await searchResponsables(q)
+    } catch (e) {
+      console.error('Error buscando responsables', e)
+      sugerencias.value = []
+    } finally {
+      isSearching.value = false
+    }
+  }, 300)
 })
 
-const sugerencias = computed(() => {
-  const query = nombreResponsable.value.trim().toLowerCase()
-  if (query.length < 2) return []
-  return todosLosResponsables.value.filter(n => n.toLowerCase().includes(query))
-})
-
-const mostrarLista       = computed(() => sugerencias.value.length > 0 && nombreResponsable.value.trim().length >= 2)
+const mostrarLista = computed(() => sugerencias.value.length > 0 && nombreResponsable.value.trim().length >= 2)
 const isContinueDisabled = computed(() => nombreResponsable.value.trim().length < 2)
 
 const seleccionarSugerencia = (nombre: string) => {
   nombreResponsable.value = nombre
+  sugerencias.value = []
 }
 
-const cerrarSugerencias = () => {
-  setTimeout(() => {}, 150)
-}
+const cerrarSugerencias = () => { setTimeout(() => { sugerencias.value = [] }, 150) }
 
 const resaltarCoincidencia = (nombre: string, query: string): string => {
   if (!query) return nombre
@@ -44,7 +45,7 @@ const resaltarCoincidencia = (nombre: string, query: string): string => {
   return nombre.replace(regex, '<strong>$1</strong>')
 }
 
-const goBack    = () => router.push('/tipo-servicio')
+const goBack = () => router.push('/tipo-servicio')
 const continuar = () => {
   const nombre = nombreResponsable.value.trim()
   if (nombre.length >= 2) {
@@ -79,26 +80,15 @@ const continuar = () => {
 
         <div class="autocomplete-wrapper">
           <div class="input-wrapper">
-            <input
-              type="text"
-              id="responsable"
-              v-model="nombreResponsable"
-              class="custom-input"
-              placeholder="Nombre del responsable del servicio"
-              autocomplete="off"
-              @keyup.enter="continuar"
-              @blur="cerrarSugerencias"
-            />
+            <input type="text" id="responsable" v-model="nombreResponsable" class="custom-input"
+              placeholder="Nombre del responsable del servicio" autocomplete="off" @keyup.enter="continuar"
+              @blur="cerrarSugerencias" />
             <span v-if="isSearching" class="input-spinner"></span>
           </div>
 
           <ul v-if="mostrarLista" class="sugerencias-list">
-            <li
-              v-for="(nombre, index) in sugerencias"
-              :key="index"
-              class="sugerencia-item"
-              @mousedown.prevent="seleccionarSugerencia(nombre)"
-            >
+            <li v-for="(nombre, index) in sugerencias" :key="index" class="sugerencia-item"
+              @mousedown.prevent="seleccionarSugerencia(nombre)">
               <span v-html="resaltarCoincidencia(nombre, nombreResponsable.trim())"></span>
             </li>
           </ul>
@@ -145,11 +135,20 @@ const continuar = () => {
   align-items: center;
   justify-content: center;
 
-  svg { width: 24px; height: 24px; color: $text-dark; }
-  &:hover { opacity: 0.7; }
+  svg {
+    width: 24px;
+    height: 24px;
+    color: $text-dark;
+  }
+
+  &:hover {
+    opacity: 0.7;
+  }
 }
 
-.logo-small { height: 50px; }
+.logo-small {
+  height: 50px;
+}
 
 h1 {
   font-size: 20px;
@@ -174,10 +173,14 @@ h1 {
   transition: background-color 0.3s;
 
   &.completed,
-  &.active { background-color: $progress-active; }
+  &.active {
+    background-color: $progress-active;
+  }
 }
 
-.form-content { flex: 1; }
+.form-content {
+  flex: 1;
+}
 
 label {
   display: block;
@@ -187,8 +190,15 @@ label {
   color: $text-dark;
 }
 
-.autocomplete-wrapper { position: relative; width: 100%; }
-.input-wrapper        { position: relative; width: 100%; }
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
 
 .custom-input {
   width: 100%;
@@ -201,7 +211,10 @@ label {
   transition: all 0.3s;
   box-sizing: border-box;
 
-  &::placeholder { color: $placeholder-color; }
+  &::placeholder {
+    color: $placeholder-color;
+  }
+
   &:focus {
     outline: none;
     border-color: $primary-red;
@@ -211,28 +224,38 @@ label {
 
 .input-spinner {
   position: absolute;
-  right: 14px; top: 50%;
+  right: 14px;
+  top: 50%;
   transform: translateY(-50%);
-  width: 16px; height: 16px;
+  width: 16px;
+  height: 16px;
   border: 2px solid $spinner-border;
   border-top-color: $spinner-color;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
 
 .sugerencias-list {
   position: absolute;
-  top: calc(100% + 4px); left: 0; right: 0;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
   background: $autocomplete-bg;
   border: 1px solid $autocomplete-border;
   border-radius: 8px;
   box-shadow: $dropdown-shadow;
   list-style: none;
-  margin: 0; padding: 4px 0;
+  margin: 0;
+  padding: 4px 0;
   z-index: 100;
-  max-height: 220px; overflow-y: auto;
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .sugerencia-item {
@@ -242,10 +265,18 @@ label {
   cursor: pointer;
   transition: background 0.15s ease;
 
-  &:hover  { background-color: $autocomplete-hover; }
-  &:active { background-color: $autocomplete-active; }
+  &:hover {
+    background-color: $autocomplete-hover;
+  }
 
-  :deep(strong) { color: $primary-red; font-weight: $font-bold; }
+  &:active {
+    background-color: $autocomplete-active;
+  }
+
+  :deep(strong) {
+    color: $primary-red;
+    font-weight: $font-bold;
+  }
 }
 
 .btn-continuar {
@@ -257,13 +288,27 @@ label {
   font-size: 16px;
   margin-top: auto;
 
-  &:not(:disabled):hover { background-color: $primary-red-hover; }
-  &:disabled { background-color: $btn-disabled-bg; cursor: not-allowed; }
+  &:not(:disabled):hover {
+    background-color: $primary-red-hover;
+  }
+
+  &:disabled {
+    background-color: $btn-disabled-bg;
+    cursor: not-allowed;
+  }
 }
 
 @media (max-width: 480px) {
-  .container { padding: 10px; }
-  h1 { font-size: 18px; }
-  .logo-small { height: 40px; }
+  .container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .logo-small {
+    height: 40px;
+  }
 }
 </style>
