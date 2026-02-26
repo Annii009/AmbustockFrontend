@@ -1,154 +1,188 @@
 <template>
-  <div v-if="!loading && user" class="dashboard-page">
-    <div class="dashboard-container">
-      <div class="header">
-        <h1 class="title">Bienvenido, {{ firstName }}</h1>
-        <p class="subtitle">Panel de control de AmbuStock</p>
-      </div>
+  <div v-if="!loading && user" class="dash">
+    <div class="dash__inner">
 
-      <div class="quick-actions">
-        <button @click="navigateTo('/principal/seleccion-ambulancia')" class="action-card action-red">
-          <div class="action-icon">
+      <!-- Subtítulo -->
+      <p class="dash__subtitle">Panel de control de AmbuStock</p>
+
+      <!-- Acciones rápidas (3 cards grandes) -->
+      <div class="dash__actions">
+        <button @click="go('/principal/seleccion-ambulancia')" class="action action--red">
+          <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
               <rect x="9" y="3" width="6" height="4" rx="1"/>
               <path d="m9 12 2 2 4-4"/>
             </svg>
           </div>
-          <h3 class="action-title">Nueva Revisión</h3>
-          <p class="action-text">Iniciar revisión completa de ambulancia</p>
+          <h3 class="action__title">NUEVA REVISIÓN</h3>
+          <p class="action__text">Iniciar revisión completa de ambulancia</p>
         </button>
 
-        <button @click="navigateTo('/principal/reposicion')" class="action-card action-gray">
-          <div class="action-icon">
+        <button @click="go('/principal/reposicion')" class="action action--blue">
+          <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
               <line x1="12" y1="22.08" x2="12" y2="12"/>
             </svg>
           </div>
-          <h3 class="action-title">Reposición</h3>
-          <p class="action-text">Gestionar material gastado y pedidos</p>
+          <h3 class="action__title">REPOSICIÓN</h3>
+          <p class="action__text">Gestionar material gastado y pedidos</p>
         </button>
 
-        <button @click="navigateTo('/principal/historial')" class="action-card action-green">
-          <div class="action-icon">
+        <button @click="go('/principal/historial')" class="action action--green">
+          <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 3v5h5"/>
               <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
             </svg>
           </div>
-          <h3 class="action-title">Historial</h3>
-          <p class="action-text">Ver inspecciones y reportes anteriores</p>
+          <h3 class="action__title">HISTORIAL</h3>
+          <p class="action__text">Ver inspecciones y reportes anteriores</p>
         </button>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-icon green">
+      <!-- Stats (4 cards pequeñas) -->
+      <div class="dash__stats">
+        <div class="stat">
+          <div class="stat__top">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--green">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
-            <span class="stat-badge green">Este mes</span>
+            <span class="stat__badge stat__badge--green">Este mes</span>
           </div>
-          <div class="stat-value">{{ totalInspecciones }}</div>
-          <div class="stat-label">Inspecciones este mes</div>
+          <div class="stat__value">{{ totalInspecciones }}</div>
+          <div class="stat__label">Inspecciones este mes</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-icon green">
+        <div class="stat">
+          <div class="stat__top">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--green">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <span class="stat-badge green">{{ porcentajeAprobadas }}%</span>
+            <span class="stat__badge stat__badge--green">{{ porcentajeAprobadas }}%</span>
           </div>
-          <div class="stat-value">{{ inspeccionesAprobadas }}</div>
-          <div class="stat-label">Aprobadas</div>
+          <div class="stat__value">{{ inspeccionesAprobadas }}</div>
+          <div class="stat__label">Aprobadas</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-icon red">
+        <div class="stat">
+          <div class="stat__top">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--red">
               <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/>
               <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-            <span class="stat-badge red">Atención</span>
+            <span class="stat__badge stat__badge--red">Atención</span>
           </div>
-          <div class="stat-value">{{ alertasPendientes }}</div>
-          <div class="stat-label">Alertas pendientes</div>
+          <div class="stat__value">{{ alertasPendientes }}</div>
+          <div class="stat__label">Alertas pendientes</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-icon gray">
+        <div class="stat">
+          <div class="stat__top">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--gray">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div class="stat-value">{{ tiempoPromedio }}</div>
-          <div class="stat-label">Tiempo promedio</div>
+          <div class="stat__value">{{ tiempoPromedio }}</div>
+          <div class="stat__label">Tiempo promedio</div>
         </div>
       </div>
 
-      <div class="content-grid">
-        <div class="content-card">
-          <h2 class="content-title">Actividad Reciente</h2>
-          <div v-if="activities.length > 0" class="activity-list">
-            <div v-for="activity in activities" :key="activity.id" class="activity-item">
-              <div class="activity-info">
-                <div class="activity-badge" :style="{ backgroundColor: activity.color + '1a' }">
-                  <span :style="{ color: activity.color }">{{ activity.id.split('-')[1] }}</span>
+      <!-- Bottom: actividad + perfil -->
+      <div class="dash__bottom">
+
+        <!-- Actividad reciente -->
+        <div class="card">
+          <h2 class="card__title">ACTIVIDAD RECIENTE</h2>
+          <div v-if="activities.length > 0" class="activity">
+            <div v-for="act in activities" :key="act.id" class="activity__row">
+              <div class="activity__left">
+                <div class="activity__badge" :style="{ background: act.color + '18' }">
+                  <span :style="{ color: act.color }">{{ act.id.split('-')[1] }}</span>
                 </div>
                 <div>
-                  <p class="activity-id">{{ activity.nombreAmbulancia }}</p>
-                  <p class="activity-time">{{ activity.time }}</p>
+                  <p class="activity__name">{{ act.nombreAmbulancia }}</p>
+                  <p class="activity__time">{{ act.time }}</p>
                 </div>
               </div>
-              <div class="activity-status" :style="{ backgroundColor: activity.color + '1a', color: activity.color }">
-                {{ activity.status }}
-              </div>
+              <span class="activity__status" :style="{ background: act.color + '18', color: act.color }">
+                {{ act.status }}
+              </span>
             </div>
           </div>
-          <div v-else class="empty-state">
-            <p>No hay actividad reciente</p>
-          </div>
+          <div v-else class="card__empty">No hay actividad reciente</div>
         </div>
 
-        <div class="content-card">
-          <h2 class="content-title">Mi Perfil</h2>
-          <div class="profile-content">
-            <div class="profile-header">
-              <div class="profile-avatar">
+        <!-- Mi perfil -->
+        <div class="card">
+          <h2 class="card__title">MI PERFIL</h2>
+          <div class="profile">
+            <div class="profile__head">
+              <div class="profile__avatar">
                 <span>{{ initials }}</span>
               </div>
               <div>
-                <h3 class="profile-name">{{ user.nombreResponsable || user.nombre }}</h3>
-                <p class="profile-role">{{ user.rol }}</p>
+                <p class="profile__name">{{ (user.nombreResponsable || user.nombre || '').toUpperCase() }}</p>
+                <p class="profile__role">{{ user.rol }}</p>
               </div>
             </div>
 
-            <div class="profile-details">
-              <div class="profile-detail">
-                <p class="detail-label">Correo Electrónico</p>
-                <p class="detail-value">{{ user.email }}</p>
+            <div class="profile__rows">
+              <div class="profile__row">
+                <span class="profile__label">Correo Electrónico</span>
+                <span class="profile__value">{{ user.email }}</span>
               </div>
-              <div class="profile-detail">
-                <p class="detail-label">Rol</p>
-                <p class="detail-value">{{ user.rol }}</p>
+              <div class="profile__row">
+                <span class="profile__label">Rol</span>
+                <span class="profile__value">{{ user.rol }}</span>
               </div>
-              <div class="profile-detail no-border">
-                <p class="detail-label">ID Usuario</p>
-                <p class="detail-value">#{{ user.usuarioId }}</p>
+              <div class="profile__row profile__row--last">
+                <span class="profile__label">ID Usuario</span>
+                <span class="profile__value">#{{ user.usuarioId }}</span>
               </div>
             </div>
 
-            <button class="edit-profile-btn">Editar Perfil</button>
+            <button class="profile__edit" @click="go('/principal/perfil')">Editar Perfil</button>
+
+            <!-- Accesos rápidos admin -->
+            <template v-if="isAdmin">
+              <div class="profile__admin-sep" />
+              <p class="profile__admin-label">Panel de Administración</p>
+              <div class="profile__admin-actions">
+                <button class="profile__admin-btn" @click="go('/principal/responsables')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  Responsables
+                </button>
+                <button class="profile__admin-btn" @click="go('/principal/ambulancias')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13" rx="1"/>
+                    <path d="M16 8h4l3 3v5h-7V8z"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                  </svg>
+                  Ambulancias
+                </button>
+              </div>
+            </template>
           </div>
         </div>
+
       </div>
     </div>
+  </div>
+
+  <div v-else-if="loading" class="dash-loading">
+    <div class="spinner" />
   </div>
 </template>
 
@@ -169,391 +203,381 @@ interface Activity {
   status: string
   time: string
   color: string
-  clase: string
 }
 
-const router = useRouter()
-const user         = ref<Usuario | null>(null)
-const activities   = ref<Activity[]>([])
-const loading      = ref(true)
-const statsLoading = ref(true)
+const router     = useRouter()
+const user       = ref<Usuario | null>(null)
+const activities = ref<Activity[]>([])
+const loading    = ref(true)
 
-const totalInspecciones    = ref(0)
+const totalInspecciones     = ref(0)
 const inspeccionesAprobadas = ref(0)
-const alertasPendientes    = ref(0)
-const tiempoPromedio       = ref('18min')
+const alertasPendientes     = ref(0)
+const tiempoPromedio        = ref('18min')
 
-const firstName = computed(() => {
-  if (!user.value) return ''
-  const nombre = user.value.nombreResponsable || user.value.nombre || ''
-  return nombre.split(' ')[0]
-})
+const isAdmin  = computed(() => user.value?.rol === 'Administrador')
+const initials = computed(() =>
+  (user.value?.nombreResponsable || user.value?.nombre || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+)
+const porcentajeAprobadas = computed(() =>
+  totalInspecciones.value === 0 ? 0
+    : Math.round(inspeccionesAprobadas.value / totalInspecciones.value * 100)
+)
 
-const initials = computed(() => {
-  if (!user.value) return ''
-  const nombre = user.value.nombreResponsable || user.value.nombre || ''
-  return nombre.split(' ').map(n => n[0]).join('').toUpperCase()
-})
+const go = (path: string) => router.push(path)
 
-const porcentajeAprobadas = computed(() => {
-  if (totalInspecciones.value === 0) return 0
-  return Math.round((inspeccionesAprobadas.value / totalInspecciones.value) * 100)
-})
+const colorFromClase = (c: string) => ({
+  completada: '#71B48D', pendiente: '#F59E0B',
+  urgente: '#891D1A', 'sin-realizar': '#5E657B'
+})[c] || '#5E657B'
 
-const navigateTo = (path: string) => router.push(path)
-
-const getColorFromEstado = (clase: string): string => {
-  const colores: Record<string, string> = {
-    'completada':   '#71b48d',
-    'pendiente':    '#f59e0b',
-    'urgente':      '#891d1a',
-    'sin-realizar': '#5e657b'
-  }
-  return colores[clase] || '#5e657b'
-}
-
-const calcularTiempoTranscurrido = (fechaISO: string): string => {
-  const fecha   = new Date(fechaISO)
-  const ahora   = new Date()
-  const diff    = ahora.getTime() - fecha.getTime()
-  const minutos = Math.floor(diff / 60000)
-  const horas   = Math.floor(minutos / 60)
-  const dias    = Math.floor(horas / 24)
-
-  if (dias > 0)    return `Hace ${dias} día${dias > 1 ? 's' : ''}`
-  if (horas > 0)   return `Hace ${horas} hora${horas > 1 ? 's' : ''}`
-  if (minutos > 0) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`
+const timeAgo = (iso: string) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24)
+  if (d > 0) return `Hace ${d} día${d > 1 ? 's' : ''}`
+  if (h > 0) return `Hace ${h} hora${h > 1 ? 's' : ''}`
+  if (m > 0) return `Hace ${m} minuto${m > 1 ? 's' : ''}`
   return 'Hace un momento'
 }
 
-const cargarActividades = async () => {
+onMounted(async () => {
+  user.value = getUsuario()
   try {
-    const revisiones      = await getHistorialRevisiones()
-    const ultimasRevisiones = revisiones.slice(0, 5)
-    activities.value = ultimasRevisiones.map((revision: Revision) => {
-      const estado = obtenerEstadoRevision(revision)
+    const revisiones = await getHistorialRevisiones()
+    activities.value = revisiones.slice(0, 5).map((r: Revision) => {
+      const estado = obtenerEstadoRevision(r)
       return {
-        id:               `AMB-${String(revision.idRevision).padStart(3, '0')}`,
-        nombreAmbulancia: revision.nombreAmbulancia || revision.matricula,
-        status:           estado.texto,
-        time:             calcularTiempoTranscurrido(revision.fechaRevision),
-        color:            getColorFromEstado(estado.clase),
-        clase:            estado.clase
+        id: `AMB-${String(r.idRevision).padStart(3, '0')}`,
+        nombreAmbulancia: r.nombreAmbulancia || r.matricula,
+        status: estado.texto,
+        time: timeAgo(r.fechaRevision),
+        color: colorFromClase(estado.clase)
       }
     })
-  } catch (error) {
-    console.error('Error cargando actividades:', error)
-    activities.value = []
-  }
-}
-
-const cargarEstadisticas = async () => {
-  try {
-    statsLoading.value = true
-    const revisiones   = await getHistorialRevisiones()
-    const ahora        = new Date()
-    const mesActual    = ahora.getMonth()
-    const añoActual    = ahora.getFullYear()
-
-    const revisionesMes = revisiones.filter((r: Revision) => {
-      const fecha = new Date(r.fechaRevision)
-      return fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual
+    const ahora = new Date()
+    const mes   = revisiones.filter((r: Revision) => {
+      const f = new Date(r.fechaRevision)
+      return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear()
     })
-
-    totalInspecciones.value = revisionesMes.length
-
-    inspeccionesAprobadas.value = revisionesMes.filter((r: Revision) =>
-      obtenerEstadoRevision(r).clase === 'completada'
-    ).length
-
-    alertasPendientes.value = revisionesMes.filter((r: Revision) => {
-      const clase = obtenerEstadoRevision(r).clase
-      return clase === 'urgente' || clase === 'pendiente'
-    }).length
-
-  } catch (error) {
-    console.error('Error cargando estadísticas:', error)
-  } finally {
-    statsLoading.value = false
-  }
-}
-
-onMounted(async () => {
-  loading.value = true
-  user.value    = getUsuario()
-  await Promise.all([cargarActividades(), cargarEstadisticas()])
+    totalInspecciones.value     = mes.length
+    inspeccionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
+    alertasPendientes.value     = mes.filter((r: Revision) => ['urgente', 'pendiente'].includes(obtenerEstadoRevision(r).clase)).length
+  } catch { /* silencioso */ }
   loading.value = false
 })
 </script>
 
 <style scoped lang="scss">
-.dashboard-page {
-  padding: 3rem;
+@import '@ui/assets/styles/variables';
+@import '@ui/assets/styles/mixins';
+
+.dash {
+  padding: 1.75rem 2rem;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $bg-page;
 }
 
-.dashboard-container {
+.dash__inner {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.header { margin-bottom: 3rem; }
-
-.title {
-  font-family: 'Bebas Neue', sans-serif;
-  color: #210706;
-  font-size: 56px;
-  line-height: 1;
-  margin-bottom: 0.75rem;
+.dash__subtitle {
+  font-family: $font-primary;
+  font-size: 14px;
+  color: $text-gray;
+  margin-bottom: 1.5rem;
 }
 
-.subtitle {
-  font-size: 20px;
-  color: #210706cc;
-}
-
-.quick-actions {
+// ── Acciones ──────────────────────────────────────────────────
+.dash__actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
 }
 
-.action-card {
-  border-radius: 20px;
-  padding: 2rem;
-  color: white;
+.action {
+  border-radius: 16px;
+  padding: 1.625rem;
+  color: $white;
   text-align: left;
   border: none;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: filter 0.2s;
+  &:hover { filter: brightness(0.92); }
 
-  &:hover {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    transform: scale(1.02);
-  }
-
-  &.action-red   { background: linear-gradient(135deg, #891d1a, #6b1515); }
-  &.action-gray  { background: linear-gradient(135deg, #5e657b, #4a5061); }
-  &.action-green { background: linear-gradient(135deg, #71b48d, #5a9371); }
+  &--red   { background: linear-gradient(140deg, #891D1A, #6b1515); }
+  &--blue  { background: linear-gradient(140deg, #5E657B, #474e61); }
+  &--green { background: linear-gradient(140deg, #71B48D, #559970); }
 }
 
-.action-icon {
-  width: 64px;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.2);
+.action__icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: rgba($white, 0.18);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
-
-  svg { width: 32px; height: 32px; color: white; }
+  margin-bottom: 1.25rem;
+  svg { width: 26px; height: 26px; }
 }
 
-.action-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
+.action__title {
+  font-family: $font-display;
+  font-size: 26px;
+  letter-spacing: $font-display-spacing;
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
 }
 
-.action-text {
-  font-size: 15px;
-  opacity: 0.9;
+.action__text {
+  font-family: $font-primary;
+  font-size: 13px;
+  opacity: 0.88;
 }
 
-.stats-grid {
+// ── Stats ────────────────────────────────────────────────────
+.dash__stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
 }
 
-.stat-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #00050033;
+.stat {
+  background: $white;
+  border-radius: 14px;
+  padding: 1.25rem 1.375rem;
+  border: 1px solid $border-color;
 }
 
-.stat-header {
+.stat__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 }
 
-.stat-icon {
-  width: 32px;
-  height: 32px;
-  &.green { color: #71b48d; }
-  &.red   { color: #891d1a; }
-  &.gray  { color: #5e657b; }
+.stat__icon {
+  width: 26px;
+  height: 26px;
+  &--green { color: $green-accent; }
+  &--red   { color: $primary-red; }
+  &--gray  { color: $blue-accent; }
 }
 
-.stat-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-
-  &.green { color: #71b48d; background: #71b48d0d; }
-  &.red   { color: #891d1a; background: #891d1a0d; }
+.stat__badge {
+  font-family: $font-primary;
+  font-size: 10.5px;
+  font-weight: $font-bold;
+  padding: 0.175rem 0.5rem;
+  border-radius: $border-radius-pill;
+  &--green { color: $green-accent; background: rgba($green-accent, 0.1); }
+  &--red   { color: $primary-red;  background: rgba($primary-red, 0.08); }
 }
 
-.stat-value {
-  font-family: 'Bebas Neue', sans-serif;
-  color: #210706;
-  font-size: 42px;
+.stat__value {
+  font-family: $font-display;
+  color: $text-dark;
+  font-size: 38px;
+  letter-spacing: $font-display-spacing;
   line-height: 1;
   margin-bottom: 0.25rem;
 }
 
-.stat-label {
-  font-size: 14px;
-  color: #210706;
-  opacity: 0.6;
+.stat__label {
+  font-family: $font-primary;
+  font-size: 13px;
+  color: $text-gray;
 }
 
-.content-grid {
+// ── Bottom ───────────────────────────────────────────────────
+.dash__bottom {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.content-card {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid #00050033;
-}
-
-.content-title {
-  font-family: 'Bebas Neue', sans-serif;
-  color: #210706;
-  font-size: 32px;
-  line-height: 1;
-  margin-bottom: 1.5rem;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
 }
 
-.activity-item {
+.card {
+  background: $white;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid $border-color;
+}
+
+.card__title {
+  font-family: $font-display;
+  font-size: 26px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+  margin-bottom: 1.25rem;
+}
+
+.card__empty {
+  font-family: $font-primary;
+  font-size: 14px;
+  color: $text-gray;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+// Actividad
+.activity { display: flex; flex-direction: column; gap: 0.625rem; }
+
+.activity__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #00050033;
-  transition: box-shadow 0.2s;
-
-  &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+  padding: 0.75rem 0.875rem;
+  border-radius: 10px;
+  border: 1px solid $border-color;
+  transition: background 0.15s;
+  &:hover { background: $bg-page; }
 }
 
-.activity-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.activity__left { display: flex; align-items: center; gap: 0.75rem; }
 
-.activity-badge {
-  width: 40px;
-  height: 40px;
+.activity__badge {
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  span {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-  }
+  flex-shrink: 0;
+  span { font-family: $font-display; font-size: 13px; }
 }
 
-.activity-id   { font-size: 15px; font-weight: 600; color: #210706; }
-.activity-time { font-size: 13px; color: #210706; opacity: 0.6; }
+.activity__name  { font-family: $font-primary; font-size: 13.5px; font-weight: $font-semibold; color: $text-dark; }
+.activity__time  { font-family: $font-primary; font-size: 11.5px; color: $text-gray; margin-top: 1px; }
 
-.activity-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+.activity__status {
+  font-family: $font-primary;
+  font-size: 11px;
+  font-weight: $font-bold;
+  padding: 0.2rem 0.625rem;
+  border-radius: $border-radius-pill;
+  white-space: nowrap;
 }
 
-.empty-state {
-  padding: 3rem 1rem;
-  text-align: center;
-  color: #210706;
-  opacity: 0.5;
-  font-size: 15px;
-}
+// Perfil
+.profile { display: flex; flex-direction: column; gap: 1rem; }
 
-.profile-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.profile-header {
+.profile__head {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  gap: 0.875rem;
 }
 
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  background: #891d1a;
+.profile__avatar {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
+  background: $primary-red;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  span {
-    font-family: 'Bebas Neue', sans-serif;
-    color: white;
-    font-size: 32px;
-  }
+  flex-shrink: 0;
+  span { font-family: $font-display; color: $white; font-size: 22px; letter-spacing: 0.04em; }
 }
 
-.profile-name  { font-size: 20px; font-weight: 600; color: #210706; margin-bottom: 0.25rem; }
-.profile-role  { font-size: 14px; color: #210706; opacity: 0.6; }
+.profile__name { font-family: $font-display; font-size: 20px; letter-spacing: $font-display-spacing; color: $text-dark; line-height: 1; }
+.profile__role { font-family: $font-primary; font-size: 12px; color: $text-gray; margin-top: 3px; }
 
-.profile-details {
+.profile__rows {
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.profile__row {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2px;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid $border-color;
+  &--last { border-bottom: none; }
 }
 
-.profile-detail {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #00050033;
-  &.no-border { border-bottom: none; padding-bottom: 0; }
-}
+.profile__label { font-family: $font-primary; font-size: 11px; color: $text-gray; }
+.profile__value { font-family: $font-primary; font-size: 13.5px; font-weight: $font-semibold; color: $text-dark; }
 
-.detail-label  { font-size: 13px; color: #210706; opacity: 0.6; margin-bottom: 0.25rem; }
-.detail-value  { font-size: 15px; color: #210706; font-weight: 500; }
-
-.edit-profile-btn {
+.profile__edit {
   width: 100%;
-  padding: 0.75rem;
-  background: #891d1a0d;
-  color: #891d1a;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 0.625rem;
+  background: rgba($primary-red, 0.06);
+  color: $primary-red;
+  border-radius: 10px;
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: $font-semibold;
   border: none;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+  &:hover { background: $primary-red; color: $white; }
+}
 
-  &:hover { background: #891d1a; color: white; }
+.profile__admin-sep {
+  height: 1px;
+  background: $border-color;
+}
+
+.profile__admin-label {
+  font-family: $font-primary;
+  font-size: 11px;
+  font-weight: $font-bold;
+  letter-spacing: 0.06em;
+  color: $text-gray;
+  text-transform: uppercase;
+}
+
+.profile__admin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.profile__admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: $bg-page;
+  border: 1px solid $border-color;
+  border-radius: 9px;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  svg { width: 15px; height: 15px; opacity: 0.5; flex-shrink: 0; }
+  &:hover { border-color: $primary-red; color: $primary-red; background: rgba($primary-red, 0.04); svg { opacity: 1; } }
+}
+
+// Loading
+.dash-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: $bg-page;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $border-color;
+  border-top-color: $primary-red;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 </style>

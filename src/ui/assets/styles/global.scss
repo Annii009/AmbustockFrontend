@@ -1,28 +1,85 @@
-// Import de Google Fonts
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@300;400;600;700&display=swap');
+// ============================================================
+// Google Fonts
+// ============================================================
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
 
-// Import de variables y mixins
+// ============================================================
+// Variables & Mixins
+// ============================================================
 @import './variables';
 @import './mixins';
 
-// Reset básico
-* {
+// ============================================================
+// Reset
+// ============================================================
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: $font-primary;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
+// ============================================================
+// Base
+// ============================================================
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
-// Container base para todas las pantallas móviles
+body {
+  font-family: $font-primary;
+  font-weight: $font-regular;
+  color: $text-dark;
+  background-color: $bg-page; // #F8F6F6 en todas las páginas
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  width: 100%;
+}
+
+// ============================================================
+// Tipografía base
+// ============================================================
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $font-display; // Bebas Neue
+  color: $text-dark;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  margin: 0;
+}
+
+p,
+span,
+label,
+input,
+textarea,
+select,
+button {
+  font-family: $font-primary; // Source Sans 3
+  color: $text-dark;
+}
+
+a {
+  color: $link-red;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// ============================================================
+// Contenedor mobile
+// ============================================================
 .mobile-container {
   width: 100%;
   max-width: $max-width-mobile;
@@ -33,9 +90,258 @@ body {
   flex-direction: column;
 }
 
+// ============================================================
+// Utilidades de color
+// ============================================================
+.text-red {
+  color: $primary-red;
+}
 
-// Dark theme global styles
+.text-green {
+  color: $green-accent;
+}
+
+.text-blue {
+  color: $blue-accent;
+}
+
+.text-dark {
+  color: $text-dark;
+}
+
+.text-muted {
+  color: $text-gray;
+}
+
+.bg-page {
+  background-color: $bg-page;
+}
+
+.bg-red {
+  background-color: $primary-red;
+}
+
+.bg-green {
+  background-color: $green-accent;
+}
+
+.bg-blue {
+  background-color: $blue-accent;
+}
+
+// ============================================================
+// Badges de estado (compartidos mobile/desktop)
+// ============================================================
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: $border-radius-pill;
+  font-size: 12px;
+  font-weight: $font-semibold;
+  font-family: $font-primary;
+
+  &--completada {
+    background: $estado-completada-bg;
+    color: $estado-completada-text;
+  }
+
+  &--pendiente {
+    background: $estado-pendiente-bg;
+    color: $estado-pendiente-text;
+  }
+
+  &--urgente {
+    background: $badge-faltante-bg;
+    color: $badge-faltante-text;
+  }
+
+  &--sin-realizar {
+    background: rgba($blue-accent, 0.12);
+    color: $blue-accent;
+  }
+}
+
+// ============================================================
+// Spinner global
+// ============================================================
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $spinner-border;
+  border-top-color: $spinner-color;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================
+// Botones base (compartidos)
+// ============================================================
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: $border-radius-button;
+  font-family: $font-primary;
+  font-size: 16px;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Primario — rojo activo
+  &--primary {
+    background: $primary-red;
+    color: $white;
+    box-shadow: $shadow-button;
+
+    &:hover:not(:disabled) {
+      background: $primary-red-hover;
+      box-shadow: $shadow-button-hover;
+    }
+  }
+
+  // Secundario — borde rojo, relleno transparente
+  &--secondary {
+    background: transparent;
+    color: $primary-red;
+    border: 2px solid $primary-red;
+
+    &:hover:not(:disabled) {
+      background: $primary-red;
+      color: $white;
+    }
+  }
+
+  // Inactivo — rojo al 50% (según spec)
+  &--inactive {
+    background: $primary-red-50;
+    color: $white;
+    cursor: default;
+  }
+
+  // Ghost gris
+  &--ghost {
+    background: transparent;
+    color: $text-dark;
+    border: 1px solid $border-color;
+
+    &:hover:not(:disabled) {
+      background: rgba($text-dark, 0.05);
+    }
+  }
+
+  // Tamaños
+  &--sm {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+  }
+
+  &--md {
+    padding: 0.75rem 1.5rem;
+    font-size: 16px;
+  }
+
+  &--lg {
+    padding: 1rem 2rem;
+    font-size: 18px;
+  }
+
+  &--full {
+    width: 100%;
+  }
+}
+
+// ============================================================
+// Dark theme
+// ============================================================
 body.dark-theme {
   background-color: $dark-bg;
   color: $dark-text;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: $dark-text;
+  }
+
+  p,
+  span,
+  label {
+    color: $dark-text;
+  }
+}
+
+// ============================================================
+// Animaciones globales
+// ============================================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease both;
+}
+
+.fade-in-scale {
+  animation: fadeInScale 0.25s ease both;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.25s ease both;
 }

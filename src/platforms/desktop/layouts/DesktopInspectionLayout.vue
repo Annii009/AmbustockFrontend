@@ -1,6 +1,85 @@
+<template>
+  <div class="insp">
+
+    <header class="insp__topbar">
+      <div class="insp__brand">
+        <img src="/logo1Rojo.png" alt="AmbuStock" />
+      </div>
+      <div class="insp__divider" />
+      <div class="insp__meta">
+        <span class="insp__meta-label">Inspeccionando</span>
+        <span class="insp__meta-value">{{ ambulanciaLabel }}</span>
+      </div>
+      <div class="insp__meta">
+        <span class="insp__meta-label">Hora</span>
+        <span class="insp__meta-clock">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          {{ currentTime }}
+        </span>
+      </div>
+      <div class="insp__topbar-right">
+        <button class="insp__btn-save" @click="$emit('guardar')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar
+        </button>
+        <button class="insp__btn-exit" @click="$router.push('/principal')">Salir</button>
+      </div>
+    </header>
+
+    <!-- Progreso -->
+    <div class="insp__progress">
+      <div class="insp__progress-info">
+        <span>Progreso de inspección</span>
+        <span class="insp__progress-pct">{{ progress }}%</span>
+      </div>
+      <div class="insp__progress-track">
+        <div class="insp__progress-fill" :style="{ width: progress + '%' }" />
+      </div>
+    </div>
+
+    <!-- Tabs pasos -->
+    <div class="insp__steps">
+      <div
+        v-for="step in steps"
+        :key="step.id"
+        class="insp__step"
+        :class="{
+          'insp__step--done':   step.id < currentStep,
+          'insp__step--active': step.id === currentStep
+        }"
+      >
+        <div class="insp__step-num">
+          <template v-if="step.id < currentStep">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </template>
+          <template v-else>{{ step.id }}</template>
+        </div>
+        <div class="insp__step-info">
+          <span class="insp__step-title">{{ step.title }}</span>
+          <span class="insp__step-sub">{{ step.subtitle }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="insp__body">
+      <slot />
+    </div>
+
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
 
 withDefaults(defineProps<{
   currentStep: 1 | 2 | 3
@@ -8,21 +87,16 @@ withDefaults(defineProps<{
   progress?: number
 }>(), {
   ambulanciaLabel: '—',
-  progress: 0,
+  progress: 0
 })
 
 defineEmits<{ guardar: [] }>()
-
-const router = useRouter()
 
 const currentTime = ref('')
 let timer: ReturnType<typeof setInterval>
 
 const updateTime = () => {
-  currentTime.value = new Date().toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  currentTime.value = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 }
 
 onMounted(() => { updateTime(); timer = setInterval(updateTime, 1000) })
@@ -31,257 +105,217 @@ onUnmounted(() => clearInterval(timer))
 const steps = [
   { id: 1, title: 'Selección de Ambulancia', subtitle: 'Unidad a inspeccionar' },
   { id: 2, title: 'Tipo de Servicio',        subtitle: 'Servicio realizado'    },
-  { id: 3, title: 'Responsable',             subtitle: 'Nombre del técnico'    },
+  { id: 3, title: 'Responsable',             subtitle: 'Nombre del técnico'    }
 ]
 </script>
 
-<template>
-  <div class="insp-wrapper">
-
-    <!-- ── Topbar ── -->
-    <header class="topbar">
-      <div class="topbar-brand">
-        <img src="/logo1Rojo.png" alt="AmbuStock" />
-      </div>
-      <div class="topbar-divider" />
-
-      <div class="topbar-vehicle">
-        <span class="topbar-label">Inspeccionando</span>
-        <span class="topbar-value">{{ ambulanciaLabel }}</span>
-      </div>
-
-      <div class="topbar-time">
-        <span class="topbar-label">Hora actual</span>
-        <span class="topbar-clock">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-          {{ currentTime }}
-        </span>
-      </div>
-
-      <div class="topbar-actions">
-        <button class="btn-guardar" @click="$emit('guardar')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-          Guardar
-        </button>
-        <button class="btn-salir" @click="$router.push('/principal')">Salir</button>
-      </div>
-    </header>
-
-    <!-- ── Progreso ── -->
-    <div class="progress-section">
-      <div class="progress-meta">
-        <span class="progress-label">Progreso de inspección</span>
-        <span class="progress-pct">{{ progress }}% Completado</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" :style="{ width: progress + '%' }" />
-      </div>
-    </div>
-
-    <!-- ── Tabs de pasos ── -->
-    <div class="steps-tabs">
-      <div
-        v-for="step in steps"
-        :key="step.id"
-        class="step-tab"
-        :class="{
-          'step-tab--active':    step.id === currentStep,
-          'step-tab--completed': step.id < currentStep,
-        }"
-      >
-        <!-- Truck -->
-        <svg v-if="step.id === 1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="1" y="3" width="15" height="13" rx="1"/>
-          <path d="M16 8h4l3 3v5h-7V8z"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/>
-          <circle cx="18.5" cy="18.5" r="2.5"/>
-        </svg>
-        <!-- Document -->
-        <svg v-else-if="step.id === 2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        <!-- Person -->
-        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-
-        <div class="step-info">
-          <span class="step-title">{{ step.title }}</span>
-          <span class="step-subtitle">{{ step.subtitle }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Slot ── -->
-    <div class="page-content">
-      <slot />
-    </div>
-
-  </div>
-</template>
-
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
+@import '@ui/assets/styles/mixins';
 
-.insp-wrapper {
+.insp {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  background: #f2f3f5;
+  background: $bg-page;
 }
 
-/* ── Topbar ── */
-.topbar {
+.insp__topbar {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 12px 28px;
-  background: #fff;
-  border-bottom: 1px solid #e4e6ea;
-
+  gap: 1.5rem;
+  padding: 0.75rem 1.75rem;
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
   @media (max-width: 768px) { display: none; }
 }
 
-.topbar-brand img { height: 36px; }
+.insp__brand img { height: 34px; }
+.insp__divider { width: 1px; height: 24px; background: $border-color; }
 
-.topbar-divider {
-  width: 1px;
-  height: 28px;
-  background: #e0e2e7;
+.insp__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.topbar-vehicle,
-.topbar-time { display: flex; flex-direction: column; }
+.insp__meta-label {
+  font-family: $font-primary;
+  font-size: 10px;
+  font-weight: $font-bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $text-gray;
+}
 
-.topbar-label  { font-size: 10.5px; color: #9aa0ad; line-height: 1.2; }
-.topbar-value  { font-size: 15px; font-weight: 700; color: $primary-red; line-height: 1.2; }
+.insp__meta-value {
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: $font-bold;
+  color: $primary-red;
+}
 
-.topbar-clock {
+.insp__meta-clock {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  svg { width: 14px; height: 14px; }
+  gap: 4px;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+  svg { width: 13px; height: 13px; }
 }
 
-.topbar-actions {
+.insp__topbar-right {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0.875rem;
 }
 
-.btn-guardar {
+.insp__btn-save {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  background: #4a5568;
-  color: #fff;
+  gap: 5px;
+  padding: 0.4375rem 1rem;
+  background: $blue-accent;
+  color: $white;
   border: none;
-  border-radius: 7px;
-  font-size: 13.5px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
   cursor: pointer;
-  transition: background 0.2s;
-
-  svg { width: 14px; height: 14px; }
-  &:hover { background: #2d3748; }
+  transition: filter 0.15s;
+  svg { width: 13px; height: 13px; }
+  &:hover { filter: brightness(0.9); }
 }
 
-.btn-salir {
+.insp__btn-exit {
   background: none;
   border: none;
-  color: #5a6072;
-  font-size: 13.5px;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
+  color: $text-gray;
   cursor: pointer;
-  &:hover { color: #222; }
+  padding: 0.4375rem 0.625rem;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  &:hover { background: $bg-page; color: $text-dark; }
 }
 
-/* ── Progreso ── */
-.progress-section {
-  padding: 10px 28px;
-  background: #fff;
-  border-bottom: 1px solid #e4e6ea;
+.insp__progress {
+  padding: 0.625rem 1.75rem;
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
 }
 
-.progress-meta {
+.insp__progress-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 7px;
+  font-family: $font-primary;
+  font-size: 11.5px;
+  color: $text-gray;
+  margin-bottom: 5px;
 }
 
-.progress-label { font-size: 12px; color: #9aa0ad; }
-.progress-pct   { font-size: 12px; font-weight: 600; color: $primary-red; }
+.insp__progress-pct {
+  font-weight: $font-bold;
+  color: $primary-red;
+}
 
-.progress-track {
-  height: 5px;
-  background: #e8eaed;
-  border-radius: 3px;
+.insp__progress-track {
+  height: 4px;
+  background: $border-color;
+  border-radius: 99px;
   overflow: hidden;
 }
 
-.progress-fill {
+.insp__progress-fill {
   height: 100%;
   background: $primary-red;
-  border-radius: 3px;
+  border-radius: 99px;
   transition: width 0.4s ease;
 }
 
-/* ── Tabs ── */
-.steps-tabs {
+.insp__steps {
   display: flex;
-  background: #fff;
-  border-bottom: 1px solid #e4e6ea;
-  padding: 0 28px;
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  padding: 0 1.75rem;
   overflow-x: auto;
+  flex-shrink: 0;
 }
 
-.step-tab {
+.insp__step {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-bottom: 3px solid transparent;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid transparent;
   white-space: nowrap;
-
-  svg          { width: 18px; height: 18px; color: #c8ccd4; flex-shrink: 0; }
-  .step-title  { display: block; font-size: 12.5px; font-weight: 600; color: #b0b5c0; }
-  .step-subtitle { display: block; font-size: 11px; color: #c8ccd4; margin-top: 1px; }
-
-  &--completed {
-    svg            { color: #7a8090; }
-    .step-title    { color: #5a6072; }
-    .step-subtitle { color: #9aa0ad; }
-  }
+  color: $text-gray;
 
   &--active {
     border-bottom-color: $primary-red;
-    svg            { color: $primary-red; }
-    .step-title    { color: #1a1d23; }
-    .step-subtitle { color: #6b7280; }
+    color: $text-dark;
+    .insp__step-num {
+      background: $primary-red;
+      color: $white;
+      border-color: $primary-red;
+    }
+    .insp__step-title { color: $text-dark; }
+  }
+
+  &--done {
+    color: $text-dark;
+    .insp__step-num {
+      background: $green-accent;
+      color: $white;
+      border-color: $green-accent;
+    }
+    .insp__step-title { color: $text-dark; }
   }
 }
 
-/* ── Contenido ── */
-.page-content {
-  flex: 1;
-  padding: 28px 32px;
-  overflow-y: auto;
+.insp__step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-primary;
+  font-size: 12px;
+  font-weight: $font-bold;
+  flex-shrink: 0;
+  svg { width: 12px; height: 12px; }
+}
 
-  @media (max-width: 768px) { padding: 20px 16px; }
+.insp__step-info { display: flex; flex-direction: column; gap: 1px; }
+
+.insp__step-title {
+  font-family: $font-primary;
+  font-size: 12.5px;
+  font-weight: $font-bold;
+  color: $text-gray;
+}
+
+.insp__step-sub {
+  font-family: $font-primary;
+  font-size: 11px;
+  color: $text-gray;
+  opacity: 0.7;
+}
+
+.insp__body {
+  flex: 1;
+  padding: 1.75rem 2rem;
+  overflow-y: auto;
+  @media (max-width: 768px) { padding: 1.25rem 1rem; }
 }
 </style>
