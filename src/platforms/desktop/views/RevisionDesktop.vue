@@ -1,413 +1,1052 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+  getRevisionAmbulancia,
+  guardarRevision,
+  guardarEstadoRevision,
+  cargarEstadoRevision,
+  limpiarEstadoRevision,
+  guardarMaterialesFaltantes,
+  getAmbulanciaSeleccionada,
+  getServicioSeleccionado,
+  getNombreResponsable,
+  getAmbulanciaById,
+  type RevisionData,
+  type Zona,
+  type Material,
+  ApiError
+} from '@core/services/api'
+import { useRevision } from '@core/composables/useRevision'
+
+const router = useRouter()
+const {
+  contarTotalMateriales,
+  contarMaterialesRevisados,
+  inicializarCantidadesRevisadas,
+  obtenerMaterialesFaltantes
+} = useRevision()
+
+// Estado — idéntico al mobile
+const revisionData = ref<RevisionData | null>(null)
+const ambulanciaId = ref<number | null>(null)
+const ambulanciaNombre = ref<string>('')
+const ambulanciaMatricula = ref<string>('')
+const isLoading = ref(true)
+const isReloading = ref(false)
+const error = ref<string | null>(null)
+
+// Paginación — idéntica al mobile
+const ZONAS_POR_PAGINA = 10
+const paginaActual = ref(1)
+
+const totalPaginas = computed(() => {
+  if (!revisionData.value) return 1
+  return Math.ceil(revisionData.value.zonas.length / ZONAS_POR_PAGINA)
+})
+
+const zonasPaginadas = computed(() => {
+  if (!revisionData.value) return []
+  const inicio = (paginaActual.value - 1) * ZONAS_POR_PAGINA
+  const fin = inicio + ZONAS_POR_PAGINA
+  return revisionData.value.zonas.slice(inicio, fin)
+})
+
+const indexRealZona = (indexPagina: number): number => {
+  return (paginaActual.value - 1) * ZONAS_POR_PAGINA + indexPagina
+}
+
+const irAPagina = (pagina: number) => {
+  if (pagina >= 1 && pagina <= totalPaginas.value) {
+    paginaActual.value = pagina
+    // En desktop no hacemos scroll, cerramos el panel derecho
+    zonaActual.value = null
+    zonaActualIndex.value = null
+  }
+}
+
+// Panel derecho (equivalente al modal del mobile)
+// En mobile: isModalOpen + zonaActual + zonaActualIndex
+// En desktop: zonaActual + zonaActualIndex (el panel siempre está visible)
+const zonaActual = ref<Zona | null>(null)
+const zonaActualIndex = ref<number | null>(null)
+
+// Estado de cajones expandidos — idéntico al mobile
+const cajonesExpandidos = ref<Record<string, boolean>>({})
+
+const toggleCajon = (zonaIndex: number, cajonIndex: number) => {
+  const key = `${zonaIndex}-${cajonIndex}`
+  cajonesExpandidos.value[key] = !cajonesExpandidos.value[key]
+}
+
+const isCajonExpandido = (zonaIndex: number, cajonIndex: number): boolean => {
+  const key = `${zonaIndex}-${cajonIndex}`
+  return cajonesExpandidos.value[key] !== false
+}
+
+const inicializarCajones = (zona: Zona, zonaIndex: number) => {
+  if (zona.cajones) {
+    zona.cajones.forEach((_, cajonIndex) => {
+      const key = `${zonaIndex}-${cajonIndex}`
+      if (cajonesExpandidos.value[key] === undefined) {
+        cajonesExpandidos.value[key] = true
+      }
+    })
+  }
+}
+
+// Progreso — idéntico al mobile
+const progresoTotal = computed(() => {
+  if (!revisionData.value) return { porcentaje: 0, revisados: 0, total: 0 }
+
+  let total = 0
+  let revisados = 0
+
+  revisionData.value.zonas.forEach(zona => {
+    total += contarTotalMateriales(zona)
+    revisados += contarMaterialesRevisados(zona)
+  })
+
+  const porcentaje = total > 0 ? Math.round((revisados / total) * 100) : 0
+  return { porcentaje, revisados, total }
+})
+
+const progresoZona = (zona: Zona) => {
+  const total = contarTotalMateriales(zona)
+  const revisados = contarMaterialesRevisados(zona)
+  const porcentaje = total > 0 ? Math.round((revisados / total) * 100) : 0
+  return { porcentaje, revisados, total }
+}
+
+// Cargar — idéntico al mobile
+const cargarRevision = async (recarga = false) => {
+  try {
+    if (recarga) {
+      isReloading.value = true
+    } else {
+      isLoading.value = true
+    }
+    error.value = null
+
+    ambulanciaId.value = getAmbulanciaSeleccionada()
+
+    if (!ambulanciaId.value) {
+      alert('No se ha seleccionado ninguna ambulancia')
+      router.push('/principal/seleccion-ambulancia')
+      return
+    }
+
+    const ambulancia = await getAmbulanciaById(ambulanciaId.value)
+    if (ambulancia) {
+      ambulanciaNombre.value = ambulancia.nombre || ''
+      ambulanciaMatricula.value = ambulancia.matricula || ''
+    }
+
+    const data = await getRevisionAmbulancia(ambulanciaId.value)
+    revisionData.value = data
+
+    inicializarCantidadesRevisadas(revisionData.value.zonas)
+
+    const estadoGuardado = cargarEstadoRevision(ambulanciaId.value)
+    if (estadoGuardado) {
+      mergeEstadoGuardado(estadoGuardado)
+    }
+
+    if (recarga) {
+      paginaActual.value = 1
+      zonaActual.value = null
+      zonaActualIndex.value = null
+    }
+
+  } catch (err) {
+    if (err instanceof ApiError) {
+      error.value = err.message
+    } else {
+      error.value = 'Error al cargar revisión'
+    }
+    console.error('Error cargando revisión:', err)
+  } finally {
+    isLoading.value = false
+    isReloading.value = false
+  }
+}
+
+const mergeEstadoGuardado = (estadoData: RevisionData) => {
+  if (!revisionData.value) return
+
+  revisionData.value.zonas.forEach((zona, zIndex) => {
+    if (zona.materiales && estadoData.zonas[zIndex]?.materiales) {
+      zona.materiales.forEach((material, mIndex) => {
+        if (estadoData.zonas[zIndex].materiales![mIndex]) {
+          material.cantidadRevisada = estadoData.zonas[zIndex].materiales![mIndex].cantidadRevisada || 0
+        }
+      })
+    }
+
+    if (zona.cajones && estadoData.zonas[zIndex]?.cajones) {
+      zona.cajones.forEach((cajon, cIndex) => {
+        if (cajon.materiales && estadoData.zonas[zIndex].cajones![cIndex]?.materiales) {
+          cajon.materiales.forEach((material, mIndex) => {
+            if (estadoData.zonas[zIndex].cajones![cIndex].materiales![mIndex]) {
+              material.cantidadRevisada = estadoData.zonas[zIndex].cajones![cIndex].materiales![mIndex].cantidadRevisada || 0
+            }
+          })
+        }
+      })
+    }
+  })
+}
+
+const guardarEstado = () => {
+  if (revisionData.value && ambulanciaId.value) {
+    guardarEstadoRevision(ambulanciaId.value, revisionData.value)
+  }
+}
+
+// Equivalente a abrirModalZona en el mobile
+const abrirZona = (zona: Zona, indexPagina: number) => {
+  const indexReal = indexRealZona(indexPagina)
+  zonaActual.value = zona
+  zonaActualIndex.value = indexReal
+  inicializarCajones(zona, indexReal)
+}
+
+// Cambiar cantidad — idéntico al mobile
+const cambiarCantidad = (zonaIndex: number, cajonIndex: number | null, materialIndex: number, cambio: number) => {
+  if (!revisionData.value) return
+
+  let material: Material
+
+  if (cajonIndex === null) {
+    material = revisionData.value.zonas[zonaIndex].materiales![materialIndex]
+  } else {
+    material = revisionData.value.zonas[zonaIndex].cajones![cajonIndex].materiales[materialIndex]
+  }
+
+  const nuevaCantidad = (material.cantidadRevisada || 0) + cambio
+
+  if (nuevaCantidad >= 0 && nuevaCantidad <= material.cantidad) {
+    material.cantidadRevisada = nuevaCantidad
+    guardarEstado()
+  }
+}
+
+const seleccionarCajon = (zonaIndex: number, cajonIndex: number) => {
+  if (!revisionData.value) return
+
+  const cajon = revisionData.value.zonas[zonaIndex].cajones![cajonIndex]
+  if (cajon.materiales) {
+    cajon.materiales.forEach(material => {
+      material.cantidadRevisada = material.cantidad
+    })
+  }
+  guardarEstado()
+}
+
+const seleccionarZonaCompleta = () => {
+  if (!revisionData.value || zonaActualIndex.value === null) return
+
+  const zona = revisionData.value.zonas[zonaActualIndex.value]
+
+  if (zona.materiales) {
+    zona.materiales.forEach(material => {
+      material.cantidadRevisada = material.cantidad
+    })
+  }
+
+  if (zona.cajones) {
+    zona.cajones.forEach(cajon => {
+      if (cajon.materiales) {
+        cajon.materiales.forEach(material => {
+          material.cantidadRevisada = material.cantidad
+        })
+      }
+    })
+  }
+
+  guardarEstado()
+}
+
+const goBack = () => {
+  if (confirm('¿Estás seguro de que quieres salir? El progreso se guardará automáticamente.')) {
+    router.push('/principal/nombre-responsable')
+  }
+}
+
+const finalizarRevision = async () => {
+  try {
+    if (!revisionData.value || !ambulanciaId.value) return
+
+    const servicioId = getServicioSeleccionado()
+    const nombreResponsable = getNombreResponsable()
+
+    if (!servicioId || !nombreResponsable) {
+      alert('Faltan datos para finalizar la revisión')
+      return
+    }
+
+    const faltantes = obtenerMaterialesFaltantes(revisionData.value.zonas)
+    guardarMaterialesFaltantes(faltantes)
+
+    const revisionCompleta = {
+      idAmbulancia: ambulanciaId.value,
+      idServicio: servicioId,
+      nombreResponsable: nombreResponsable,
+      fechaRevision: new Date().toISOString(),
+      zonas: revisionData.value.zonas
+    }
+
+    await guardarRevision(revisionCompleta)
+    limpiarEstadoRevision(ambulanciaId.value)
+    router.push('/principal/materiales-faltantes')
+
+  } catch (err) {
+    console.error('Error:', err)
+    alert('Error al guardar la revisión: ' + (err instanceof Error ? err.message : 'Error desconocido'))
+  }
+}
+
+onMounted(() => {
+  cargarRevision()
+})
+</script>
+
 <template>
-  <DesktopInspectionLayout
-    :current-step="3"
-    :ambulancia-label="ambulanciaNombre || ambulanciaMatricula || '—'"
-    :progress="progreso"
-    @guardar="guardarYContinuar"
-  >
-    <div class="revision">
+  <div class="revision-desktop">
 
-      <!-- Error -->
-      <div v-if="error" class="alert alert--error">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        {{ error }}
-      </div>
+    <!-- ══ COLUMNA IZQUIERDA: lista de zonas (= pantalla mobile entera) ══ -->
+    <div class="col-zonas">
+      <div class="container">
 
-      <!-- Loading -->
-      <div v-else-if="isLoading" class="loading-state">
-        <div class="spinner" />
-        <p>Cargando revisión...</p>
-      </div>
-
-      <template v-else-if="revisionData">
-
-        <!-- Cabecera de progreso -->
-        <div class="revision__summary">
-          <div class="summary-stat">
-            <span class="summary-stat__value">{{ contarMaterialesRevisados(revisionData) }}</span>
-            <span class="summary-stat__label">Revisados</span>
-          </div>
-          <div class="summary-stat">
-            <span class="summary-stat__value">{{ contarTotalMateriales(revisionData) }}</span>
-            <span class="summary-stat__label">Total</span>
-          </div>
-          <div class="summary-stat">
-            <span class="summary-stat__value summary-stat__value--red">{{ faltantes }}</span>
-            <span class="summary-stat__label">Faltantes</span>
-          </div>
-          <div class="summary-stat">
-            <span class="summary-stat__value">{{ revisionData.zonas.length }}</span>
-            <span class="summary-stat__label">Zonas</span>
-          </div>
+        <!-- Header -->
+        <div class="header">
+          <button class="back-button" @click="goBack">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <button
+            class="reload-button"
+            @click="cargarRevision(true)"
+            :disabled="isReloading"
+            :class="{ spinning: isReloading }"
+            title="Recargar revisión"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
         </div>
 
-        <!-- Grid de zonas -->
-        <div class="zones-grid">
-          <div
-            v-for="(zona, zi) in zonasPaginadas"
-            :key="zi"
-            class="zone-card"
-          >
-            <button class="zone-card__header" @click="toggleZona(zi)">
-              <div class="zone-card__header-left">
-                <span class="zone-card__name">{{ zona.nombre }}</span>
-                <span class="zone-card__count">{{ zona.cajones?.length || 0 }} cajones</span>
+        <h1>REVISIÓN DE AMBULANCIA</h1>
+
+        <p v-if="ambulanciaNombre || ambulanciaMatricula" class="ambulancia-subtitulo">
+          {{ ambulanciaNombre }}{{ ambulanciaMatricula ? ' · ' + ambulanciaMatricula : '' }}
+        </p>
+
+        <div v-if="isLoading" class="loading">Cargando revisión...</div>
+        <div v-else-if="error" class="error-box">
+          <span>{{ error }}</span>
+          <button class="btn-retry" @click="cargarRevision(true)">Reintentar</button>
+        </div>
+
+        <template v-else-if="revisionData">
+
+          <!-- Progreso total -->
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Progreso total</span>
+              <span>{{ progresoTotal.porcentaje }}%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" :style="{ width: progresoTotal.porcentaje + '%' }" />
+            </div>
+          </div>
+
+          <!-- Info paginación -->
+          <div v-if="totalPaginas > 1" class="pagination-info">
+            Mostrando {{ (paginaActual - 1) * 10 + 1 }}–{{ Math.min(paginaActual * 10, revisionData.zonas.length) }}
+            de {{ revisionData.zonas.length }} zonas
+          </div>
+
+          <!-- Lista de zonas — mismo HTML que el mobile -->
+          <div class="zonas-list">
+            <div
+              v-for="(zona, indexPagina) in zonasPaginadas"
+              :key="indexRealZona(indexPagina)"
+              class="zona-item"
+              :class="{
+                completed: progresoZona(zona).porcentaje === 100 && progresoZona(zona).total > 0,
+                active: zonaActualIndex === indexRealZona(indexPagina)
+              }"
+              @click="abrirZona(zona, indexPagina)"
+            >
+              <div class="zona-content">
+                <div class="zona-name">{{ zona.nombreZona }}</div>
+                <div class="zona-progress-text">
+                  {{ progresoZona(zona).revisados }}/{{ progresoZona(zona).total }} cajones revisados
+                </div>
+                <div class="zona-mini-bar">
+                  <div class="zona-mini-fill" :style="{ width: progresoZona(zona).porcentaje + '%' }" />
+                </div>
               </div>
-              <svg class="zone-card__chevron" :class="{ 'zone-card__chevron--open': zonaExpandida(zi) }"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"/>
+
+              <div v-if="progresoZona(zona).porcentaje === 100 && progresoZona(zona).total > 0" class="zona-check">✓</div>
+              <div v-else class="zona-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div v-if="totalPaginas > 1" class="pagination">
+            <button class="pagination-btn" :disabled="paginaActual === 1" @click="irAPagina(paginaActual - 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
               </svg>
             </button>
+            <div class="pagination-pages">
+              <button
+                v-for="pagina in totalPaginas"
+                :key="pagina"
+                class="pagination-page"
+                :class="{ active: pagina === paginaActual }"
+                @click="irAPagina(pagina)"
+              >{{ pagina }}</button>
+            </div>
+            <button class="pagination-btn" :disabled="paginaActual === totalPaginas" @click="irAPagina(paginaActual + 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
 
-            <div v-if="zonaExpandida(zi)" class="zone-card__body">
-              <div
-                v-for="(cajon, ci) in zona.cajones"
-                :key="ci"
-                class="cajon"
-              >
-                <button class="cajon__header" @click="toggleCajon(indexRealZona(zi), ci)">
-                  <span class="cajon__name">{{ cajon.nombre }}</span>
-                  <div class="cajon__header-right">
-                    <span class="cajon__count">{{ cajon.materiales?.length || 0 }} materiales</span>
-                    <svg :class="['cajon__chevron', { 'cajon__chevron--open': isCajonExpandido(indexRealZona(zi), ci) }]"
-                      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                  </div>
+          <button class="btn-finalizar" @click="finalizarRevision">
+            Finalizar
+          </button>
+
+        </template>
+      </div>
+    </div>
+
+    <!-- ══ COLUMNA DERECHA: el modal mobile convertido en panel fijo ══ -->
+    <div class="col-modal">
+
+      <!-- Estado vacío: ninguna zona seleccionada -->
+      <div v-if="!zonaActual" class="panel-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <p>Selecciona una zona para ver y revisar sus materiales</p>
+      </div>
+
+      <!-- Contenido zona activa — HTML exacto del modal mobile, sin el overlay ni el close -->
+      <div v-else class="modal-content">
+
+        <div class="modal-header">
+          <h2>{{ zonaActual.nombreZona }}</h2>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-select-all" @click="seleccionarZonaCompleta">
+            Seleccionar toda la zona
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Cajones colapsables — idéntico al mobile -->
+          <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0">
+            <div
+              v-for="(cajon, cajonIndex) in zonaActual.cajones"
+              :key="cajonIndex"
+              class="cajon-section"
+            >
+              <div class="cajon-header" @click="toggleCajon(zonaActualIndex!, cajonIndex)">
+                <div class="cajon-header-left">
+                  <svg
+                    class="cajon-chevron"
+                    :class="{ rotated: isCajonExpandido(zonaActualIndex!, cajonIndex) }"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                  <h3>{{ cajon.nombreCajon }}</h3>
+                </div>
+                <button class="btn-select-cajon" @click.stop="seleccionarCajon(zonaActualIndex!, cajonIndex)">
+                  Seleccionar cajón
                 </button>
+              </div>
 
-                <div v-if="isCajonExpandido(indexRealZona(zi), ci)" class="cajon__materials">
-                  <div v-for="(mat, mi) in cajon.materiales" :key="mi" class="material-row">
-                    <div class="material-row__info">
-                      <span class="material-row__name">{{ mat.nombre }}</span>
-                      <span v-if="mat.cantidadMinima" class="material-row__min">Mín: {{ mat.cantidadMinima }}</span>
-                    </div>
-                    <div class="material-row__controls">
-                      <button class="qty-btn" @click="decrementar(indexRealZona(zi), ci, mi)">−</button>
-                      <span class="qty-value" :class="{ 'qty-value--low': (mat.cantidadRevisada ?? mat.cantidadMinima ?? 0) < (mat.cantidadMinima ?? 0) }">
-                        {{ mat.cantidadRevisada ?? mat.cantidadMinima ?? 0 }}
-                      </span>
-                      <button class="qty-btn" @click="incrementar(indexRealZona(zi), ci, mi)">+</button>
-                    </div>
+              <div v-show="isCajonExpandido(zonaActualIndex!, cajonIndex)" class="cajon-materials">
+                <div
+                  v-for="(material, materialIndex) in cajon.materiales"
+                  :key="materialIndex"
+                  class="material-item"
+                >
+                  <div class="material-info">
+                    <div class="material-name">{{ material.nombreProducto }}</div>
+                    <div class="material-cantidad">Cantidad esperada: {{ material.cantidad }}</div>
+                  </div>
+                  <div class="quantity-controls">
+                    <button
+                      class="btn-quantity minus"
+                      :disabled="(material.cantidadRevisada || 0) === 0"
+                      @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, -1)"
+                    >−</button>
+                    <span class="quantity-value">{{ material.cantidadRevisada || 0 }}</span>
+                    <button
+                      class="btn-quantity plus"
+                      :disabled="(material.cantidadRevisada || 0) >= material.cantidad"
+                      @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, 1)"
+                    >+</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Paginación -->
-        <div v-if="totalPaginas > 1" class="pagination">
-          <button class="pagination__btn" :disabled="paginaActual === 1" @click="irAPagina(paginaActual - 1)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-          <button
-            v-for="p in totalPaginas"
-            :key="p"
-            class="pagination__page"
-            :class="{ 'pagination__page--active': p === paginaActual }"
-            @click="irAPagina(p)"
-          >{{ p }}</button>
-          <button class="pagination__btn" :disabled="paginaActual === totalPaginas" @click="irAPagina(paginaActual + 1)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-        </div>
+          <!-- Materiales directos — idéntico al mobile -->
+          <div v-if="zonaActual.materiales && zonaActual.materiales.length > 0" class="materiales-directos">
+            <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0" class="materiales-directos-title">
+              Materiales sueltos
+            </div>
+            <div
+              v-for="(material, materialIndex) in zonaActual.materiales"
+              :key="materialIndex"
+              class="material-item"
+            >
+              <div class="material-info">
+                <div class="material-name">{{ material.nombreProducto }}</div>
+                <div class="material-cantidad">Cantidad esperada: {{ material.cantidad }}</div>
+              </div>
+              <div class="quantity-controls">
+                <button
+                  class="btn-quantity minus"
+                  :disabled="(material.cantidadRevisada || 0) === 0"
+                  @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, -1)"
+                >−</button>
+                <span class="quantity-value">{{ material.cantidadRevisada || 0 }}</span>
+                <button
+                  class="btn-quantity plus"
+                  :disabled="(material.cantidadRevisada || 0) >= material.cantidad"
+                  @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, 1)"
+                >+</button>
+              </div>
+            </div>
+          </div>
 
-        <!-- Botón continuar -->
-        <div class="revision__footer">
-          <button class="btn-back" @click="router.push('/principal/nombre-responsable')">Atrás</button>
-          <button class="btn-next" @click="guardarYContinuar">
-            Finalizar Revisión
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
         </div>
-
-      </template>
+      </div>
     </div>
-  </DesktopInspectionLayout>
+
+  </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  getRevisionAmbulancia, guardarRevision, guardarEstadoRevision, cargarEstadoRevision,
-  limpiarEstadoRevision, guardarMaterialesFaltantes, getAmbulanciaSeleccionada,
-  getServicioSeleccionado, getNombreResponsable, getAmbulanciaById,
-  type RevisionData, type Zona, ApiError
-} from '@core/services/api'
-import { useRevision } from '@core/composables/useRevision'
-import DesktopInspectionLayout from '../layouts/DesktopInspectionLayout.vue'
-
-const router = useRouter()
-const { contarTotalMateriales, contarMaterialesRevisados, obtenerMaterialesFaltantes } = useRevision()
-
-const revisionData       = ref<RevisionData | null>(null)
-const ambulanciaNombre   = ref('')
-const ambulanciaMatricula = ref('')
-const isLoading          = ref(true)
-const error              = ref<string | null>(null)
-const paginaActual       = ref(1)
-const ZONAS_POR_PAGINA   = 6 // más en desktop
-
-const zonasExpandidas    = ref<Record<number, boolean>>({})
-const cajonesExpandidos  = ref<Record<string, boolean>>({})
-
-const totalPaginas = computed(() =>
-  revisionData.value ? Math.ceil(revisionData.value.zonas.length / ZONAS_POR_PAGINA) : 1
-)
-
-const zonasPaginadas = computed(() => {
-  if (!revisionData.value) return []
-  const inicio = (paginaActual.value - 1) * ZONAS_POR_PAGINA
-  return revisionData.value.zonas.slice(inicio, inicio + ZONAS_POR_PAGINA)
-})
-
-const indexRealZona = (i: number) => (paginaActual.value - 1) * ZONAS_POR_PAGINA + i
-
-const faltantes = computed(() =>
-  revisionData.value ? obtenerMaterialesFaltantes(revisionData.value).length : 0
-)
-
-const progreso = computed(() => {
-  if (!revisionData.value) return 0
-  const total    = contarTotalMateriales(revisionData.value)
-  const revisados = contarMaterialesRevisados(revisionData.value)
-  return total === 0 ? 0 : Math.round(revisados / total * 100)
-})
-
-const toggleZona    = (i: number) => { zonasExpandidas.value[i] = !zonasExpandidas.value[i] }
-const zonaExpandida = (i: number) => !!zonasExpandidas.value[i]
-
-const toggleCajon     = (zi: number, ci: number) => {
-  const k = `${zi}-${ci}`
-  cajonesExpandidos.value[k] = !cajonesExpandidos.value[k]
-}
-const isCajonExpandido = (zi: number, ci: number) => !!cajonesExpandidos.value[`${zi}-${ci}`]
-
-const incrementar = (zi: number, ci: number, mi: number) => {
-  const mat = revisionData.value?.zonas[zi]?.cajones[ci]?.materiales[mi]
-  if (mat) { mat.cantidadRevisada = (mat.cantidadRevisada ?? mat.cantidadMinima ?? 0) + 1 }
-}
-const decrementar = (zi: number, ci: number, mi: number) => {
-  const mat = revisionData.value?.zonas[zi]?.cajones[ci]?.materiales[mi]
-  if (mat) { const v = (mat.cantidadRevisada ?? mat.cantidadMinima ?? 0); mat.cantidadRevisada = Math.max(0, v - 1) }
-}
-
-const irAPagina = (p: number) => {
-  if (p >= 1 && p <= totalPaginas.value) {
-    paginaActual.value = p
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const guardarYContinuar = async () => {
-  if (!revisionData.value) return
-  const faltantesList = obtenerMaterialesFaltantes(revisionData.value)
-  guardarMaterialesFaltantes(faltantesList)
-  await guardarRevision(revisionData.value)
-  limpiarEstadoRevision()
-  if (faltantesList.length > 0) {
-    router.push('/principal/materiales-faltantes')
-  } else {
-    router.push('/principal/mision-cumplida')
-  }
-}
-
-onMounted(async () => {
-  try {
-    const ambulanciaId = getAmbulanciaSeleccionada()
-    const servicioId   = getServicioSeleccionado()
-    if (!ambulanciaId || !servicioId) { router.push('/principal'); return }
-
-    const ambulancia = await getAmbulanciaById(ambulanciaId)
-    ambulanciaNombre.value    = ambulancia?.nombre || ''
-    ambulanciaMatricula.value = ambulancia?.matricula || ''
-
-    const savedState = cargarEstadoRevision()
-    if (savedState) {
-      revisionData.value = savedState
-    } else {
-      revisionData.value = await getRevisionAmbulancia(ambulanciaId, servicioId)
-    }
-    // Abrir primera zona por defecto
-    if (revisionData.value?.zonas.length) zonasExpandidas.value[0] = true
-  } catch (e) {
-    error.value = e instanceof ApiError ? e.message : 'Error al cargar la revisión'
-  } finally {
-    isLoading.value = false
-  }
-})
-</script>
 
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-.revision { display: flex; flex-direction: column; gap: 1.25rem; }
-
-.alert {
-  display: flex; align-items: center; gap: 0.625rem;
-  padding: 0.875rem 1rem; border-radius: 10px;
-  font-family: $font-primary; font-size: 14px;
-  svg { width: 18px; height: 18px; flex-shrink: 0; }
-  &--error { background: rgba($primary-red, 0.08); color: $primary-red; border: 1px solid rgba($primary-red, 0.2); }
+// ════════════════════════════════════════════════════════════
+// Layout desktop: dos columnas
+// ════════════════════════════════════════════════════════════
+.revision-desktop {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 0;
+  min-height: 100%;
 }
 
-.loading-state {
-  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
-  padding: 3rem; color: $text-gray;
-  p { font-family: $font-primary; font-size: 14px; }
+// ── Columna izquierda ─────────────────────────────────────────
+// Copia EXACTA de .revision-view + .container del mobile
+.col-zonas {
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  background: $white;
+}
+
+.container {
+  padding: 20px;
+}
+
+// ── Columna derecha ───────────────────────────────────────────
+// Contiene el modal mobile pegado (sin overlay, sin animación de entrada)
+.col-modal {
+  overflow-y: auto;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+}
+
+// Estado vacío del panel derecho
+.panel-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 40px;
+  color: $text-gray;
+
+  svg {
+    width: 56px;
+    height: 56px;
+    opacity: 0.2;
+  }
+
+  p {
+    font-size: 15px;
+    text-align: center;
+    max-width: 240px;
+    line-height: 1.5;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// A partir de aquí: CSS copiado EXACTO del mobile
+// ════════════════════════════════════════════════════════════
+
+// Header
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.back-button,
+.reload-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    stroke: $text-dark;
+  }
+
+  &:hover { background: $menu-item-hover; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.reload-button.spinning svg {
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-.spinner { width: 28px; height: 28px; border: 3px solid $border-color; border-top-color: $primary-red; border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-.revision__summary {
-  display: flex; gap: 1rem;
-  background: $white; border: 1px solid $border-color;
-  border-radius: 12px; padding: 1rem 1.5rem;
+h1 {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 4px;
+  color: $text-dark;
 }
 
-.summary-stat {
-  display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1;
-  & + & { border-left: 1px solid $border-color; }
+.ambulancia-subtitulo {
+  text-align: center;
+  font-size: 13px;
+  color: $text-gray;
+  margin-bottom: 20px;
 }
 
-.summary-stat__value {
-  font-family: $font-display; font-size: 32px; letter-spacing: $font-display-spacing; color: $text-dark; line-height: 1;
-  &--red { color: $primary-red; }
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 16px;
+  color: $text-gray;
 }
 
-.summary-stat__label { font-family: $font-primary; font-size: 12px; color: $text-gray; }
-
-.zones-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.875rem;
-  @media (max-width: 1100px) { grid-template-columns: 1fr; }
+.error-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  color: $error-text;
+  font-size: 15px;
 }
 
-.zone-card {
-  background: $white; border: 1px solid $border-color; border-radius: 12px; overflow: hidden;
+.btn-retry {
+  padding: 10px 24px;
+  background: $primary-red;
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  &:hover { background: $primary-red-hover; }
 }
 
-.zone-card__header {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 0.875rem 1rem; background: transparent; border: none; cursor: pointer;
-  transition: background 0.15s;
-  &:hover { background: $bg-page; }
+// Progreso total
+.progress-section { margin-bottom: 16px; }
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: $text-gray;
 }
 
-.zone-card__header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
-.zone-card__name { font-family: $font-primary; font-size: 14px; font-weight: $font-bold; color: $text-dark; }
-.zone-card__count { font-family: $font-primary; font-size: 11.5px; color: $text-gray; }
-
-.zone-card__chevron {
-  width: 18px; height: 18px; color: $text-gray; flex-shrink: 0;
-  transition: transform 0.2s;
-  &--open { transform: rotate(180deg); }
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: $progress-bar-bg;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.zone-card__body { border-top: 1px solid $border-color; }
-
-.cajon { border-bottom: 1px solid $border-color; &:last-child { border-bottom: none; } }
-
-.cajon__header {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 0.625rem 1rem; background: transparent; border: none; cursor: pointer;
-  transition: background 0.15s;
-  &:hover { background: $bg-page; }
+.progress-bar-fill {
+  height: 100%;
+  background-color: $progress-bar-fill;
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
-.cajon__name { font-family: $font-primary; font-size: 13px; font-weight: $font-semibold; color: $text-dark; }
-.cajon__header-right { display: flex; align-items: center; gap: 0.5rem; }
-.cajon__count { font-family: $font-primary; font-size: 11px; color: $text-gray; }
-
-.cajon__chevron {
-  width: 14px; height: 14px; color: $text-gray; transition: transform 0.2s;
-  &--open { transform: rotate(180deg); }
+// Info paginación
+.pagination-info {
+  font-size: 12px;
+  color: $text-gray;
+  text-align: right;
+  margin-bottom: 12px;
 }
 
-.cajon__materials { padding: 0.5rem 0; }
-
-.material-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid rgba($border-color, 0.5);
-  &:last-child { border-bottom: none; }
-  &:hover { background: $bg-page; }
+// Zonas list — CSS idéntico al mobile
+.zonas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.material-row__info { display: flex; flex-direction: column; gap: 2px; }
-.material-row__name { font-family: $font-primary; font-size: 13px; font-weight: $font-semibold; color: $text-dark; }
-.material-row__min  { font-family: $font-primary; font-size: 11px; color: $text-gray; }
+.zona-item {
+  background: $white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid #ccc;
 
-.material-row__controls { display: flex; align-items: center; gap: 0.5rem; }
+  &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
 
-.qty-btn {
-  width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid $border-color;
-  background: $white; cursor: pointer; font-size: 16px; color: $text-dark;
-  display: flex; align-items: center; justify-content: center; font-weight: bold;
-  transition: border-color 0.15s, background 0.15s;
-  &:hover { border-color: $primary-red; color: $primary-red; background: rgba($primary-red, 0.04); }
+  // Zona seleccionada actualmente en el panel derecho
+  &.active {
+    border-color: $primary-red;
+    box-shadow: 0 0 0 2px rgba($primary-red, 0.15);
+  }
+
+  &.completed {
+    background-color: $zona-completed-bg;
+    border-color: $zona-completed-bg;
+    color: $white;
+
+    .zona-name          { color: $white; }
+    .zona-progress-text { color: rgba(255, 255, 255, 0.8); }
+    .zona-mini-bar      { background: rgba(255,255,255,0.3); }
+    .zona-mini-fill     { background: $white; }
+    .zona-check {
+      background-color: $white;
+      color: $zona-completed-bg;
+    }
+  }
 }
 
-.qty-value {
-  min-width: 32px; text-align: center;
-  font-family: $font-display; font-size: 18px; color: $text-dark;
-  &--low { color: $primary-red; }
+.zona-content { flex: 1; }
+
+.zona-name {
+  font-size: 16px;
+  font-weight: $font-semibold;
+  margin-bottom: 4px;
+  color: $text-dark;
 }
 
+.zona-progress-text {
+  font-size: 13px;
+  color: $text-gray;
+  margin-bottom: 8px;
+}
+
+.zona-mini-bar {
+  width: 100%;
+  height: 3px;
+  background: $progress-bar-bg;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.zona-mini-fill {
+  height: 100%;
+  background: $progress-bar-fill;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.zona-arrow {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+  svg { width: 20px; height: 20px; stroke: $text-gray; }
+}
+
+.zona-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: $zona-check-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $white;
+  font-size: 14px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+// Paginación — idéntica al mobile
 .pagination {
-  display: flex; justify-content: center; align-items: center; gap: 0.375rem; padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.pagination__btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 8px; border: 1px solid $border-color;
-  background: $white; cursor: pointer; color: $text-dark; transition: all 0.15s;
-  svg { width: 16px; height: 16px; }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-  &:not(:disabled):hover { border-color: $primary-red; color: $primary-red; }
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid $border-gray;
+  background: $white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  svg { width: 18px; height: 18px; stroke: $text-dark; }
+  &:hover:not(:disabled) { background: $menu-item-hover; border-color: $text-gray; }
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
 }
 
-.pagination__page {
-  width: 34px; height: 34px; border-radius: 8px; border: 1px solid $border-color;
-  background: $white; cursor: pointer; font-family: $font-primary; font-size: 13px;
-  color: $text-dark; transition: all 0.15s;
-  &--active { background: $primary-red; color: $white; border-color: $primary-red; }
-  &:not(.pagination__page--active):hover { border-color: $primary-red; color: $primary-red; }
+.pagination-pages { display: flex; gap: 4px; }
+
+.pagination-page {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid $border-gray;
+  background: $white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+  transition: all 0.2s;
+
+  &:hover:not(.active) { background: $menu-item-hover; }
+  &.active { background: $primary-red; border-color: $primary-red; color: $white; }
 }
 
-.revision__footer {
-  display: flex; justify-content: flex-end; gap: 0.75rem;
-  padding-top: 0.5rem;
+// Botón finalizar — idéntico al mobile
+.btn-finalizar {
+  @include button-base;
+  width: 100%;
+  padding: 16px;
+  background-color: $primary-red;
+  color: $white;
+  font-size: 16px;
+  &:hover { background-color: $primary-red-hover; }
 }
 
-.btn-back {
-  padding: 0.75rem 1.5rem; background: $white; color: $primary-red;
-  border: 1.5px solid $primary-red; border-radius: 10px;
-  font-family: $font-primary; font-size: 14px; font-weight: $font-semibold;
-  cursor: pointer; transition: background 0.15s;
-  &:hover { background: rgba($primary-red, 0.04); }
+// ════════════════════════════════════════════════════════════
+// CSS del modal mobile — se aplica al panel derecho
+// Copiado exacto, sin .modal ni .modal-content wrapper de overlay
+// ════════════════════════════════════════════════════════════
+
+.modal-content {
+  background: $white;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.btn-next {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.75rem 1.5rem; background: $primary-red; color: $white;
-  border: none; border-radius: 10px;
-  font-family: $font-primary; font-size: 14px; font-weight: $font-semibold;
-  cursor: pointer; transition: filter 0.15s;
-  svg { width: 16px; height: 16px; }
-  &:hover { filter: brightness(0.9); }
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  h2 {
+    font-size: 18px;
+    font-weight: $font-semibold;
+    flex: 1;
+    color: $text-dark;
+  }
+}
+
+.modal-actions {
+  padding: 12px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.btn-select-all {
+  width: 100%;
+  padding: 12px;
+  background-color: $green-accent;
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Cajones — idéntico al mobile
+.cajon-section { margin-bottom: 16px; }
+
+.cajon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  &:hover { background-color: #eeeeee; }
+}
+
+.cajon-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+
+  h3 {
+    font-size: 15px;
+    font-weight: $font-semibold;
+    color: $text-dark;
+  }
+}
+
+.cajon-chevron {
+  width: 18px;
+  height: 18px;
+  stroke: $text-gray;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  &.rotated { transform: rotate(180deg); }
+}
+
+.btn-select-cajon {
+  padding: 6px 12px;
+  background-color: $green-accent;
+  color: $white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  &:hover { opacity: 0.9; }
+}
+
+.cajon-materials { padding-left: 8px; }
+
+// Materiales — idéntico al mobile
+.material-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  &:last-child { border-bottom: none; }
+}
+
+.material-info { flex: 1; }
+
+.material-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: $text-dark;
+}
+
+.material-cantidad {
+  font-size: 13px;
+  color: $text-gray;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-quantity {
+  width: $quantity-btn-size;
+  height: $quantity-btn-size;
+  border-radius: 50%;
+  border: 2px solid $primary-red;
+  background: $white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: $primary-red;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background-color: $primary-red; color: $white; }
+  &:disabled { border-color: $progress-inactive; color: $progress-inactive; cursor: not-allowed; }
+}
+
+.quantity-value {
+  min-width: 30px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+}
+
+.materiales-directos { margin-top: 16px; }
+
+.materiales-directos-title {
+  font-size: 15px;
+  font-weight: $font-semibold;
+  margin-bottom: 12px;
+  color: $text-dark;
 }
 </style>

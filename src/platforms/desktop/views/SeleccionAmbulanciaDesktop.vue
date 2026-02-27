@@ -13,7 +13,7 @@
           </div>
           <div>
             <h2 class="step-card__title">SELECCIÓN DE AMBULANCIA</h2>
-            <p class="step-card__sub">Selecciona la unidad que vas a inspeccionar</p>
+            <p class="step-card__sub">Selecciona la unidad que vas a reposicionar</p>
           </div>
         </div>
         <div class="step-card__body">

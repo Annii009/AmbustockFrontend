@@ -62,7 +62,7 @@ const routes = [
         )
       },
 
-      // ── Flujo Nueva Inspección ──────────────────────────────────────────────
+      // ── Flujo Nueva reposicion ──────────────────────────────────────────────
       {
         path: 'seleccion-ambulancia',
         name: 'seleccion-ambulancia',

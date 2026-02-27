@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar" :class="{ 'sidebar--open': isOpen }">
 
-    <div class="sidebar__logo">
+    <div class="sidebar__logo" @click="router.push('/')" title="Ir al inicio">
       <img src="/logo1Rojo.png" alt="AmbuStock" />
     </div>
 
@@ -94,11 +94,18 @@ const navItems = [
   },
   {
     path: '/principal/seleccion-ambulancia',
-    label: 'Nueva Inspección',
+    label: 'Nueva Reposición',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
       <rect x="9" y="3" width="6" height="4" rx="1"/>
       <path d="m9 12 2 2 4-4"/>
+    </svg>`
+  },
+  {
+    path: '/principal/material-gastado',
+    label: 'Material Gastado',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
     </svg>`
   },
   {
@@ -182,7 +189,12 @@ const handleLogout = () => {
 .sidebar__logo {
   padding: 1.5rem 1.25rem 1rem;
   flex-shrink: 0;
-  img { height: 42px; width: auto; object-fit: contain; }
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover { opacity: 0.8; }
+  cursor: pointer;
+  img { height: 42px; width: auto; object-fit: contain; transition: opacity 0.15s; }
+  &:hover img { opacity: 0.75; }
 }
 
 .sidebar__nav {

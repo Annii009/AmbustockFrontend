@@ -35,7 +35,7 @@
               <th>Nombre</th>
               <th>Email</th>
               <th>Rol</th>
-              <th>Inspecciones</th>
+              <th>Reposiciones</th>
             </tr>
           </thead>
           <tbody>
@@ -52,7 +52,7 @@
                   {{ r.rol }}
                 </span>
               </td>
-              <td class="table__secondary">{{ r.totalInspecciones ?? '—' }}</td>
+              <td class="table__secondary">{{ r.totalReposiciones ?? '—' }}</td>
             </tr>
           </tbody>
         </table>

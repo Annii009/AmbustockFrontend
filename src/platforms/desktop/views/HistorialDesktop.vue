@@ -5,14 +5,14 @@
       <div class="page__header">
         <div>
           <h1 class="page__title">HISTORIAL</h1>
-          <p class="page__sub">Registro de todas las inspecciones realizadas</p>
+          <p class="page__sub">Registro de todas las reposiciones realizadas</p>
         </div>
         <button class="btn-primary" @click="router.push('/principal/seleccion-ambulancia')">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Nueva Inspección
+          Nueva reposición
         </button>
       </div>
 

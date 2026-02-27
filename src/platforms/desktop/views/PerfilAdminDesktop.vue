@@ -55,7 +55,7 @@
               </div>
               <div class="action-item__text">
                 <p class="action-item__name">Historial completo</p>
-                <p class="action-item__sub">Todas las inspecciones</p>
+                <p class="action-item__sub">Todas las reposiciones</p>
               </div>
               <svg class="action-item__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"/>

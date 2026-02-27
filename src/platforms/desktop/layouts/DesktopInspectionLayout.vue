@@ -7,7 +7,7 @@
       </div>
       <div class="insp__divider" />
       <div class="insp__meta">
-        <span class="insp__meta-label">Inspeccionando</span>
+        <span class="insp__meta-label">reposicionando</span>
         <span class="insp__meta-value">{{ ambulanciaLabel }}</span>
       </div>
       <div class="insp__meta">
@@ -36,7 +36,7 @@
     <!-- Progreso -->
     <div class="insp__progress">
       <div class="insp__progress-info">
-        <span>Progreso de inspección</span>
+        <span>Progreso de reposición</span>
         <span class="insp__progress-pct">{{ progress }}%</span>
       </div>
       <div class="insp__progress-track">
@@ -103,7 +103,7 @@ onMounted(() => { updateTime(); timer = setInterval(updateTime, 1000) })
 onUnmounted(() => clearInterval(timer))
 
 const steps = [
-  { id: 1, title: 'Selección de Ambulancia', subtitle: 'Unidad a inspeccionar' },
+  { id: 1, title: 'Selección de Ambulancia', subtitle: 'Unidad a reposicionar' },
   { id: 2, title: 'Tipo de Servicio',        subtitle: 'Servicio realizado'    },
   { id: 3, title: 'Responsable',             subtitle: 'Nombre del técnico'    }
 ]

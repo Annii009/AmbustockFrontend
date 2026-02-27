@@ -39,7 +39,7 @@
             </svg>
           </div>
           <h3 class="action__title">HISTORIAL</h3>
-          <p class="action__text">Ver inspecciones y reportes anteriores</p>
+          <p class="action__text">Ver reposiciones y reportes anteriores</p>
         </button>
       </div>
 
@@ -52,8 +52,8 @@
             </svg>
             <span class="stat__badge stat__badge--green">Este mes</span>
           </div>
-          <div class="stat__value">{{ totalInspecciones }}</div>
-          <div class="stat__label">Inspecciones este mes</div>
+          <div class="stat__value">{{ totalReposiciones }}</div>
+          <div class="stat__label">reposiciones este mes</div>
         </div>
 
         <div class="stat">
@@ -64,7 +64,7 @@
             </svg>
             <span class="stat__badge stat__badge--green">{{ porcentajeAprobadas }}%</span>
           </div>
-          <div class="stat__value">{{ inspeccionesAprobadas }}</div>
+          <div class="stat__value">{{ reposicionesAprobadas }}</div>
           <div class="stat__label">Aprobadas</div>
         </div>
 
@@ -210,8 +210,8 @@ const user       = ref<Usuario | null>(null)
 const activities = ref<Activity[]>([])
 const loading    = ref(true)
 
-const totalInspecciones     = ref(0)
-const inspeccionesAprobadas = ref(0)
+const totalReposiciones     = ref(0)
+const reposicionesAprobadas = ref(0)
 const alertasPendientes     = ref(0)
 const tiempoPromedio        = ref('18min')
 
@@ -220,8 +220,8 @@ const initials = computed(() =>
   (user.value?.nombreResponsable || user.value?.nombre || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 )
 const porcentajeAprobadas = computed(() =>
-  totalInspecciones.value === 0 ? 0
-    : Math.round(inspeccionesAprobadas.value / totalInspecciones.value * 100)
+  totalReposiciones.value === 0 ? 0
+    : Math.round(reposicionesAprobadas.value / totalReposiciones.value * 100)
 )
 
 const go = (path: string) => router.push(path)
@@ -259,8 +259,8 @@ onMounted(async () => {
       const f = new Date(r.fechaRevision)
       return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear()
     })
-    totalInspecciones.value     = mes.length
-    inspeccionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
+    totalReposiciones.value     = mes.length
+    reposicionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
     alertasPendientes.value     = mes.filter((r: Revision) => ['urgente', 'pendiente'].includes(obtenerEstadoRevision(r).clase)).length
   } catch { /* silencioso */ }
   loading.value = false

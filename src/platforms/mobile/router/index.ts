@@ -7,7 +7,7 @@
  */
 
 const BREAKPOINT = 768
-const isDesktop = (): boolean => window.innerWidth > BREAKPOINT
+const isDesktop  = (): boolean => window.innerWidth > BREAKPOINT
 
 /** Devuelve un loader que elige la vista según dispositivo */
 function adaptive(
@@ -47,7 +47,7 @@ const routes = [
     // En desktop → DashboardLayout (sidebar fijo)
     // En mobile  → pass-through (cada vista lleva su propio topbar)
     component: adaptive(
-      () => Promise.resolve({ default: { template: '<router-view />' } }),
+      () => import('@mobile/layouts/MobilePassThrough.vue'),
       () => import('@desktop/layouts/DashboardLayout.vue')
     ),
     children: [
@@ -228,20 +228,20 @@ const routes = [
   },
 
   // ── Redirects legacy (rutas mobile antiguas sin /principal) ─────────────────
-  { path: '/seleccion-ambulancia', redirect: '/principal/seleccion-ambulancia' },
-  { path: '/tipo-servicio', redirect: '/principal/tipo-servicio' },
-  { path: '/nombre-responsable', redirect: '/principal/nombre-responsable' },
-  { path: '/revision', redirect: '/principal/revision' },
-  { path: '/materiales-faltantes', redirect: '/principal/materiales-faltantes' },
-  { path: '/mision-cumplida', redirect: '/principal/mision-cumplida' },
-  { path: '/material-gastado', redirect: '/principal/material-gastado' },
-  { path: '/sugerencias', redirect: '/principal/sugerencias' },
-  { path: '/todo-listo', redirect: '/principal/todo-listo' },
-  { path: '/perfil', redirect: '/principal/perfil' },
-  { path: '/perfil-admin', redirect: '/principal/perfil-admin' },
-  { path: '/lista-responsables', redirect: '/principal/responsables' },
+  { path: '/seleccion-ambulancia',   redirect: '/principal/seleccion-ambulancia' },
+  { path: '/tipo-servicio',          redirect: '/principal/tipo-servicio' },
+  { path: '/nombre-responsable',     redirect: '/principal/nombre-responsable' },
+  { path: '/revision',               redirect: '/principal/revision' },
+  { path: '/materiales-faltantes',   redirect: '/principal/materiales-faltantes' },
+  { path: '/mision-cumplida',        redirect: '/principal/mision-cumplida' },
+  { path: '/material-gastado',       redirect: '/principal/material-gastado' },
+  { path: '/sugerencias',            redirect: '/principal/sugerencias' },
+  { path: '/todo-listo',             redirect: '/principal/todo-listo' },
+  { path: '/perfil',                 redirect: '/principal/perfil' },
+  { path: '/perfil-admin',           redirect: '/principal/perfil-admin' },
+  { path: '/lista-responsables',     redirect: '/principal/responsables' },
   { path: '/historial-reposiciones', redirect: '/principal/historial' },
-  { path: '/ver-revisiones', redirect: '/principal/ver-revisiones' },
+  { path: '/ver-revisiones',         redirect: '/principal/ver-revisiones' },
   {
     path: '/detalle-reposicion/:id',
     redirect: (to: any) => `/principal/detalle-reposicion/${to.params.id}`
