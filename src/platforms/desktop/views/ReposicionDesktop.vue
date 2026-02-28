@@ -4,8 +4,8 @@
 
       <div class="page__header">
         <div>
-          <h1 class="page__title">REPOSICIÓN MATERIAL</h1>
-          <p class="page__sub">Gestiona el material gastado y los pedidos de reposición</p>
+          <h1 class="page__title">REVISIÓN MATERIAL</h1>
+          <p class="page__sub">Gestiona el material gastado y los pedidos de revisión</p>
         </div>
       </div>
 

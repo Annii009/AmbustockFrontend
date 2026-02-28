@@ -6,14 +6,8 @@
     </div>
 
     <nav class="sidebar__nav">
-      <router-link
-        v-for="item in navItems"
-        :key="item.path"
-        :to="item.path"
-        class="sidebar__item"
-        active-class="sidebar__item--active"
-        exact-active-class="sidebar__item--active"
-      >
+      <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="sidebar__item"
+        active-class="sidebar__item--active" exact-active-class="sidebar__item--active">
         <span class="sidebar__item-icon" v-html="item.icon" />
         <span class="sidebar__item-label">{{ item.label }}</span>
       </router-link>
@@ -21,13 +15,8 @@
       <template v-if="isAdmin">
         <div class="sidebar__sep" />
         <p class="sidebar__group">Administración</p>
-        <router-link
-          v-for="item in adminItems"
-          :key="item.path"
-          :to="item.path"
-          class="sidebar__item"
-          active-class="sidebar__item--active"
-        >
+        <router-link v-for="item in adminItems" :key="item.path" :to="item.path" class="sidebar__item"
+          active-class="sidebar__item--active">
           <span class="sidebar__item-icon" v-html="item.icon" />
           <span class="sidebar__item-label">{{ item.label }}</span>
         </router-link>
@@ -48,9 +37,9 @@
       </div>
       <button class="sidebar__logout" @click="handleLogout">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
         Cerrar Sesión
       </button>
@@ -58,8 +47,8 @@
 
     <button class="sidebar__close" @click="$emit('close')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
       </svg>
     </button>
 
@@ -74,11 +63,11 @@ import { getUsuario } from '@/core/services/api'
 defineProps<{ isOpen?: boolean }>()
 defineEmits<{ close: [] }>()
 
-const router   = useRouter()
-const user     = computed(() => getUsuario())
+const router = useRouter()
+const user = computed(() => getUsuario())
 const userName = computed(() => user.value?.nombreResponsable || user.value?.nombre || 'Usuario')
 const userRole = computed(() => user.value?.rol || 'Inspector')
-const isAdmin  = computed(() => user.value?.rol === 'Administrador')
+const isAdmin = computed(() => user.value?.rol === 'Administrador')
 const initials = computed(() =>
   userName.value.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 )
@@ -94,7 +83,7 @@ const navItems = [
   },
   {
     path: '/principal/seleccion-ambulancia',
-    label: 'Nueva Reposición',
+    label: 'Nueva revisión',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
       <rect x="9" y="3" width="6" height="4" rx="1"/>
@@ -109,8 +98,8 @@ const navItems = [
     </svg>`
   },
   {
-    path: '/principal/reposicion',
-    label: 'Reposición Material',
+    path: '/principal/ver-revisiones',
+    label: 'Ver revisiones',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
       <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
@@ -119,7 +108,7 @@ const navItems = [
   },
   {
     path: '/principal/historial',
-    label: 'Historial',
+    label: 'Historial de material gastado',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M3 3v5h5"/>
       <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
@@ -172,8 +161,14 @@ const handleLogout = () => {
   overflow-y: auto;
   flex-shrink: 0;
 
-  &::-webkit-scrollbar { width: 3px; }
-  &::-webkit-scrollbar-thumb { background: $border-color; border-radius: 3px; }
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border-color;
+    border-radius: 3px;
+  }
 
   @media (max-width: 768px) {
     position: fixed;
@@ -182,7 +177,10 @@ const handleLogout = () => {
     z-index: 100;
     box-shadow: $shadow-sidebar;
     transition: left 0.3s ease;
-    &--open { left: 0; }
+
+    &--open {
+      left: 0;
+    }
   }
 }
 
@@ -191,10 +189,23 @@ const handleLogout = () => {
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity 0.15s;
-  &:hover { opacity: 0.8; }
+
+  &:hover {
+    opacity: 0.8;
+  }
+
   cursor: pointer;
-  img { height: 42px; width: auto; object-fit: contain; transition: opacity 0.15s; }
-  &:hover img { opacity: 0.75; }
+
+  img {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    transition: opacity 0.15s;
+  }
+
+  &:hover img {
+    opacity: 0.75;
+  }
 }
 
 .sidebar__nav {
@@ -225,21 +236,44 @@ const handleLogout = () => {
     flex-shrink: 0;
     opacity: 0.4;
     transition: opacity 0.15s;
-    :deep(svg) { width: 20px; height: 20px; }
+
+    :deep(svg) {
+      width: 20px;
+      height: 20px;
+    }
   }
 
-  &-label { flex: 1; }
+  &-label {
+    flex: 1;
+  }
 
   &:hover {
     background: $bg-page;
-    .sidebar__item-icon { opacity: 0.7; }
+
+    .sidebar__item-icon {
+      opacity: 0.7;
+    }
   }
 
   &--active {
     background: $primary-red;
     color: $white;
-    .sidebar__item-icon { opacity: 1; }
-    &:hover { background: $primary-red-hover; }
+
+    .sidebar__item-icon {
+      opacity: 1;
+
+      :deep(svg) {
+        stroke: $white;
+      }
+    }
+
+    .sidebar__item-label {
+      color: $white;
+    }
+
+    &:hover {
+      background: $primary-red-hover;
+    }
   }
 }
 
@@ -260,7 +294,9 @@ const handleLogout = () => {
   margin: 0;
 }
 
-.sidebar__spacer { flex: 1; }
+.sidebar__spacer {
+  flex: 1;
+}
 
 .sidebar__footer {
   padding: 0.75rem 0.625rem;
@@ -289,6 +325,7 @@ const handleLogout = () => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
   span {
     font-family: $font-display;
     color: $white;
@@ -297,7 +334,9 @@ const handleLogout = () => {
   }
 }
 
-.sidebar__user-text { overflow: hidden; }
+.sidebar__user-text {
+  overflow: hidden;
+}
 
 .sidebar__user-name {
   font-family: $font-primary;
@@ -330,8 +369,18 @@ const handleLogout = () => {
   font-weight: $font-semibold;
   width: 100%;
   transition: background 0.15s, color 0.15s;
-  svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.45; }
-  &:hover { background: rgba($primary-red, 0.06); color: $primary-red; }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.45;
+  }
+
+  &:hover {
+    background: rgba($primary-red, 0.06);
+    color: $primary-red;
+  }
 }
 
 .sidebar__close {
@@ -347,7 +396,14 @@ const handleLogout = () => {
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  svg { width: 14px; height: 14px; }
-  @media (max-width: 768px) { display: flex; }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
 }
 </style>

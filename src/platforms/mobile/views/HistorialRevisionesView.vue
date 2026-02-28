@@ -9,7 +9,6 @@ import {
   type Revision
 } from '@core/services/api'
 
-
 const router = useRouter()
 
 // Estado
@@ -22,7 +21,6 @@ const isLoading = ref(true)
 const revisionesFiltradas = computed(() => {
   let revisiones = [...todasLasRevisiones.value]
   
-  // Filtro por búsqueda
   const busqueda = searchQuery.value.toLowerCase().trim()
   if (busqueda) {
     revisiones = revisiones.filter(r => 
@@ -32,7 +30,6 @@ const revisionesFiltradas = computed(() => {
     )
   }
   
-  // Filtro por estado
   if (filtroActual.value !== 'todas') {
     revisiones = revisiones.filter(r => {
       const estado = obtenerEstadoRevision(r)
@@ -40,7 +37,6 @@ const revisionesFiltradas = computed(() => {
     })
   }
   
-  // Ordenar por fecha (más reciente primero)
   revisiones.sort((a, b) => {
     const fechaA = new Date(a.fechaRevision)
     const fechaB = new Date(b.fechaRevision)
@@ -73,11 +69,6 @@ const cambiarFiltro = (filtro: string) => {
   filtroActual.value = filtro
 }
 
-// Ver detalle
-const verDetalle = (id: number) => {
-  router.push(`/detalle-revision/${id}`)
-}
-
 // Navegación
 const goBack = () => {
   if (isAdmin()) {
@@ -87,8 +78,6 @@ const goBack = () => {
   }
 }
 
-
-// Inicializar
 onMounted(() => {
   cargarRevisiones()
 })
@@ -172,7 +161,6 @@ onMounted(() => {
           v-for="revision in revisionesFiltradas" 
           :key="revision.idRevision"
           class="revision-card"
-          @click="verDetalle(revision.idRevision)"
         >
           <div class="revision-header">
             <div>
@@ -201,9 +189,6 @@ onMounted(() => {
               </svg>
               <span>{{ revision.nombreResponsable || 'Sin asignar' }}</span>
             </div>
-            <svg class="revision-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
           </div>
         </div>
       </div>
@@ -225,7 +210,6 @@ onMounted(() => {
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-
 .ver-revisiones-view {
   background-color: #f5f5f5;
   min-height: 100vh;
@@ -239,7 +223,6 @@ onMounted(() => {
   padding: 20px;
 }
 
-// Header
 .header {
   margin-bottom: 20px;
 }
@@ -273,7 +256,6 @@ h1 {
   color: $text-dark;
 }
 
-// Búsqueda
 .search-box {
   position: relative;
   margin-bottom: 20px;
@@ -309,7 +291,6 @@ h1 {
   }
 }
 
-// Filtros
 .filters {
   display: flex;
   gap: 8px;
@@ -347,7 +328,6 @@ h1 {
   }
 }
 
-// Lista de revisiones
 .revisiones-list {
   display: flex;
   flex-direction: column;
@@ -359,17 +339,6 @@ h1 {
   border: 1px solid #e0e0e0;
   border-radius: 16px;
   padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
 }
 
 .revision-header {
@@ -428,7 +397,6 @@ h1 {
 .revision-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .revision-revisor {
@@ -444,13 +412,6 @@ h1 {
   height: 16px;
 }
 
-.revision-arrow {
-  width: 20px;
-  height: 20px;
-  color: #999;
-}
-
-// Loading
 .loading {
   text-align: center;
   padding: 40px 20px;
@@ -475,7 +436,6 @@ h1 {
   font-size: 15px;
 }
 
-// Sin resultados
 .no-results {
   text-align: center;
   padding: 60px 20px;
@@ -493,7 +453,6 @@ h1 {
   }
 }
 
-// Responsive
 @media (max-width: 480px) {
   .container {
     padding: 15px;

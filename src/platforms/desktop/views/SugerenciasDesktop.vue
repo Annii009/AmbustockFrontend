@@ -10,7 +10,7 @@
         </div>
         <div>
           <h1 class="page__title">SUGERENCIAS</h1>
-          <p class="page__sub">Añade comentarios o fotos opcionales antes de guardar la reposición</p>
+          <p class="page__sub">Añade comentarios o fotos opcionales antes de guardar la revisión</p>
         </div>
       </div>
 
@@ -62,7 +62,7 @@
       <div class="page__footer">
         <button class="btn-skip" @click="guardar">Omitir y guardar</button>
         <button class="btn-next" @click="guardar">
-          Guardar Reposición
+          Guardar revisión
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6"/>
           </svg>

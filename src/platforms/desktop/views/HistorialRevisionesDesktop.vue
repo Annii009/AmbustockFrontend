@@ -5,7 +5,7 @@
       <div class="page__header">
         <div>
           <p class="page__eyebrow">HISTORIAL</p>
-          <h1 class="page__title">REPOSICIONES</h1>
+          <h1 class="page__title">REVISIONES</h1>
         </div>
       </div>
 
@@ -31,49 +31,45 @@
       </div>
 
       <template v-else>
-        <div v-if="reposicionesFiltradas.length === 0" class="empty-state">
+        <div v-if="revisionesFiltradas.length === 0" class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <p>No se encontraron reposiciones</p>
+          <p>No se encontraron revisiones</p>
         </div>
 
-        <div v-else class="reposicion-list">
-          <div
-            v-for="rep in reposicionesFiltradas"
-            :key="rep.id || rep.idReposicion"
-            class="reposicion-card"
-          >
-            <div class="reposicion-card__stripe" :class="`stripe--${obtenerEstadoReposicion(rep).clase}`" />
+        <div v-else class="revision-list">
+          <div v-for="rev in revisionesFiltradas" :key="rev.idRevision" class="revision-card">
+            <div class="revision-card__stripe" :class="`stripe--${obtenerEstadoRevision(rev).clase}`" />
 
-            <div class="reposicion-card__body">
-              <div class="reposicion-card__main">
-                <span class="reposicion-card__date">
-                  {{ formatearFechaLarga(rep.fechaReposicion || rep.fecha) }}
+            <div class="revision-card__body">
+              <div class="revision-card__main">
+                <span class="revision-card__date">
+                  {{ formatearFechaLarga(rev.fechaRevision) }}
                 </span>
-                <span class="reposicion-card__amb">
-                  {{ rep.nombreAmbulancia || 'AMBULANCIA' }}
+                <span class="revision-card__amb">
+                  {{ rev.nombreAmbulancia || 'AMBULANCIA' }}
                 </span>
-                <span class="reposicion-card__mat">
-                  Matrícula: {{ rep.matricula || 'N/A' }}
+                <span class="revision-card__mat">
+                  Matrícula: {{ rev.matricula || 'N/A' }}
                 </span>
               </div>
 
-              <div class="reposicion-card__mid">
-                <span class="status-badge" :class="`status-badge--${obtenerEstadoReposicion(rep).clase}`">
-                  {{ obtenerEstadoReposicion(rep).texto }}
+              <div class="revision-card__mid">
+                <span class="status-badge" :class="`status-badge--${obtenerEstadoRevision(rev).clase}`">
+                  {{ obtenerEstadoRevision(rev).texto }}
                 </span>
               </div>
 
-              <div class="reposicion-card__foot">
-                <div class="reposicion-card__resp">
+              <div class="revision-card__foot">
+                <div class="revision-card__resp">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                   </svg>
-                  {{ rep.nombreResponsable || 'Sin asignar' }}
+                  {{ rev.nombreResponsable || 'Sin asignar' }}
                 </div>
               </div>
             </div>
@@ -88,14 +84,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import {
-  getHistorialReposiciones,
-  obtenerEstadoReposicion,
+  getHistorialRevisiones,
+  obtenerEstadoRevision,
   formatearFechaLarga,
-  type ReposicionDetalle
+  type Revision
 } from '@core/services/api'
 
 const isLoading = ref(true)
-const todasLasReposiciones = ref<ReposicionDetalle[]>([])
+const todasLasRevisiones = ref<Revision[]>([])
 const filtroActual = ref('todas')
 const searchQuery = ref('')
 
@@ -107,8 +103,8 @@ const filtros = [
   { value: 'urgente',      label: 'Urgentes'     }
 ]
 
-const reposicionesFiltradas = computed(() => {
-  let lista = [...todasLasReposiciones.value]
+const revisionesFiltradas = computed(() => {
+  let lista = [...todasLasRevisiones.value]
 
   const q = searchQuery.value.toLowerCase().trim()
   if (q) {
@@ -120,12 +116,11 @@ const reposicionesFiltradas = computed(() => {
   }
 
   if (filtroActual.value !== 'todas') {
-    lista = lista.filter(r => obtenerEstadoReposicion(r).clase === filtroActual.value)
+    lista = lista.filter(r => obtenerEstadoRevision(r).clase === filtroActual.value)
   }
 
   lista.sort((a, b) =>
-    new Date(b.fechaReposicion || b.fecha).getTime() -
-    new Date(a.fechaReposicion || a.fecha).getTime()
+    new Date(b.fechaRevision).getTime() - new Date(a.fechaRevision).getTime()
   )
 
   return lista
@@ -133,9 +128,9 @@ const reposicionesFiltradas = computed(() => {
 
 onMounted(async () => {
   try {
-    todasLasReposiciones.value = await getHistorialReposiciones()
+    todasLasRevisiones.value = await getHistorialRevisiones()
   } catch (e) {
-    console.error('[HistorialReposiciones]', e)
+    console.error('[VerRevisiones]', e)
   } finally {
     isLoading.value = false
   }
@@ -291,13 +286,13 @@ onMounted(async () => {
   }
 }
 
-.reposicion-list {
+.revision-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.reposicion-card {
+.revision-card {
   background: $white;
   border: 1.5px solid $border-color;
   border-radius: 14px;
@@ -305,17 +300,17 @@ onMounted(async () => {
   display: flex;
 }
 
-.reposicion-card__stripe {
+.revision-card__stripe {
   width: 5px;
   flex-shrink: 0;
 
-  &.stripe--completada   { background: $green-accent; }
-  &.stripe--pendiente    { background: #F59E0B; }
-  &.stripe--sin-realizar { background: #C0C0C0; }
-  &.stripe--urgente      { background: $primary-red; }
+  &.stripe--completada  { background: $green-accent; }
+  &.stripe--pendiente   { background: #F59E0B; }
+  &.stripe--sin-realizar{ background: #C0C0C0; }
+  &.stripe--urgente     { background: $primary-red; }
 }
 
-.reposicion-card__body {
+.revision-card__body {
   flex: 1;
   padding: 1rem 1.25rem;
   display: grid;
@@ -324,20 +319,20 @@ onMounted(async () => {
   gap: 1.5rem;
 }
 
-.reposicion-card__main {
+.revision-card__main {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-.reposicion-card__date {
+.revision-card__date {
   font-family: $font-primary;
   font-size: 12px;
   color: $text-gray;
 }
 
-.reposicion-card__amb {
+.revision-card__amb {
   font-family: $font-display;
   font-size: 20px;
   letter-spacing: $font-display-spacing;
@@ -347,7 +342,7 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
-.reposicion-card__mat {
+.revision-card__mat {
   font-family: $font-primary;
   font-size: 12.5px;
   color: $text-gray;
@@ -367,7 +362,7 @@ onMounted(async () => {
   &--urgente      { background: rgba($primary-red, 0.1);   color: $primary-red; }
 }
 
-.reposicion-card__foot {
+.revision-card__foot {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -376,7 +371,7 @@ onMounted(async () => {
   color: $text-gray;
 }
 
-.reposicion-card__resp {
+.revision-card__resp {
   display: flex;
   align-items: center;
   gap: 0.4rem;

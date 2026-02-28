@@ -9,20 +9,16 @@ import {
   type ReposicionDetalle
 } from '@core/services/api'
 
-
 const router = useRouter()
 
-// Estado
 const todasLasReposiciones = ref<ReposicionDetalle[]>([])
 const filtroActual = ref('todas')
 const searchQuery = ref('')
 const isLoading = ref(true)
 
-// Computed
 const reposicionesFiltradas = computed(() => {
   let reposiciones = [...todasLasReposiciones.value]
   
-  // Filtro por búsqueda
   const busqueda = searchQuery.value.toLowerCase().trim()
   if (busqueda) {
     reposiciones = reposiciones.filter(r => 
@@ -32,7 +28,6 @@ const reposicionesFiltradas = computed(() => {
     )
   }
   
-  // Filtro por estado
   if (filtroActual.value !== 'todas') {
     reposiciones = reposiciones.filter(r => {
       const estado = obtenerEstadoReposicion(r)
@@ -40,7 +35,6 @@ const reposicionesFiltradas = computed(() => {
     })
   }
   
-  // Ordenar por fecha (más reciente primero)
   reposiciones.sort((a, b) => {
     const fechaA = new Date(a.fechaReposicion || a.fecha)
     const fechaB = new Date(b.fechaReposicion || b.fecha)
@@ -54,13 +48,11 @@ const mostrarNoResults = computed(() => {
   return !isLoading.value && reposicionesFiltradas.value.length === 0
 })
 
-// Cargar reposiciones
 const cargarReposiciones = async () => {
   try {
     isLoading.value = true
     const reposiciones = await getHistorialReposiciones()
     todasLasReposiciones.value = reposiciones
-    console.log('Reposiciones cargadas:', reposiciones)
   } catch (error) {
     console.error('Error:', error)
   } finally {
@@ -68,17 +60,10 @@ const cargarReposiciones = async () => {
   }
 }
 
-// Cambiar filtro
 const cambiarFiltro = (filtro: string) => {
   filtroActual.value = filtro
 }
 
-// Ver detalle
-const verDetalle = (id: number) => {
-  router.push(`/detalle-reposicion/${id}`)
-}
-
-// Navegación
 const goBack = () => {
   if (isAdmin()) {
     router.push('/perfil-admin')
@@ -87,8 +72,6 @@ const goBack = () => {
   }
 }
 
-
-// Inicializar
 onMounted(() => {
   cargarReposiciones()
 })
@@ -172,7 +155,6 @@ onMounted(() => {
           v-for="reposicion in reposicionesFiltradas" 
           :key="reposicion.id || reposicion.idReposicion"
           class="reposicion-card"
-          @click="verDetalle(reposicion.id || reposicion.idReposicion)"
         >
           <div class="reposicion-header">
             <div>
@@ -201,9 +183,6 @@ onMounted(() => {
               </svg>
               <span>{{ reposicion.nombreResponsable || 'Sin asignar' }}</span>
             </div>
-            <svg class="reposicion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
           </div>
         </div>
       </div>
@@ -224,7 +203,6 @@ onMounted(() => {
 <style scoped lang="scss">
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
-
 
 .historial-reposiciones-view {
   background-color: #f5f5f5;
@@ -347,7 +325,7 @@ h1 {
   }
 }
 
-// Lista de reposiciones
+// Lista
 .reposiciones-list {
   display: flex;
   flex-direction: column;
@@ -359,13 +337,6 @@ h1 {
   border: 1px solid #e0e0e0;
   border-radius: 16px;
   padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-  }
 }
 
 .reposicion-header {
@@ -424,7 +395,6 @@ h1 {
 .reposicion-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .reposicion-revisor {
@@ -438,12 +408,6 @@ h1 {
 .revisor-icon {
   width: 16px;
   height: 16px;
-}
-
-.reposicion-arrow {
-  width: 20px;
-  height: 20px;
-  color: #999;
 }
 
 // Loading
@@ -485,6 +449,20 @@ h1 {
   
   p {
     color: $no-results-text;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .reposicion-ambulancia {
     font-size: 16px;
   }
 }

@@ -9,10 +9,11 @@
       <div class="dash__actions">
         <button @click="go('/principal/seleccion-ambulancia')" class="action action--red">
           <div class="action__icon-wrap">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="1"/>
-              <path d="m9 12 2 2 4-4"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="1" />
+              <path d="m9 12 2 2 4-4" />
             </svg>
           </div>
           <h3 class="action__title">NUEVA REVISIÓN</h3>
@@ -21,21 +22,24 @@
 
         <button @click="go('/principal/reposicion')" class="action action--blue">
           <div class="action__icon-wrap">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
           </div>
-          <h3 class="action__title">REPOSICIÓN</h3>
+          <h3 class="action__title">MATERIAL GASTADO EN EL SERVICIO</h3>
           <p class="action__text">Gestionar material gastado y pedidos</p>
         </button>
 
         <button @click="go('/principal/historial')" class="action action--green">
           <div class="action__icon-wrap">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 3v5h5"/>
-              <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M3 3v5h5" />
+              <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
             </svg>
           </div>
           <h3 class="action__title">HISTORIAL</h3>
@@ -47,8 +51,9 @@
       <div class="dash__stats">
         <div class="stat">
           <div class="stat__top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--green">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" class="stat__icon stat__icon--green">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
             <span class="stat__badge stat__badge--green">Este mes</span>
           </div>
@@ -58,9 +63,10 @@
 
         <div class="stat">
           <div class="stat__top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--green">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" class="stat__icon stat__icon--green">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
             <span class="stat__badge stat__badge--green">{{ porcentajeAprobadas }}%</span>
           </div>
@@ -70,26 +76,16 @@
 
         <div class="stat">
           <div class="stat__top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--red">
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" class="stat__icon stat__icon--red">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
             <span class="stat__badge stat__badge--red">Atención</span>
           </div>
           <div class="stat__value">{{ alertasPendientes }}</div>
           <div class="stat__label">Alertas pendientes</div>
-        </div>
-
-        <div class="stat">
-          <div class="stat__top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat__icon stat__icon--gray">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <div class="stat__value">{{ tiempoPromedio }}</div>
-          <div class="stat__label">Tiempo promedio</div>
         </div>
       </div>
 
@@ -155,20 +151,22 @@
               <p class="profile__admin-label">Panel de Administración</p>
               <div class="profile__admin-actions">
                 <button class="profile__admin-btn" @click="go('/principal/responsables')">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                   Responsables
                 </button>
                 <button class="profile__admin-btn" @click="go('/principal/ambulancias')">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="1" y="3" width="15" height="13" rx="1"/>
-                    <path d="M16 8h4l3 3v5h-7V8z"/>
-                    <circle cx="5.5" cy="18.5" r="2.5"/>
-                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13" rx="1" />
+                    <path d="M16 8h4l3 3v5h-7V8z" />
+                    <circle cx="5.5" cy="18.5" r="2.5" />
+                    <circle cx="18.5" cy="18.5" r="2.5" />
                   </svg>
                   Ambulancias
                 </button>
@@ -205,17 +203,16 @@ interface Activity {
   color: string
 }
 
-const router     = useRouter()
-const user       = ref<Usuario | null>(null)
+const router = useRouter()
+const user = ref<Usuario | null>(null)
 const activities = ref<Activity[]>([])
-const loading    = ref(true)
+const loading = ref(true)
 
-const totalReposiciones     = ref(0)
+const totalReposiciones = ref(0)
 const reposicionesAprobadas = ref(0)
-const alertasPendientes     = ref(0)
-const tiempoPromedio        = ref('18min')
+const alertasPendientes = ref(0)
 
-const isAdmin  = computed(() => user.value?.rol === 'Administrador')
+const isAdmin = computed(() => user.value?.rol === 'Administrador')
 const initials = computed(() =>
   (user.value?.nombreResponsable || user.value?.nombre || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 )
@@ -255,13 +252,13 @@ onMounted(async () => {
       }
     })
     const ahora = new Date()
-    const mes   = revisiones.filter((r: Revision) => {
+    const mes = revisiones.filter((r: Revision) => {
       const f = new Date(r.fechaRevision)
       return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear()
     })
-    totalReposiciones.value     = mes.length
+    totalReposiciones.value = mes.length
     reposicionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
-    alertasPendientes.value     = mes.filter((r: Revision) => ['urgente', 'pendiente'].includes(obtenerEstadoRevision(r).clase)).length
+    alertasPendientes.value = mes.filter((r: Revision) => ['urgente', 'pendiente'].includes(obtenerEstadoRevision(r).clase)).length
   } catch { /* silencioso */ }
   loading.value = false
 })
@@ -295,7 +292,10 @@ onMounted(async () => {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1rem;
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .action {
@@ -306,11 +306,22 @@ onMounted(async () => {
   border: none;
   cursor: pointer;
   transition: filter 0.2s;
-  &:hover { filter: brightness(0.92); }
 
-  &--red   { background: linear-gradient(140deg, #891D1A, #6b1515); }
-  &--blue  { background: linear-gradient(140deg, #5E657B, #474e61); }
-  &--green { background: linear-gradient(140deg, #71B48D, #559970); }
+  &:hover {
+    filter: brightness(0.92);
+  }
+
+  &--red {
+    background: linear-gradient(140deg, #891D1A, #6b1515);
+  }
+
+  &--blue {
+    background: linear-gradient(140deg, #5E657B, #474e61);
+  }
+
+  &--green {
+    background: linear-gradient(140deg, #71B48D, #559970);
+  }
 }
 
 .action__icon-wrap {
@@ -322,7 +333,11 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  svg { width: 26px; height: 26px; }
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .action__title {
@@ -331,22 +346,30 @@ onMounted(async () => {
   letter-spacing: $font-display-spacing;
   line-height: 1;
   margin-bottom: 0.375rem;
+  color: $white;
 }
 
 .action__text {
   font-family: $font-primary;
   font-size: 13px;
   opacity: 0.88;
+  color: $white;
 }
 
 // ── Stats ────────────────────────────────────────────────────
 .dash__stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1rem;
-  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat {
@@ -366,9 +389,18 @@ onMounted(async () => {
 .stat__icon {
   width: 26px;
   height: 26px;
-  &--green { color: $green-accent; }
-  &--red   { color: $primary-red; }
-  &--gray  { color: $blue-accent; }
+
+  &--green {
+    color: $green-accent;
+  }
+
+  &--red {
+    color: $primary-red;
+  }
+
+  &--gray {
+    color: $blue-accent;
+  }
 }
 
 .stat__badge {
@@ -377,8 +409,16 @@ onMounted(async () => {
   font-weight: $font-bold;
   padding: 0.175rem 0.5rem;
   border-radius: $border-radius-pill;
-  &--green { color: $green-accent; background: rgba($green-accent, 0.1); }
-  &--red   { color: $primary-red;  background: rgba($primary-red, 0.08); }
+
+  &--green {
+    color: $green-accent;
+    background: rgba($green-accent, 0.1);
+  }
+
+  &--red {
+    color: $primary-red;
+    background: rgba($primary-red, 0.08);
+  }
 }
 
 .stat__value {
@@ -401,7 +441,10 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -429,7 +472,11 @@ onMounted(async () => {
 }
 
 // Actividad
-.activity { display: flex; flex-direction: column; gap: 0.625rem; }
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
 
 .activity__row {
   display: flex;
@@ -439,10 +486,17 @@ onMounted(async () => {
   border-radius: 10px;
   border: 1px solid $border-color;
   transition: background 0.15s;
-  &:hover { background: $bg-page; }
+
+  &:hover {
+    background: $bg-page;
+  }
 }
 
-.activity__left { display: flex; align-items: center; gap: 0.75rem; }
+.activity__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
 .activity__badge {
   width: 36px;
@@ -452,11 +506,26 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  span { font-family: $font-display; font-size: 13px; }
+
+  span {
+    font-family: $font-display;
+    font-size: 13px;
+  }
 }
 
-.activity__name  { font-family: $font-primary; font-size: 13.5px; font-weight: $font-semibold; color: $text-dark; }
-.activity__time  { font-family: $font-primary; font-size: 11.5px; color: $text-gray; margin-top: 1px; }
+.activity__name {
+  font-family: $font-primary;
+  font-size: 13.5px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+}
+
+.activity__time {
+  font-family: $font-primary;
+  font-size: 11.5px;
+  color: $text-gray;
+  margin-top: 1px;
+}
 
 .activity__status {
   font-family: $font-primary;
@@ -468,7 +537,11 @@ onMounted(async () => {
 }
 
 // Perfil
-.profile { display: flex; flex-direction: column; gap: 1rem; }
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
 .profile__head {
   display: flex;
@@ -485,11 +558,29 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  span { font-family: $font-display; color: $white; font-size: 22px; letter-spacing: 0.04em; }
+
+  span {
+    font-family: $font-display;
+    color: $white;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
 }
 
-.profile__name { font-family: $font-display; font-size: 20px; letter-spacing: $font-display-spacing; color: $text-dark; line-height: 1; }
-.profile__role { font-family: $font-primary; font-size: 12px; color: $text-gray; margin-top: 3px; }
+.profile__name {
+  font-family: $font-display;
+  font-size: 20px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+}
+
+.profile__role {
+  font-family: $font-primary;
+  font-size: 12px;
+  color: $text-gray;
+  margin-top: 3px;
+}
 
 .profile__rows {
   border: 1px solid $border-color;
@@ -503,11 +594,24 @@ onMounted(async () => {
   gap: 2px;
   padding: 0.625rem 0.875rem;
   border-bottom: 1px solid $border-color;
-  &--last { border-bottom: none; }
+
+  &--last {
+    border-bottom: none;
+  }
 }
 
-.profile__label { font-family: $font-primary; font-size: 11px; color: $text-gray; }
-.profile__value { font-family: $font-primary; font-size: 13.5px; font-weight: $font-semibold; color: $text-dark; }
+.profile__label {
+  font-family: $font-primary;
+  font-size: 11px;
+  color: $text-gray;
+}
+
+.profile__value {
+  font-family: $font-primary;
+  font-size: 13.5px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+}
 
 .profile__edit {
   width: 100%;
@@ -521,7 +625,11 @@ onMounted(async () => {
   border: none;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
-  &:hover { background: $primary-red; color: $white; }
+
+  &:hover {
+    background: $primary-red;
+    color: $white;
+  }
 }
 
 .profile__admin-sep {
@@ -558,8 +666,23 @@ onMounted(async () => {
   color: $text-dark;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
-  svg { width: 15px; height: 15px; opacity: 0.5; flex-shrink: 0; }
-  &:hover { border-color: $primary-red; color: $primary-red; background: rgba($primary-red, 0.04); svg { opacity: 1; } }
+
+  svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    border-color: $primary-red;
+    color: $primary-red;
+    background: rgba($primary-red, 0.04);
+
+    svg {
+      opacity: 1;
+    }
+  }
 }
 
 // Loading
@@ -571,7 +694,12 @@ onMounted(async () => {
   background: $bg-page;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .spinner {
   width: 32px;
   height: 32px;

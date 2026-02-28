@@ -101,7 +101,7 @@ onMounted(async () => {
   }
 })
 
-// Idéntico al mobile: guardar reposición y luego navegar
+// Idéntico al mobile: guardar Revisión y luego navegar
 const finalizar = async () => {
   try {
     if (materialesFaltantes.value.length > 0) {
@@ -142,7 +142,7 @@ const finalizar = async () => {
       }
     }
   } catch (error) {
-    console.error('Error al guardar reposición:', error)
+    console.error('Error al guardar revisión:', error)
   }
 
   limpiarDatosRevision()

@@ -36,7 +36,7 @@
     <!-- Progreso -->
     <div class="insp__progress">
       <div class="insp__progress-info">
-        <span>Progreso de reposición</span>
+        <span>Progreso de revisión</span>
         <span class="insp__progress-pct">{{ progress }}%</span>
       </div>
       <div class="insp__progress-track">

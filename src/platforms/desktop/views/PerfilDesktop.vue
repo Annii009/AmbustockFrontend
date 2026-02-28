@@ -42,7 +42,9 @@
         <!-- Actividad reciente -->
         <div class="card">
           <h3 class="card__section-title">ACTIVIDAD RECIENTE</h3>
-          <div v-if="loading" class="empty-state"><div class="spinner" /></div>
+          <div v-if="loading" class="empty-state">
+            <div class="spinner" />
+          </div>
           <div v-else-if="activities.length === 0" class="empty-state">
             <p>Sin actividad reciente</p>
           </div>
@@ -69,8 +71,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { getUsuario, getHistorialRevisiones, obtenerEstadoRevision, type Revision } from '@/core/services/api'
 
-const user     = ref(getUsuario())
-const loading  = ref(true)
+const user = ref(getUsuario())
+const loading = ref(true)
 const activities = ref<any[]>([])
 
 const initials = computed(() =>
@@ -99,8 +101,8 @@ onMounted(async () => {
         id: `AMB-${String(r.idRevision).padStart(3, '0')}`,
         nombre: r.nombreAmbulancia || r.matricula,
         status: estado.texto,
-        time:   timeAgo(r.fechaRevision),
-        color:  colorFromClase(estado.clase)
+        time: timeAgo(r.fechaRevision),
+        color: colorFromClase(estado.clase)
       }
     })
   } catch { /* */ }
@@ -112,16 +114,41 @@ onMounted(async () => {
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-.page { padding: 1.75rem 2rem; min-height: 100vh; background: $bg-page; }
-.page__inner { max-width: 900px; margin: 0 auto; }
-.page__title { font-family: $font-display; font-size: 38px; letter-spacing: $font-display-spacing; color: $text-dark; line-height: 1; margin-bottom: 0.25rem; }
-.page__sub { font-family: $font-primary; font-size: 14px; color: $text-gray; margin-bottom: 1.5rem; }
+.page {
+  padding: 1.75rem 2rem;
+  min-height: 100vh;
+  background: $bg-page;
+}
+
+.page__inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.page__title {
+  font-family: $font-display;
+  font-size: 38px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.page__sub {
+  font-family: $font-primary;
+  font-size: 14px;
+  color: $text-gray;
+  margin-bottom: 1.5rem;
+}
 
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -132,69 +159,180 @@ onMounted(async () => {
 }
 
 .card__avatar-section {
-  display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .big-avatar {
-  width: 64px; height: 64px; border-radius: 50%; background: $primary-red;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  span { font-family: $font-display; color: $white; font-size: 26px; letter-spacing: 0.04em; }
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: $primary-red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  span {
+    font-family: $font-display;
+    color: $white;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+  }
 }
 
-.card__name { font-family: $font-display; font-size: 22px; letter-spacing: $font-display-spacing; color: $text-dark; line-height: 1; margin-bottom: 0.375rem; }
+.card__name {
+  font-family: $font-display;
+  font-size: 22px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+  margin-bottom: 0.375rem;
+}
 
 .role-badge {
-  font-family: $font-primary; font-size: 12px; font-weight: $font-semibold;
-  color: $primary-red; background: rgba($primary-red, 0.08);
-  padding: 0.2rem 0.625rem; border-radius: $border-radius-pill;
+  font-family: $font-primary;
+  font-size: 12px;
+  font-weight: $font-semibold;
+  color: $primary-red;
+  background: rgba($primary-red, 0.08);
+  padding: 0.2rem 0.625rem;
+  border-radius: $border-radius-pill;
 }
 
-.info-rows { border: 1px solid $border-color; border-radius: 10px; overflow: hidden; }
+.info-rows {
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  overflow: hidden;
+}
 
 .info-row {
-  display: flex; flex-direction: column; gap: 2px;
-  padding: 0.625rem 0.875rem; border-bottom: 1px solid $border-color;
-  &--last { border-bottom: none; }
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid $border-color;
+
+  &--last {
+    border-bottom: none;
+  }
 }
 
-.info-row__label { font-family: $font-primary; font-size: 11px; color: $text-gray; }
-.info-row__value { font-family: $font-primary; font-size: 13.5px; font-weight: $font-semibold; color: $text-dark; }
+.info-row__label {
+  font-family: $font-primary;
+  font-size: 11px;
+  color: $text-gray;
+}
+
+.info-row__value {
+  font-family: $font-primary;
+  font-size: 13.5px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+}
 
 .card__section-title {
-  font-family: $font-display; font-size: 22px; letter-spacing: $font-display-spacing;
-  color: $text-dark; line-height: 1; margin-bottom: 1rem;
+  font-family: $font-display;
+  font-size: 22px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+  margin-bottom: 1rem;
 }
 
 .empty-state {
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  padding: 2rem; color: $text-gray;
-  p { font-family: $font-primary; font-size: 14px; }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: $text-gray;
+
+  p {
+    font-family: $font-primary;
+    font-size: 14px;
+  }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-.spinner { width: 24px; height: 24px; border: 2.5px solid $border-color; border-top-color: $primary-red; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-.activity-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid $border-color;
+  border-top-color: $primary-red;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
 .activity-item {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.625rem 0.75rem; border-radius: 9px;
-  border: 1px solid $border-color; transition: background 0.12s;
-  &:hover { background: $bg-page; }
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 9px;
+  border: 1px solid $border-color;
+  transition: background 0.12s;
+
+  &:hover {
+    background: $bg-page;
+  }
 }
 
 .activity-item__badge {
-  width: 34px; height: 34px; border-radius: 7px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  span { font-family: $font-display; font-size: 13px; }
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  span {
+    font-family: $font-display;
+    font-size: 13px;
+  }
 }
 
-.activity-item__info { flex: 1; overflow: hidden; }
-.activity-item__name { font-family: $font-primary; font-size: 13px; font-weight: $font-semibold; color: $text-dark; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.activity-item__time { font-family: $font-primary; font-size: 11px; color: $text-gray; }
+.activity-item__info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.activity-item__name {
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-item__time {
+  font-family: $font-primary;
+  font-size: 11px;
+  color: $text-gray;
+}
 
 .badge {
-  font-family: $font-primary; font-size: 11px; font-weight: $font-bold;
-  padding: 0.175rem 0.5rem; border-radius: $border-radius-pill; white-space: nowrap;
+  font-family: $font-primary;
+  font-size: 11px;
+  font-weight: $font-bold;
+  padding: 0.175rem 0.5rem;
+  border-radius: $border-radius-pill;
+  white-space: nowrap;
 }
 </style>

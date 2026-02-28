@@ -57,7 +57,7 @@
           </button>
         </div>
 
-        <!-- Arriba derecha — Reposición -->
+        <!-- Arriba derecha — revisión -->
         <div class="scene-card scene-card--top-right"
           :style="{ opacity: dashOpacity, transform: `translateY(${dashY * 0.6}px)` }">
           <button class="scene-btn scene-btn--slate" @click="router.push('/reposicion')">
@@ -68,7 +68,7 @@
               </svg>
             </div>
             <div>
-              <div class="scene-btn__label">REPOSICIÓN</div>
+              <div class="scene-btn__label">REVISIÓN</div>
               <div class="scene-btn__sub">Gestionar material gastado</div>
             </div>
           </button>
@@ -208,7 +208,7 @@
                             <rect x="9" y="3" width="6" height="4" rx="1" />
                             <path d="m9 12 2 2 4-4" />
                           </svg>
-                          <span>Reposición</span>
+                          <span>Revisión</span>
                         </div>
                         <div class="drs-nav__item">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -439,7 +439,7 @@ const features = [
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>`
   },
   {
-    title: 'Reposición de material',
+    title: 'Revisión de material',
     text: 'Wizard guiado: selecciona ambulancia, tipo de servicio y responsable en 3 pasos.',
     color: '#5E657B',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>`
