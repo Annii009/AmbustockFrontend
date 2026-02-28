@@ -2,112 +2,152 @@
   <div class="page">
     <div class="page__inner">
 
-      <h1 class="page__title">MI PERFIL</h1>
-      <p class="page__sub">Información de tu cuenta</p>
+      <div class="page__header">
+        <div>
+          <p class="page__eyebrow">CUENTA</p>
+          <h1 class="page__title">EDITAR PERFIL</h1>
+        </div>
+      </div>
 
-      <div v-if="user" class="profile-grid">
+      <div class="edit-grid">
 
-        <!-- Card principal -->
+        <!-- Formulario información personal -->
         <div class="card">
-          <div class="card__avatar-section">
-            <div class="big-avatar">
-              <span>{{ initials }}</span>
-            </div>
-            <div>
-              <h2 class="card__name">{{ (user.nombreResponsable || user.nombre || '').toUpperCase() }}</h2>
-              <span class="role-badge">{{ user.rol }}</span>
-            </div>
-          </div>
+          <h3 class="card__title">Información personal</h3>
 
           <div class="info-rows">
             <div class="info-row">
-              <span class="info-row__label">Correo Electrónico</span>
-              <span class="info-row__value">{{ user.email }}</span>
+              <label class="info-row__label">Nombre completo</label>
+              <input
+                v-model="nombre"
+                type="text"
+                class="info-row__input"
+                placeholder="Tu nombre completo"
+              >
             </div>
             <div class="info-row">
-              <span class="info-row__label">Nombre completo</span>
-              <span class="info-row__value">{{ user.nombreResponsable || user.nombre }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-row__label">Rol</span>
-              <span class="info-row__value">{{ user.rol }}</span>
+              <label class="info-row__label">Correo electrónico</label>
+              <input
+                v-model="email"
+                type="email"
+                class="info-row__input"
+                placeholder="tu@email.com"
+              >
             </div>
             <div class="info-row info-row--last">
-              <span class="info-row__label">ID de usuario</span>
-              <span class="info-row__value">#{{ user.usuarioId }}</span>
+              <label class="info-row__label">Rol</label>
+              <input
+                :value="rol"
+                type="text"
+                class="info-row__input info-row__input--disabled"
+                disabled
+              >
             </div>
           </div>
         </div>
 
-        <!-- Actividad reciente -->
+        <!-- Cambiar contraseña -->
         <div class="card">
-          <h3 class="card__section-title">ACTIVIDAD RECIENTE</h3>
-          <div v-if="loading" class="empty-state">
-            <div class="spinner" />
-          </div>
-          <div v-else-if="activities.length === 0" class="empty-state">
-            <p>Sin actividad reciente</p>
-          </div>
-          <div v-else class="activity-list">
-            <div v-for="a in activities" :key="a.id" class="activity-item">
-              <div class="activity-item__badge" :style="{ background: a.color + '18' }">
-                <span :style="{ color: a.color }">{{ a.id.split('-')[1] }}</span>
-              </div>
-              <div class="activity-item__info">
-                <p class="activity-item__name">{{ a.nombre }}</p>
-                <p class="activity-item__time">{{ a.time }}</p>
-              </div>
-              <span class="badge" :style="{ background: a.color + '18', color: a.color }">{{ a.status }}</span>
+          <h3 class="card__title">Seguridad</h3>
+
+          <div class="info-rows">
+            <div class="info-row">
+              <label class="info-row__label">Contraseña actual</label>
+              <input
+                type="password"
+                class="info-row__input"
+                placeholder="••••••••"
+              >
+            </div>
+            <div class="info-row">
+              <label class="info-row__label">Nueva contraseña</label>
+              <input
+                type="password"
+                class="info-row__input"
+                placeholder="••••••••"
+              >
+            </div>
+            <div class="info-row info-row--last">
+              <label class="info-row__label">Confirmar nueva contraseña</label>
+              <input
+                type="password"
+                class="info-row__input"
+                placeholder="••••••••"
+              >
             </div>
           </div>
         </div>
 
       </div>
+
+      <!-- Botón guardar -->
+      <div class="actions">
+        <button
+          class="btn-guardar"
+          :disabled="isSaving || !nombre.trim() || !email.trim()"
+          @click="guardar"
+        >
+          <svg v-if="isSaving" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+
+      <!-- Toast éxito -->
+      <transition name="toast">
+        <div v-if="showSuccess" class="toast">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Cambios guardados correctamente
+        </div>
+      </transition>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { getUsuario, getHistorialRevisiones, obtenerEstadoRevision, type Revision } from '@/core/services/api'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getUsuario } from '@core/services/api'
 
-const user = ref(getUsuario())
-const loading = ref(true)
-const activities = ref<any[]>([])
+const router = useRouter()
 
-const initials = computed(() =>
-  (user.value?.nombreResponsable || user.value?.nombre || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-)
+const nombre = ref('')
+const email = ref('')
+const rol = ref('')
+const isSaving = ref(false)
+const showSuccess = ref(false)
 
-const colorFromClase = (c: string) => ({
-  completada: '#71B48D', pendiente: '#F59E0B',
-  urgente: '#891D1A', 'sin-realizar': '#5E657B'
-})[c] || '#5E657B'
-
-const timeAgo = (iso: string) => {
-  const diff = Date.now() - new Date(iso).getTime()
-  const m = Math.floor(diff / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24)
-  if (d > 0) return `Hace ${d} día${d > 1 ? 's' : ''}`
-  if (h > 0) return `Hace ${h} hora${h > 1 ? 's' : ''}`
-  return `Hace ${m} minuto${m > 1 ? 's' : ''}`
+const cargarDatos = () => {
+  const usuario = getUsuario()
+  if (!usuario) {
+    router.push('/login')
+    return
+  }
+  nombre.value = usuario.nombreResponsable || usuario.nombre || ''
+  email.value = usuario.email || ''
+  rol.value = usuario.rol || ''
 }
 
-onMounted(async () => {
+const guardar = async () => {
+  if (!nombre.value.trim() || !email.value.trim()) return
   try {
-    const rev = await getHistorialRevisiones()
-    activities.value = rev.slice(0, 5).map((r: Revision) => {
-      const estado = obtenerEstadoRevision(r)
-      return {
-        id: `AMB-${String(r.idRevision).padStart(3, '0')}`,
-        nombre: r.nombreAmbulancia || r.matricula,
-        status: estado.texto,
-        time: timeAgo(r.fechaRevision),
-        color: colorFromClase(estado.clase)
-      }
-    })
-  } catch { /* */ }
-  finally { loading.value = false }
-})
+    isSaving.value = true
+    // TODO: llamada a la API para guardar cambios
+    await new Promise(r => setTimeout(r, 600))
+    showSuccess.value = true
+    setTimeout(() => showSuccess.value = false, 2500)
+  } catch (e) {
+    console.error('Error al guardar perfil', e)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+onMounted(() => cargarDatos())
 </script>
 
 <style scoped lang="scss">
@@ -125,85 +165,60 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.page__title {
-  font-family: $font-display;
-  font-size: 38px;
-  letter-spacing: $font-display-spacing;
-  color: $text-dark;
-  line-height: 1;
-  margin-bottom: 0.25rem;
-}
-
-.page__sub {
-  font-family: $font-primary;
-  font-size: 14px;
-  color: $text-gray;
+.page__header {
   margin-bottom: 1.5rem;
 }
 
-.profile-grid {
+.page__eyebrow {
+  font-family: $font-primary;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: $text-gray;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.page__title {
+  font-family: $font-display;
+  font-size: 42px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+}
+
+// Grid
+.edit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 
-  @media (max-width: 900px) {
+  @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 }
 
 .card {
   background: $white;
-  border: 1px solid $border-color;
+  border: 1.5px solid $border-color;
   border-radius: 14px;
   padding: 1.5rem;
 }
 
-.card__avatar-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.big-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: $primary-red;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  span {
-    font-family: $font-display;
-    color: $white;
-    font-size: 26px;
-    letter-spacing: 0.04em;
-  }
-}
-
-.card__name {
-  font-family: $font-display;
-  font-size: 22px;
-  letter-spacing: $font-display-spacing;
-  color: $text-dark;
-  line-height: 1;
-  margin-bottom: 0.375rem;
-}
-
-.role-badge {
+.card__title {
   font-family: $font-primary;
-  font-size: 12px;
-  font-weight: $font-semibold;
-  color: $primary-red;
-  background: rgba($primary-red, 0.08);
-  padding: 0.2rem 0.625rem;
-  border-radius: $border-radius-pill;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: $text-gray;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
 }
 
+// Info rows
 .info-rows {
-  border: 1px solid $border-color;
+  border: 1.5px solid $border-color;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -211,128 +226,122 @@ onMounted(async () => {
 .info-row {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0.625rem 0.875rem;
+  gap: 4px;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid $border-color;
 
-  &--last {
-    border-bottom: none;
+  &--last { border-bottom: none; }
+
+  &__label {
+    font-family: $font-primary;
+    font-size: 11px;
+    color: $text-gray;
+  }
+
+  &__input {
+    border: none;
+    outline: none;
+    font-family: $font-primary;
+    font-size: 14px;
+    font-weight: $font-semibold;
+    color: $text-dark;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    transition: color 0.15s;
+
+    &::placeholder {
+      color: #ccc;
+      font-weight: 400;
+    }
+
+    &:focus {
+      color: $primary-red;
+    }
+
+    &--disabled {
+      color: $text-gray;
+      cursor: not-allowed;
+    }
   }
 }
 
-.info-row__label {
-  font-family: $font-primary;
-  font-size: 11px;
-  color: $text-gray;
-}
-
-.info-row__value {
-  font-family: $font-primary;
-  font-size: 13.5px;
-  font-weight: $font-semibold;
-  color: $text-dark;
-}
-
-.card__section-title {
-  font-family: $font-display;
-  font-size: 22px;
-  letter-spacing: $font-display-spacing;
-  color: $text-dark;
-  line-height: 1;
-  margin-bottom: 1rem;
-}
-
-.empty-state {
+// Acciones
+.actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 2rem;
-  color: $text-gray;
+  justify-content: flex-end;
+}
 
-  p {
-    font-family: $font-primary;
-    font-size: 14px;
+.btn-guardar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 2rem;
+  background: $primary-red;
+  color: $white;
+  border: none;
+  border-radius: 10px;
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+
+  &:not(:disabled):hover {
+    background: $primary-red-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 46, 46, 0.3);
+  }
+
+  &:disabled {
+    background: #c4a4a4;
+    cursor: not-allowed;
   }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 2.5px solid $border-color;
-  border-top-color: $primary-red;
-  border-radius: 50%;
+.btn-spinner {
+  width: 15px;
+  height: 15px;
   animation: spin 0.8s linear infinite;
 }
 
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.activity-item {
+// Toast
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1a1a1a;
+  color: $white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
-  border-radius: 9px;
-  border: 1px solid $border-color;
-  transition: background 0.12s;
+  gap: 8px;
+  z-index: 100;
 
-  &:hover {
-    background: $bg-page;
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #71B48D;
+    flex-shrink: 0;
   }
 }
 
-.activity-item__badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  span {
-    font-family: $font-display;
-    font-size: 13px;
-  }
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
 }
 
-.activity-item__info {
-  flex: 1;
-  overflow: hidden;
-}
-
-.activity-item__name {
-  font-family: $font-primary;
-  font-size: 13px;
-  font-weight: $font-semibold;
-  color: $text-dark;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.activity-item__time {
-  font-family: $font-primary;
-  font-size: 11px;
-  color: $text-gray;
-}
-
-.badge {
-  font-family: $font-primary;
-  font-size: 11px;
-  font-weight: $font-bold;
-  padding: 0.175rem 0.5rem;
-  border-radius: $border-radius-pill;
-  white-space: nowrap;
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>
