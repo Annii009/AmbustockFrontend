@@ -332,8 +332,8 @@ onBeforeUnmount(() => {
             >
               <option value="">Seleccione un rol</option>
               <option value="Administrador">Administrador</option>
-              <option value="Supervisor">Supervisor</option>
-              <option value="Operador">Operador</option>
+              <option value="Socorrista">Socorrista</option>
+              <option value="Sanitario">Sanitario</option>
               <option value="Técnico de emergencias">Técnico de emergencias</option>
             </select>
           </div>

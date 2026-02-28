@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import RevisionCard from './RevisionCard.vue'
+import RevisionCard from '../components/RevisionCard.vue'
 import {
   getHistorialRevisiones,
   obtenerEstadoRevision,

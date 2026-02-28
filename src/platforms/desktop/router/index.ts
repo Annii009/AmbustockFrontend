@@ -208,10 +208,19 @@ const routes = [
                 name: 'ambulancias',
                 meta: { requiresAuth: true, requiresAdmin: true },
                 component: adaptive(
-                    () => import('@desktop/views/AmbulanciasDesktop.vue'),
+                    () => import('@mobile/views/AmbulanciasView.vue'),
                     () => import('@desktop/views/AmbulanciasDesktop.vue')
                 )
-            }
+            },
+            {
+                path: 'ambulancia-editor/:id?',
+                name: 'ambulancia-editor',
+                meta: { requiresAuth: true, requiresAdmin: true },
+                component: adaptive(
+                    () => import('@mobile/views/AmbulanciaEditorView.vue'),
+                    () => import('@desktop/views/AmbulanciasDesktop.vue')  // desktop ya lo gestiona todo en uno
+                )
+            },
         ]
     },
 
@@ -231,10 +240,6 @@ const routes = [
     { path: '/lista-responsables', redirect: '/principal/responsables' },
     { path: '/historial-reposiciones', redirect: '/principal/historial' },
     { path: '/ver-revisiones', redirect: '/principal/ver-revisiones' },
-    {
-        path: '/detalle-reposicion/:id',
-        redirect: (to: any) => `/principal/detalle-reposicion/${to.params.id}`
-    },
 
     // ── 404 ───────────────────────────────────────────────────────────────────
     { path: '/:pathMatch(.*)*', redirect: '/' }

@@ -170,7 +170,7 @@ import * as yup from 'yup'                   // schema de reglas de validación
 import { isAdmin, getUsuarioById, type UsuarioResponsable } from '@core/services/api'
 import { useUsuariosStore } from '@/stores/useUsuariosStore'
 import { useToast } from '@core/composables/useToast'
-import ResponsableRow from './ResponsableRow.vue'
+import ResponsableRow from '../components/ResponsableRow.vue'
 
 const router = useRouter()
 const store = useUsuariosStore()

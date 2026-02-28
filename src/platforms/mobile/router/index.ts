@@ -240,10 +240,6 @@ const routes = [
     { path: '/lista-responsables', redirect: '/principal/responsables' },
     { path: '/historial-reposiciones', redirect: '/principal/historial' },
     { path: '/ver-revisiones', redirect: '/principal/ver-revisiones' },
-    {
-        path: '/detalle-reposicion/:id',
-        redirect: (to: any) => `/principal/detalle-reposicion/${to.params.id}`
-    },
 
     // ── 404 ───────────────────────────────────────────────────────────────────
     { path: '/:pathMatch(.*)*', redirect: '/' }

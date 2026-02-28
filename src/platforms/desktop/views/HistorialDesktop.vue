@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import ReposicionCard from './ReposicionCard.vue'
+import ReposicionCard from '../components/ReposicionCard.vue'
 import {
     getHistorialReposiciones,
     obtenerEstadoReposicion,
