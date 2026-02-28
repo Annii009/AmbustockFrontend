@@ -26,24 +26,15 @@
           <div class="spinner" />
         </div>
 
+        <!-- Cada item de ambulancia pintado por AmbulanciaItem -->
         <div v-else class="amb-list">
-          <div v-for="amb in filteredAmbs" :key="amb.idAmbulancia" class="amb-item"
-            :class="{ 'amb-item--active': selected?.idAmbulancia === amb.idAmbulancia }" @click="selectAmbulancia(amb)">
-            <div class="amb-item__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="1" y="3" width="15" height="13" rx="1" />
-                <path d="M16 8h4l3 3v5h-7V8z" />
-                <circle cx="5.5" cy="18.5" r="2.5" />
-                <circle cx="18.5" cy="18.5" r="2.5" />
-              </svg>
-            </div>
-            <div class="amb-item__text">
-              <span class="amb-item__name">{{ amb.nombre?.trim() || `Ambulancia ${amb.matricula}` }}</span>
-              <span class="amb-item__mat">{{ amb.matricula }}</span>
-            </div>
-            <span class="amb-item__id">#{{ String(amb.idAmbulancia).padStart(3, '0') }}</span>
-          </div>
-
+          <AmbulanciaItem
+            v-for="amb in filteredAmbs"
+            :key="amb.idAmbulancia"
+            :ambulancia="amb"
+            :active="selected?.idAmbulancia === amb.idAmbulancia"
+            @select="selectAmbulancia"
+          />
           <div v-if="filteredAmbs.length === 0" class="amb-empty">Sin resultados</div>
         </div>
       </aside>
@@ -260,8 +251,25 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MaterialAutocomplete from './MaterialAutocomplete.vue'
+import AmbulanciaItem from './AmbulanciaItem.vue'
+import { useAmbulanciasStore } from '@/stores/useAmbulanciasStore'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
+
+const { toast } = useToast()
+const ambStore = useAmbulanciasStore()
+
+// ── VeeValidate — schema del formulario básico de ambulancia ──
+const ambSchema = yup.object({
+  nombre:   yup.string().required('El nombre es obligatorio').min(3, 'Mínimo 3 caracteres'),
+  matricula: yup.string().required('La matrícula es obligatoria')
+    .matches(/^[A-Z0-9-]+$/i, 'Formato inválido (ej: 1234-ABC)')
+})
+
+const { validate: validateAmb, errors: ambErrors } = useForm({ validationSchema: ambSchema })
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
@@ -393,7 +401,8 @@ const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 // ── Guardar (crear o actualizar) ──────────────────────────────
 const guardarAmbulancia = async () => {
   if (!form.value.nombre || !form.value.matricula) {
-    alert('Nombre y matrícula son obligatorios'); return
+    const { valid } = await validateAmb()
+    if (!valid) return
   }
   saving.value = true
   try {
@@ -476,12 +485,12 @@ const guardarAmbulancia = async () => {
 
     if (creando.value) {
       creando.value = false
-      alert('Ambulancia creada correctamente')
+      toast.success('Ambulancia creada', 'La ambulancia se ha registrado correctamente')
     } else {
-      alert('Cambios guardados correctamente')
+      toast.success('Cambios guardados', 'Los datos de la ambulancia se han actualizado')
     }
   } catch (e: any) {
-    alert('Error al guardar: ' + e.message)
+    toast.error('Error al guardar', e.message)
   } finally {
     saving.value = false
   }
@@ -499,7 +508,7 @@ const eliminarAmbulancia = async () => {
     selected.value = null
     await cargarAmbulancias()
   } catch (e: any) {
-    alert('Error al eliminar: ' + e.message)
+    toast.error('Error al eliminar', e.message)
   } finally {
     deleting.value = false
   }

@@ -40,40 +40,9 @@
           <p>No se encontraron revisiones</p>
         </div>
 
+        <!-- El pintado de cada card está delegado al subcomponente RevisionCard -->
         <div v-else class="revision-list">
-          <div v-for="rev in revisionesFiltradas" :key="rev.idRevision" class="revision-card">
-            <div class="revision-card__stripe" :class="`stripe--${obtenerEstadoRevision(rev).clase}`" />
-
-            <div class="revision-card__body">
-              <div class="revision-card__main">
-                <span class="revision-card__date">
-                  {{ formatearFechaLarga(rev.fechaRevision) }}
-                </span>
-                <span class="revision-card__amb">
-                  {{ rev.nombreAmbulancia || 'AMBULANCIA' }}
-                </span>
-                <span class="revision-card__mat">
-                  Matrícula: {{ rev.matricula || 'N/A' }}
-                </span>
-              </div>
-
-              <div class="revision-card__mid">
-                <span class="status-badge" :class="`status-badge--${obtenerEstadoRevision(rev).clase}`">
-                  {{ obtenerEstadoRevision(rev).texto }}
-                </span>
-              </div>
-
-              <div class="revision-card__foot">
-                <div class="revision-card__resp">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  {{ rev.nombreResponsable || 'Sin asignar' }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <RevisionCard v-for="rev in revisionesFiltradas" :key="rev.idRevision" :revision="rev" />
         </div>
       </template>
 
@@ -83,6 +52,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import RevisionCard from './RevisionCard.vue'
 import {
   getHistorialRevisiones,
   obtenerEstadoRevision,
@@ -96,11 +66,11 @@ const filtroActual = ref('todas')
 const searchQuery = ref('')
 
 const filtros = [
-  { value: 'todas',        label: 'Todas'        },
-  { value: 'completada',   label: 'Completadas'  },
-  { value: 'pendiente',    label: 'Pendientes'   },
+  { value: 'todas', label: 'Todas' },
+  { value: 'completada', label: 'Completadas' },
+  { value: 'pendiente', label: 'Pendientes' },
   { value: 'sin-realizar', label: 'Sin realizar' },
-  { value: 'urgente',      label: 'Urgentes'     }
+  { value: 'urgente', label: 'Urgentes' }
 ]
 
 const revisionesFiltradas = computed(() => {
@@ -109,8 +79,8 @@ const revisionesFiltradas = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
   if (q) {
     lista = lista.filter(r =>
-      (r.nombreAmbulancia  || '').toLowerCase().includes(q) ||
-      (r.matricula         || '').toLowerCase().includes(q) ||
+      (r.nombreAmbulancia || '').toLowerCase().includes(q) ||
+      (r.matricula || '').toLowerCase().includes(q) ||
       (r.nombreResponsable || '').toLowerCase().includes(q)
     )
   }
@@ -255,7 +225,9 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner {
@@ -304,10 +276,21 @@ onMounted(async () => {
   width: 5px;
   flex-shrink: 0;
 
-  &.stripe--completada  { background: $green-accent; }
-  &.stripe--pendiente   { background: #F59E0B; }
-  &.stripe--sin-realizar{ background: #C0C0C0; }
-  &.stripe--urgente     { background: $primary-red; }
+  &.stripe--completada {
+    background: $green-accent;
+  }
+
+  &.stripe--pendiente {
+    background: #F59E0B;
+  }
+
+  &.stripe--sin-realizar {
+    background: #C0C0C0;
+  }
+
+  &.stripe--urgente {
+    background: $primary-red;
+  }
 }
 
 .revision-card__body {
@@ -356,10 +339,25 @@ onMounted(async () => {
   font-weight: $font-bold;
   white-space: nowrap;
 
-  &--completada   { background: rgba($green-accent, 0.12); color: darken($green-accent, 12%); }
-  &--pendiente    { background: rgba(#F59E0B, 0.12);       color: #B45309; }
-  &--sin-realizar { background: rgba(#C0C0C0, 0.2);        color: #777; }
-  &--urgente      { background: rgba($primary-red, 0.1);   color: $primary-red; }
+  &--completada {
+    background: rgba($green-accent, 0.12);
+    color: darken($green-accent, 12%);
+  }
+
+  &--pendiente {
+    background: rgba(#F59E0B, 0.12);
+    color: #B45309;
+  }
+
+  &--sin-realizar {
+    background: rgba(#C0C0C0, 0.2);
+    color: #777;
+  }
+
+  &--urgente {
+    background: rgba($primary-red, 0.1);
+    color: $primary-red;
+  }
 }
 
 .revision-card__foot {
