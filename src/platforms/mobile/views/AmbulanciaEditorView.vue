@@ -45,7 +45,7 @@
             <div class="section">
                 <div class="section__row">
                     <p class="section__label">ZONAS Y MATERIALES</p>
-                    <button class="btn-add-small" @click.stop="addZona">+ Zona</button>
+                    <button class="btn-add-small" @click="addZona">+ Zona</button>
                 </div>
 
                 <div v-if="form.zonas.length === 0" class="zonas-empty">
@@ -86,7 +86,7 @@
                         <div class="subsection">
                             <div class="subsection__header">
                                 <span class="subsection__label">Materiales de zona</span>
-                                <button class="btn-add-tiny" @click.stop="addMaterial(zona, null)">+ Material</button>
+                                <button class="btn-add-tiny" @click="addMaterial(zona, null)">+ Material</button>
                             </div>
                             <div v-if="zona.materiales.length === 0" class="mat-empty">Sin materiales directos</div>
                             <div v-for="(mat, mi) in zona.materiales" :key="mi" class="mat-row">
@@ -95,7 +95,7 @@
                                         :all-materials="allMaterialNames" />
                                 </div>
                                 <div class="mat-row__qty">
-                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" @click.stop />
+                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" />
                                 </div>
                                 <button class="btn-icon-xs" @click="removeMaterial(zona.materiales, mi)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -110,7 +110,7 @@
                         <div class="subsection">
                             <div class="subsection__header">
                                 <span class="subsection__label">Cajones</span>
-                                <button class="btn-add-tiny" @click.stop="addCajon(zona)">+ Cajón</button>
+                                <button class="btn-add-tiny" @click="addCajon(zona)">+ Cajón</button>
                             </div>
 
                             <div v-for="(cajon, ci) in zona.cajones" :key="ci" class="cajon-block">
@@ -171,14 +171,14 @@
 
         </template>
 
-        <!-- Botón guardar fijo -->
+        <!-- Botón guardar fijo  -->
         <div class="footer-btn">
             <button class="btn-save" :disabled="saving" @click="guardar">
                 {{ saving ? 'Guardando...' : (esNueva ? 'Crear ambulancia' : 'Guardar cambios') }}
             </button>
         </div>
 
-        <!--  Modal eliminar -->
+        <!-- Modal eliminar -->
         <Teleport to="body">
             <Transition name="modal">
                 <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -209,11 +209,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MobileAutocomplete from './MobileAutocomplete.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { toast } = useToast()
 
 const idAmbulancia = computed(() => route.params.id ? Number(route.params.id) : null)
 const esNueva = computed(() => !idAmbulancia.value)
@@ -249,7 +251,7 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
     return res.json()
 }
 
-//Cargar datos
+// Cargar datos
 const cargarDetalle = async () => {
     if (!idAmbulancia.value) return
     loadingDetail.value = true
@@ -301,10 +303,13 @@ const startEditZonaName = async (zi: number) => {
     form.value.zonas[zi]._editingName = true
 }
 
-// Guardar 
+// ── Guardar ───────────────────────────────────────────────────
 const guardar = async () => {
-    if (!form.value.nombre || !form.value.matricula) {
-        alert('Nombre y matrícula son obligatorios'); return
+    if (!form.value.nombre?.trim()) {
+        toast.warning('Campo obligatorio', 'El nombre es obligatorio'); return
+    }
+    if (!form.value.matricula?.trim()) {
+        toast.warning('Campo obligatorio', 'La matrícula es obligatoria'); return
     }
     saving.value = true
     try {
@@ -352,22 +357,23 @@ const guardar = async () => {
             }
         }
 
+        toast.success(esNueva.value ? 'Ambulancia creada' : 'Cambios guardados', 'Los datos se guardaron correctamente')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        alert('Error al guardar: ' + e.message)
+        toast.error('Error al guardar', e.message)
     } finally {
         saving.value = false
     }
 }
 
-//Eliminar 
+// Eliminar 
 const eliminar = async () => {
     deleting.value = true
     try {
         await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        alert('Error al eliminar: ' + e.message)
+        toast.error('Error al eliminar', e.message)
     } finally {
         deleting.value = false
     }

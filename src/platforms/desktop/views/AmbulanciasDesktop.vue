@@ -2,7 +2,7 @@
   <div class="page">
     <div class="layout">
 
-      <!-- PANEL IZQUIERDO: lista ambulancias-->
+      <!-- PANEL IZQUIERDO: lista ambulancias -->
       <aside class="panel-left">
         <div class="panel-left__header">
           <h1 class="panel-left__title">AMBULANCIAS</h1>
@@ -48,7 +48,7 @@
         </div>
       </aside>
 
-      <!--PANEL DERECHO: editor-->
+      <!--  PANEL DERECHO: editor -->
       <main class="panel-right">
 
         <!-- Estado vacío -->
@@ -63,7 +63,7 @@
         </div>
 
         <template v-else>
-          <!-- Header editor -->
+          <!-- Header editor  -->
           <div class="editor-header">
             <div class="editor-header__left">
               <p class="editor-header__eyebrow">{{ creando ? 'NUEVA AMBULANCIA' : 'EDITANDO' }}</p>
@@ -86,7 +86,7 @@
             </div>
           </div>
 
-          <!-- Datos básicos-->
+          <!--Datos básicos -->
           <div class="section-card">
             <h3 class="section-title">Datos básicos</h3>
             <div class="form-row">
@@ -101,7 +101,7 @@
             </div>
           </div>
 
-          <!-- Zonas y materiales-->
+          <!-- ── Zonas y materiales ── -->
           <div class="section-card">
             <div class="section-header">
               <h3 class="section-title">Zonas y materiales</h3>
@@ -230,7 +230,7 @@
       </main>
     </div>
 
-    <!-- MODAL CONFIRMAR ELIMINAR-->
+    <!-- MODAL CONFIRMAR ELIMINAR -->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -260,19 +260,22 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MaterialAutocomplete from './MaterialAutocomplete.vue'
 
+const { toast } = useToast()
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
-// Tipos locales
+// Tipos locales 
 interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number; _nuevo?: boolean }
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _nuevo?: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _nuevo?: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 interface Ambulancia { idAmbulancia: number; nombre?: string; matricula?: string }
 
-// Estado
+// estado
 const ambulancias = ref<Ambulancia[]>([])
 const selected = ref<Ambulancia | null>(null)
 const creando = ref(false)
@@ -286,7 +289,7 @@ const allMaterialNames = ref<string[]>([])
 
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 
-//Computed 
+//  Computed
 const filteredAmbs = computed(() => {
   const q = search.value.toLowerCase()
   return ambulancias.value.filter(a =>
@@ -319,7 +322,7 @@ const cargarAmbulancias = async () => {
   finally { loadingAmbs.value = false }
 }
 
-// Seleccionar ambulancia y cargar su estructura
+// Seleccionar ambulancia y cargar su estructura 
 const selectAmbulancia = async (amb: Ambulancia) => {
   selected.value = amb
   creando.value = false
@@ -370,7 +373,7 @@ const cancelarEditor = () => {
   selected.value = null
 }
 
-//Helpers de árbol
+//  Helpers de árbol
 const contarMateriales = (zona: ZonaForm) =>
   zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
@@ -393,12 +396,10 @@ const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 // Guardar (crear o actualizar)
 const guardarAmbulancia = async () => {
   if (!form.value.nombre?.trim()) {
-    toast.warning('Campo obligatorio', 'El nombre es obligatorio')
-    return
+    toast.warning('Campo obligatorio', 'El nombre es obligatorio'); return
   }
   if (!form.value.matricula?.trim()) {
-    toast.warning('Campo obligatorio', 'La matrícula es obligatoria')
-    return
+    toast.warning('Campo obligatorio', 'La matrícula es obligatoria'); return
   }
   saving.value = true
   try {
@@ -411,7 +412,7 @@ const guardarAmbulancia = async () => {
       })
       ambId = nueva.idAmbulancia
     } else {
-      //Actualizar ambulancia
+      // Actualizar ambulancia
       await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', {
         nombre: form.value.nombre, matricula: form.value.matricula
       })
@@ -481,12 +482,12 @@ const guardarAmbulancia = async () => {
 
     if (creando.value) {
       creando.value = false
-      alert('Ambulancia creada correctamente')
+      toast.success('Ambulancia creada', 'La ambulancia se ha registrado correctamente')
     } else {
-      alert('Cambios guardados correctamente')
+      toast.success('Cambios guardados', 'Los datos de la ambulancia se han actualizado')
     }
   } catch (e: any) {
-    alert('Error al guardar: ' + e.message)
+    toast.error('Error al guardar', e.message)
   } finally {
     saving.value = false
   }
@@ -504,7 +505,7 @@ const eliminarAmbulancia = async () => {
     selected.value = null
     await cargarAmbulancias()
   } catch (e: any) {
-    alert('Error al eliminar: ' + e.message)
+    toast.error('Error al eliminar', e.message)
   } finally {
     deleting.value = false
   }
@@ -545,7 +546,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
-// Panel izquierdo
+// Panel izquierdo 
 .panel-left {
   width: 280px;
   flex-shrink: 0;
@@ -750,7 +751,7 @@ onMounted(() => {
   color: $text-gray;
 }
 
-//Panel derecho
+// Panel derecho
 .panel-right {
   flex: 1;
   overflow-y: auto;
@@ -1254,7 +1255,7 @@ onMounted(() => {
   background: $bg-page;
 }
 
-// ── Modal ─────────────────────────────────────────────────────
+// Modal
 .modal-overlay {
   position: fixed;
   inset: 0;
