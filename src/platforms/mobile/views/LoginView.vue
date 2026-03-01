@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { loginUser, saveAuthData, ApiError } from '@core/services/api'
 import { useValidation } from '@core/composables/useValidation'
 
 const router = useRouter()
+const { toast } = useToast()
 const { validateEmail, validateRequired } = useValidation()
 
 const email = ref('')
@@ -82,7 +84,7 @@ const goToRegister = () => {
 
 const handleSocialLogin = (provider: string) => {
   console.log(`${provider} login clicked`)
-  alert(`${provider} login no implementado aún`)
+  toast.warning('No disponible', `${provider} login no implementado aún`)
 }
 </script>
 

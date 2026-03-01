@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { 
   getUsuarios,
@@ -12,6 +13,7 @@ import {
 } from '@core/services/api'
 
 const router = useRouter()
+const { toast } = useToast()
 
 // Estado
 const allResponsables = ref<UsuarioResponsable[]>([])
@@ -71,7 +73,7 @@ const cargarResponsables = async () => {
     console.log('Responsables cargados:', responsables)
   } catch (error) {
     console.error('Error al cargar responsables:', error)
-    alert('Error al cargar la lista de responsables')
+    toast.error('Error', 'Error al cargar la lista de responsables')
   } finally {
     isLoading.value = false
   }
@@ -103,7 +105,7 @@ const editarResponsable = async (idUsuario: number) => {
     showModalResponsable.value = true
   } catch (error) {
     console.error('Error al cargar responsable:', error)
-    alert('Error al cargar el responsable')
+    toast.error('Error', 'Error al cargar el responsable')
   }
 }
 
@@ -111,12 +113,12 @@ const editarResponsable = async (idUsuario: number) => {
 const guardarResponsable = async () => {
   try {
     if (!formData.value.nombreUsuario || !formData.value.rol || !formData.value.email) {
-      alert('Por favor complete todos los campos obligatorios')
+      toast.warning('Campos obligatorios', 'Por favor complete todos los campos obligatorios')
       return
     }
     
     if (!editingResponsable.value && !formData.value.password) {
-      alert('La contraseña es obligatoria para nuevos usuarios')
+      toast.warning('Contraseña requerida', 'La contraseña es obligatoria para nuevos usuarios')
       return
     }
     
@@ -142,7 +144,7 @@ const guardarResponsable = async () => {
     await cargarResponsables()
   } catch (error) {
     console.error('Error al guardar responsable:', error)
-    alert('Error al guardar el responsable')
+    toast.error('Error al guardar', 'No se pudo guardar el responsable')
   }
 }
 
@@ -162,7 +164,7 @@ const eliminarResponsableConfirmar = async () => {
     await cargarResponsables()
   } catch (error) {
     console.error('Error al eliminar responsable:', error)
-    alert('Error al eliminar el responsable')
+    toast.error('Error al eliminar', 'No se pudo eliminar el responsable')
   }
 }
 

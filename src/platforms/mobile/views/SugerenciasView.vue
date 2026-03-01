@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { 
   getReposicionData,
@@ -13,6 +14,7 @@ import {
 } from '@core/services/api'
 
 const router = useRouter()
+const { toast } = useToast()
 
 // Estado
 const comentarios = ref('')
@@ -61,13 +63,13 @@ const guardarReposicionCompleta = async () => {
     const reposicionData = getReposicionData()
     
     if (!reposicionData) {
-      alert('No hay datos de reposición')
+      toast.warning('Sin datos', 'No hay datos de reposición')
       return
     }
     
     const ambulanciaId = getAmbulanciaSeleccionada()
     if (!ambulanciaId) {
-      alert('No se encontró ambulancia seleccionada')
+      toast.warning('Sin ambulancia', 'No se encontró ambulancia seleccionada')
       return
     }
     

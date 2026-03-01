@@ -208,12 +208,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuthToken } from '@core/services/api'
 import MobileAutocomplete from './MobileAutocomplete.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { toast } = useToast()
 
 const idAmbulancia = computed(() => route.params.id ? Number(route.params.id) : null)
 const esNueva = computed(() => !idAmbulancia.value)
@@ -304,7 +306,7 @@ const startEditZonaName = async (zi: number) => {
 // ── Guardar ───────────────────────────────────────────────────
 const guardar = async () => {
     if (!form.value.nombre || !form.value.matricula) {
-        alert('Nombre y matrícula son obligatorios'); return
+        toast.warning('Campos obligatorios', 'Nombre y matrícula son obligatorios'); return
     }
     saving.value = true
     try {
@@ -352,9 +354,10 @@ const guardar = async () => {
             }
         }
 
+        toast.success(esNueva.value ? 'Ambulancia creada' : 'Cambios guardados', 'Los datos se guardaron correctamente')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        alert('Error al guardar: ' + e.message)
+        toast.error('Error al guardar', e.message)
     } finally {
         saving.value = false
     }
@@ -367,7 +370,7 @@ const eliminar = async () => {
         await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        alert('Error al eliminar: ' + e.message)
+        toast.error('Error al eliminar', e.message)
     } finally {
         deleting.value = false
     }

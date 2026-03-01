@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import {
   getRevisionAmbulancia,
@@ -20,6 +21,7 @@ import {
 import { useRevision } from '@core/composables/useRevision'
 
 const router = useRouter()
+const { toast } = useToast()
 const {
   contarTotalMateriales,
   contarMaterialesRevisados,
@@ -129,7 +131,7 @@ const cargarRevision = async (recarga = false) => {
     ambulanciaId.value = getAmbulanciaSeleccionada()
 
     if (!ambulanciaId.value) {
-      alert('No se ha seleccionado ninguna ambulancia')
+      toast.warning('Sin ambulancia', 'No se ha seleccionado ninguna ambulancia')
       router.push('/seleccion-ambulancia')
       return
     }
@@ -281,7 +283,7 @@ const finalizarRevision = async () => {
     const nombreResponsable = getNombreResponsable()
 
     if (!servicioId || !nombreResponsable) {
-      alert('Faltan datos para finalizar la revisión')
+      toast.warning('Faltan datos', 'Faltan datos para finalizar la revisión')
       return
     }
 
@@ -302,7 +304,7 @@ const finalizarRevision = async () => {
 
   } catch (err) {
     console.error('Error:', err)
-    alert('Error al guardar la revisión: ' + (err instanceof Error ? err.message : 'Error desconocido'))
+    toast.error('Error al guardar', err instanceof Error ? err.message : 'Error desconocido')
   }
 }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import {
   getMateriales,
@@ -16,6 +17,7 @@ import {
 } from '@core/services/api'
 
 const router = useRouter()
+const { toast } = useToast()
 
 const allMateriales = ref<MaterialProducto[]>([])
 const allServicios = ref<Servicio[]>([])
@@ -110,7 +112,7 @@ const cargarDatos = async () => {
     allAmbulancias.value = ambulancias
   } catch (error) {
     console.error('Error al cargar datos:', error)
-    if (error instanceof ApiError) alert(`Error: ${error.message}`)
+    if (error instanceof ApiError) toast.error('Error', error.message)
   } finally {
     isLoading.value = false
   }

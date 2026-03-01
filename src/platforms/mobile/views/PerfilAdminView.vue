@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { 
   getUsuario,
@@ -9,6 +10,7 @@ import {
 } from '@core/services/api'
 
 const router = useRouter()
+const { toast } = useToast()
 
 // Estado
 const userName = ref('ADMIN')
@@ -26,7 +28,7 @@ const verificarPermisos = () => {
   }
   
   if (!isAdmin()) {
-    alert('No tienes permisos para acceder a esta página')
+    toast.error('Sin permisos', 'No tienes permisos para acceder a esta página')
     router.push('/perfil')
     return false
   }
