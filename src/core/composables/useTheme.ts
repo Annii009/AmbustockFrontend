@@ -1,4 +1,4 @@
-//para gestión de tema claro/oscuro
+//para gestión de tema claro/oscuro no icluido al terminar el proyecto
 
 import { ref, onMounted } from 'vue'
 

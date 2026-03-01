@@ -41,7 +41,7 @@
                     <p>No se encontraron reposiciones</p>
                 </div>
 
-                <!-- El pintado de cada card está delegado al subcomponente ReposicionCard -->
+                <!-- El pintado de cada card esta delegado al subcomponente ReposicionCard -->
                 <div v-else class="reposicion-list">
                     <ReposicionCard v-for="rep in reposicionesFiltradas" :key="rep.id || rep.idReposicion"
                         :reposicion="rep" />

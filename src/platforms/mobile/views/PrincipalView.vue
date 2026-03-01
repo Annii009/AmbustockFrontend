@@ -83,7 +83,7 @@ const handleModalClick = (e: MouseEvent) => {
 
 <template>
   <div class="principal-view">
-    <!-- Menú hamburguesa -->
+    <!-- Menu hamburguesa -->
     <div class="menu-container">
       <button class="menu-button" @click="toggleMenu">
         <span class="dot"></span>

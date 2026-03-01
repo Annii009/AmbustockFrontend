@@ -26,11 +26,11 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
 }
 
 export const useAmbulanciasStore = defineStore('ambulancias', () => {
-  // ── Estado ──────────────────────────────────────────────────
+  //Estado
   const ambulancias = ref<Ambulancia[]>([])
   const loading = ref(false)
 
-  // ── Obtener lista completa del backend ──────────────────────
+  //  Obtener lista completa del backend
   async function cargar() {
     loading.value = true
     try {
@@ -40,21 +40,21 @@ export const useAmbulanciasStore = defineStore('ambulancias', () => {
     }
   }
 
-  // ── Crear nueva ambulancia y añadirla al estado local ───────
+  //Crear nueva ambulancia y añadirla al estado local
   async function crear(datos: { nombre: string; matricula: string }) {
     const nueva = await apiFetch('/api/Ambulancia', 'POST', datos)
     ambulancias.value.push(nueva)
     return nueva
   }
 
-  // ── Actualizar ambulancia en backend y en estado local ──────
+  // Actualizar ambulancia en backend y en estado local
   async function actualizar(id: number, datos: { nombre: string; matricula: string }) {
     await apiFetch(`/api/Ambulancia/${id}`, 'PUT', datos)
     const idx = ambulancias.value.findIndex(a => a.idAmbulancia === id)
     if (idx !== -1) ambulancias.value[idx] = { ...ambulancias.value[idx], ...datos }
   }
 
-  // ── Eliminar ambulancia del backend y del estado local ──────
+  //Eliminar ambulancia del backend y del estado local
   async function eliminar(id: number) {
     await apiFetch(`/api/Ambulancia/${id}`, 'DELETE')
     ambulancias.value = ambulancias.value.filter(a => a.idAmbulancia !== id)

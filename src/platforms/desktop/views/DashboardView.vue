@@ -2,10 +2,9 @@
   <div v-if="!loading && user" class="dash">
     <div class="dash__inner">
 
-      <!-- Subtítulo -->
       <p class="dash__subtitle">Panel de control de AmbuStock</p>
 
-      <!-- Acciones rápidas (3 cards grandes) -->
+      <!-- Acciones rápidas -->
       <div class="dash__actions">
         <button @click="go('/principal/seleccion-ambulancia')" class="action action--red">
           <div class="action__icon-wrap">
@@ -19,7 +18,6 @@
           <h3 class="action__title">NUEVA REVISIÓN</h3>
           <p class="action__text">Iniciar revisión completa de ambulancia</p>
         </button>
-
         <button @click="go('/principal/reposicion')" class="action action--blue">
           <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -30,10 +28,9 @@
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
           </div>
-          <h3 class="action__title">MATERIAL GASTADO EN EL SERVICIO</h3>
+          <h3 class="action__title">MATERIAL GASTADO</h3>
           <p class="action__text">Gestionar material gastado y pedidos</p>
         </button>
-
         <button @click="go('/principal/historial')" class="action action--green">
           <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -47,7 +44,7 @@
         </button>
       </div>
 
-      <!-- Stats (4 cards pequeñas) -->
+      <!-- Stats -->
       <div class="dash__stats">
         <div class="stat">
           <div class="stat__top">
@@ -57,10 +54,9 @@
             </svg>
             <span class="stat__badge stat__badge--green">Este mes</span>
           </div>
-          <div class="stat__value">{{ totalReposiciones }}</div>
-          <div class="stat__label">reposiciones este mes</div>
+          <div class="stat__value">{{ totalRevisiones }}</div>
+          <div class="stat__label">Revisiones este mes</div>
         </div>
-
         <div class="stat">
           <div class="stat__top">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -70,10 +66,9 @@
             </svg>
             <span class="stat__badge stat__badge--green">{{ porcentajeAprobadas }}%</span>
           </div>
-          <div class="stat__value">{{ reposicionesAprobadas }}</div>
-          <div class="stat__label">Aprobadas</div>
+          <div class="stat__value">{{ revisionesAprobadas }}</div>
+          <div class="stat__label">Completadas</div>
         </div>
-
         <div class="stat">
           <div class="stat__top">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -89,10 +84,65 @@
         </div>
       </div>
 
+      <!--SECCIÓN GRÁFICAS -->
+      <div class="dash__charts-header">
+        <h2 class="section-title">ANÁLISIS</h2>
+        <!-- Filtro de fechas y categoría -->
+        <div class="charts-filters">
+          <select v-model="filtroPeriodo" class="filter-select">
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 3 meses</option>
+            <option value="365">Este año</option>
+          </select>
+          <select v-model="filtroCategoria" class="filter-select">
+            <option value="todas">Todos los estados</option>
+            <option value="completada">Completadas</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="urgente">Urgentes</option>
+            <option value="sin-realizar">Sin realizar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dash__charts">
+
+        <!-- Gráfica 1: Línea — revisiones por día -->
+        <div class="chart-card chart-card--wide">
+          <h3 class="chart-card__title">Revisiones por día</h3>
+          <div class="chart-wrap">
+            <canvas ref="lineChartRef" />
+          </div>
+        </div>
+
+        <!-- Gráfica 2: Barras — revisiones por ambulancia -->
+        <div class="chart-card">
+          <h3 class="chart-card__title">Por ambulancia</h3>
+          <div class="chart-wrap">
+            <canvas ref="barChartRef" />
+          </div>
+        </div>
+
+        <!-- Gráfica 3: Doughnut — distribución por estado -->
+        <div class="chart-card">
+          <h3 class="chart-card__title">Distribución por estado</h3>
+          <div class="chart-wrap chart-wrap--donut">
+            <canvas ref="donutChartRef" />
+          </div>
+          <!-- Leyenda del donut -->
+          <div class="donut-legend">
+            <div v-for="item in donutLegend" :key="item.label" class="donut-legend__item">
+              <span class="donut-legend__dot" :style="{ background: item.color }" />
+              <span class="donut-legend__label">{{ item.label }}</span>
+              <span class="donut-legend__value">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
       <!-- Bottom: actividad + perfil -->
       <div class="dash__bottom">
-
-        <!-- Actividad reciente -->
         <div class="card">
           <h2 class="card__title">ACTIVIDAD RECIENTE</h2>
           <div v-if="activities.length > 0" class="activity">
@@ -114,20 +164,16 @@
           <div v-else class="card__empty">No hay actividad reciente</div>
         </div>
 
-        <!-- Mi perfil -->
         <div class="card">
           <h2 class="card__title">MI PERFIL</h2>
           <div class="profile">
             <div class="profile__head">
-              <div class="profile__avatar">
-                <span>{{ initials }}</span>
-              </div>
+              <div class="profile__avatar"><span>{{ initials }}</span></div>
               <div>
                 <p class="profile__name">{{ (user.nombreResponsable || user.nombre || '').toUpperCase() }}</p>
                 <p class="profile__role">{{ user.rol }}</p>
               </div>
             </div>
-
             <div class="profile__rows">
               <div class="profile__row">
                 <span class="profile__label">Correo Electrónico</span>
@@ -142,10 +188,7 @@
                 <span class="profile__value">#{{ user.usuarioId }}</span>
               </div>
             </div>
-
             <button class="profile__edit" @click="go('/principal/perfil')">Editar Perfil</button>
-
-            <!-- Accesos rápidos admin -->
             <template v-if="isAdmin">
               <div class="profile__admin-sep" />
               <p class="profile__admin-label">Panel de Administración</p>
@@ -155,8 +198,6 @@
                     stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                   Responsables
                 </button>
@@ -174,8 +215,8 @@
             </template>
           </div>
         </div>
-
       </div>
+
     </div>
   </div>
 
@@ -185,40 +226,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  getUsuario,
-  getHistorialRevisiones,
-  obtenerEstadoRevision,
-  type Usuario,
-  type Revision
+  getUsuario, getHistorialRevisiones, obtenerEstadoRevision,
+  type Usuario, type Revision
 } from '@/core/services/api'
+import {
+  Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale,
+  BarController, BarElement, DoughnutController, ArcElement,
+  Tooltip, Legend, Filler
+} from 'chart.js'
+
+Chart.register(
+  LineController, LineElement, PointElement, LinearScale, CategoryScale,
+  BarController, BarElement, DoughnutController, ArcElement,
+  Tooltip, Legend, Filler
+)
 
 interface Activity {
-  id: string
-  nombreAmbulancia: string
-  status: string
-  time: string
-  color: string
+  id: string; nombreAmbulancia: string; status: string; time: string; color: string
 }
 
 const router = useRouter()
 const user = ref<Usuario | null>(null)
 const activities = ref<Activity[]>([])
 const loading = ref(true)
+const todasLasRevisiones = ref<Revision[]>([])
 
-const totalReposiciones = ref(0)
-const reposicionesAprobadas = ref(0)
+// Filtros
+const filtroPeriodo = ref('30')   // días
+const filtroCategoria = ref('todas')
+
+//Canvas refs 
+const lineChartRef = ref<HTMLCanvasElement | null>(null)
+const barChartRef = ref<HTMLCanvasElement | null>(null)
+const donutChartRef = ref<HTMLCanvasElement | null>(null)
+
+let lineChart: Chart | null = null
+let barChart: Chart | null = null
+let donutChart: Chart | null = null
+
+// KPIs 
+const totalRevisiones = ref(0)
+const revisionesAprobadas = ref(0)
 const alertasPendientes = ref(0)
 
 const isAdmin = computed(() => user.value?.rol === 'Administrador')
 const initials = computed(() =>
-  (user.value?.nombreResponsable || user.value?.nombre || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  (user.value?.nombreResponsable || user.value?.nombre || '')
+    .split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 )
 const porcentajeAprobadas = computed(() =>
-  totalReposiciones.value === 0 ? 0
-    : Math.round(reposicionesAprobadas.value / totalReposiciones.value * 100)
+  totalRevisiones.value === 0 ? 0
+    : Math.round(revisionesAprobadas.value / totalRevisiones.value * 100)
 )
 
 const go = (path: string) => router.push(path)
@@ -226,7 +287,7 @@ const go = (path: string) => router.push(path)
 const colorFromClase = (c: string) => ({
   completada: '#71B48D', pendiente: '#F59E0B',
   urgente: '#891D1A', 'sin-realizar': '#5E657B'
-})[c] || '#5E657B'
+}[c] || '#5E657B')
 
 const timeAgo = (iso: string) => {
   const diff = Date.now() - new Date(iso).getTime()
@@ -237,10 +298,169 @@ const timeAgo = (iso: string) => {
   return 'Hace un momento'
 }
 
+//  Revisiones filtradas por periodo y categoría 
+const revisionesFiltradas = computed(() => {
+  const dias = Number(filtroPeriodo.value)
+  const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000)
+  return todasLasRevisiones.value.filter(r => {
+    const fecha = new Date(r.fechaRevision)
+    if (fecha < desde) return false
+    if (filtroCategoria.value === 'todas') return true
+    return obtenerEstadoRevision(r).clase === filtroCategoria.value
+  })
+})
+
+// Leyenda del donut 
+const donutLegend = computed(() => {
+  const estados = ['completada', 'pendiente', 'urgente', 'sin-realizar']
+  const labels = ['Completadas', 'Pendientes', 'Urgentes', 'Sin realizar']
+  const colores = ['#71B48D', '#F59E0B', '#891D1A', '#5E657B']
+  return estados.map((e, i) => ({
+    label: labels[i],
+    color: colores[i],
+    value: revisionesFiltradas.value.filter(r => obtenerEstadoRevision(r).clase === e).length
+  })).filter(x => x.value > 0)
+})
+
+// Construir datos para gráfica de línea 
+const buildLineData = () => {
+  const dias = Number(filtroPeriodo.value)
+  const labels: string[] = []
+  const counts: number[] = []
+
+  for (let i = dias - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
+    const key = d.toISOString().split('T')[0]
+    labels.push(dias <= 14 ? key.slice(5) : key.slice(5))  // MM-DD
+    counts.push(
+      revisionesFiltradas.value.filter(r => r.fechaRevision?.startsWith(key)).length
+    )
+  }
+  return { labels, counts }
+}
+
+//Construir datos para gráfica de barras
+const buildBarData = () => {
+  const map = new Map<string, number>()
+  revisionesFiltradas.value.forEach(r => {
+    const nombre = r.nombreAmbulancia || r.matricula || 'N/A'
+    map.set(nombre, (map.get(nombre) || 0) + 1)
+  })
+  const sorted = [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
+  return { labels: sorted.map(x => x[0]), counts: sorted.map(x => x[1]) }
+}
+
+// Construir datos para donut
+const buildDonutData = () => {
+  const estados = ['completada', 'pendiente', 'urgente', 'sin-realizar']
+  const labels = ['Completadas', 'Pendientes', 'Urgentes', 'Sin realizar']
+  const colores = ['#71B48D', '#F59E0B', '#891D1A', '#5E657B']
+  const counts = estados.map(e =>
+    revisionesFiltradas.value.filter(r => obtenerEstadoRevision(r).clase === e).length
+  )
+  return { labels, counts, colores }
+}
+
+// Crear o actualizar gráficas
+const renderCharts = async () => {
+  await nextTick()
+
+  const lineData = buildLineData()
+  const barData = buildBarData()
+  const donutData = buildDonutData()
+
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } }
+  }
+
+  // Línea
+  if (lineChartRef.value) {
+    lineChart?.destroy()
+    lineChart = new Chart(lineChartRef.value, {
+      type: 'line',
+      data: {
+        labels: lineData.labels,
+        datasets: [{
+          label: 'Revisiones',
+          data: lineData.counts,
+          borderColor: '#891D1A',
+          backgroundColor: 'rgba(137,29,26,0.08)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#891D1A',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        ...baseOptions,
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 10 } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    })
+  }
+
+  // Barras
+  if (barChartRef.value) {
+    barChart?.destroy()
+    barChart = new Chart(barChartRef.value, {
+      type: 'bar',
+      data: {
+        labels: barData.labels,
+        datasets: [{
+          label: 'Revisiones',
+          data: barData.counts,
+          backgroundColor: 'rgba(137,29,26,0.75)',
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        ...baseOptions,
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    })
+  }
+
+  //  Donut
+  if (donutChartRef.value) {
+    donutChart?.destroy()
+    donutChart = new Chart(donutChartRef.value, {
+      type: 'doughnut',
+      data: {
+        labels: donutData.labels,
+        datasets: [{
+          data: donutData.counts,
+          backgroundColor: donutData.colores,
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        ...baseOptions,
+        cutout: '68%',
+        plugins: { legend: { display: false }, tooltip: { enabled: true } }
+      }
+    })
+  }
+}
+
+// Redibujar cuando cambian los filtros
+watch([filtroPeriodo, filtroCategoria], renderCharts)
+
 onMounted(async () => {
   user.value = getUsuario()
   try {
     const revisiones = await getHistorialRevisiones()
+    todasLasRevisiones.value = revisiones
+
     activities.value = revisiones.slice(0, 5).map((r: Revision) => {
       const estado = obtenerEstadoRevision(r)
       return {
@@ -251,16 +471,21 @@ onMounted(async () => {
         color: colorFromClase(estado.clase)
       }
     })
+
     const ahora = new Date()
     const mes = revisiones.filter((r: Revision) => {
       const f = new Date(r.fechaRevision)
       return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear()
     })
-    totalReposiciones.value = mes.length
-    reposicionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
+    totalRevisiones.value = mes.length
+    revisionesAprobadas.value = mes.filter((r: Revision) => obtenerEstadoRevision(r).clase === 'completada').length
     alertasPendientes.value = mes.filter((r: Revision) => ['urgente', 'pendiente'].includes(obtenerEstadoRevision(r).clase)).length
-  } catch { /* silencioso */ }
+
+    await renderCharts()
+  } catch { }
   loading.value = false
+  await nextTick() 
+  await renderCharts()
 })
 </script>
 
@@ -286,7 +511,7 @@ onMounted(async () => {
   margin-bottom: 1.5rem;
 }
 
-// ── Acciones ──────────────────────────────────────────────────
+// Acciones
 .dash__actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -356,7 +581,7 @@ onMounted(async () => {
   color: $white;
 }
 
-// ── Stats ────────────────────────────────────────────────────
+// Stats
 .dash__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -397,10 +622,6 @@ onMounted(async () => {
   &--red {
     color: $primary-red;
   }
-
-  &--gray {
-    color: $blue-accent;
-  }
 }
 
 .stat__badge {
@@ -436,7 +657,124 @@ onMounted(async () => {
   color: $text-gray;
 }
 
-// ── Bottom ───────────────────────────────────────────────────
+// ── Gráficas ──────────────────────────────────────────────────
+.dash__charts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-family: $font-display;
+  font-size: 28px;
+  letter-spacing: $font-display-spacing;
+  color: $text-dark;
+  line-height: 1;
+}
+
+.charts-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.4rem 0.75rem;
+  border: 1.5px solid $border-color;
+  border-radius: 9px;
+  background: $white;
+  font-family: $font-primary;
+  font-size: 13px;
+  color: $text-dark;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: $primary-red;
+  }
+}
+
+.dash__charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: $white;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid $border-color;
+
+  // La gráfica de línea ocupa toda la fila superior
+  &--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.chart-card__title {
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-bold;
+  color: $text-gray;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+}
+
+.chart-wrap {
+  height: 200px;
+  position: relative;
+
+  &--donut {
+    height: 160px;
+  }
+}
+
+// Leyenda donut
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.875rem;
+}
+
+.donut-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: $font-primary;
+  font-size: 12.5px;
+}
+
+.donut-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend__label {
+  flex: 1;
+  color: $text-dark;
+}
+
+.donut-legend__value {
+  font-weight: $font-bold;
+  color: $text-dark;
+}
+
+// Bottom
 .dash__bottom {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -471,7 +809,6 @@ onMounted(async () => {
   padding: 2rem 0;
 }
 
-// Actividad
 .activity {
   display: flex;
   flex-direction: column;
@@ -536,7 +873,6 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-// Perfil
 .profile {
   display: flex;
   flex-direction: column;
@@ -685,7 +1021,6 @@ onMounted(async () => {
   }
 }
 
-// Loading
 .dash-loading {
   display: flex;
   align-items: center;

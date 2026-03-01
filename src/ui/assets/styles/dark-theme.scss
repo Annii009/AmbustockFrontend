@@ -1,0 +1,134 @@
+// MODO OSCURO 
+
+body.dark-theme {
+
+  // Fondo general y superficies
+  background-color: #1A1A1A;
+
+
+
+  // Fondos de página
+  .page, .view {
+    background: #1A1A1A !important;
+  }
+
+  // Sidebar
+  .sidebar {
+    background: #2D2D2D !important;
+    border-right-color: rgba(255,255,255,0.08) !important;
+
+    &__item {
+      color: #FFFFFF !important;
+      &:hover { background: #3D3D3D !important; }
+      &--active { background: #891D1A !important; color: #FFFFFF !important; }
+    }
+
+    &__group { color: #AAAAAA !important; }
+    &__sep { background: rgba(255,255,255,0.08) !important; }
+
+    &__user {
+      background: #3D3D3D !important;
+    }
+
+    &__user-name { color: #FFFFFF !important; }
+    &__user-role { color: #AAAAAA !important; }
+
+    &__theme-toggle, &__logout {
+      color: #FFFFFF !important;
+      &:hover { background: #3D3D3D !important; }
+    }
+  }
+
+  // Cards y contenedores blancos
+  .modal, .table-wrap, .card,
+  .amb-card, .revision-card, .reposicion-card,
+  .zona-card, .cajon-block {
+    background: #2D2D2D !important;
+    border-color: rgba(255,255,255,0.08) !important;
+  }
+
+  // Textos
+  h1, h2, h3, h4, h5, p, span, label, td, th, li {
+    color: #FFFFFF;
+  }
+
+  .page__eyebrow, .modal__eyebrow,
+  .sidebar__group, .table-count,
+  .amb-item__mat, .reposicion-card__date,
+  .reposicion-card__mat, .revision-card__date,
+  .revision-card__mat, .amb-card__mat,
+  .sidebar__user-role {
+    color: #AAAAAA !important;
+  }
+
+  // Inputs y selects
+  input, select, textarea {
+    background: #3D3D3D !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #FFFFFF !important;
+
+    &::placeholder { color: #AAAAAA !important; }
+    &:focus { border-color: #FF6B6B !important; }
+  }
+
+  // Tablas
+  table { background: #2D2D2D !important; }
+  thead tr { background: #3D3D3D !important; }
+  th { color: #AAAAAA !important; }
+  td { color: #FFFFFF !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+  .resp-row:hover { background: #3D3D3D !important; }
+
+  // Botones secundarios
+  .btn-cancel, .action-btn, .filter-btn, .sidebar__close {
+    background: #3D3D3D !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #FFFFFF !important;
+  }
+
+  // Buscador
+  .search-box input {
+    background: #3D3D3D !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #FFFFFF !important;
+  }
+
+  // Toolbar / filtros
+  .toolbar { background: transparent !important; }
+  .filter-btn {
+    background: #2D2D2D !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #AAAAAA !important;
+    &--active { background: #891D1A !important; color: #FFFFFF !important; border-color: #891D1A !important; }
+    &:hover { border-color: #FF6B6B !important; color: #FF6B6B !important; }
+  }
+
+  // Modales
+  .modal-overlay { background: rgba(0,0,0,0.7) !important; }
+  .modal {
+    background: #2D2D2D !important;
+    .modal__sub { color: #AAAAAA !important; }
+  }
+
+  // Panel izquierdo ambulancias
+  .panel-left { background: #2D2D2D !important; border-right-color: rgba(255,255,255,0.08) !important; }
+  .panel-right { background: #1A1A1A !important; }
+  .amb-item {
+    &:hover { background: #3D3D3D !important; }
+    &--active { background: rgba(255,107,107,0.12) !important; }
+    &__icon { background: #3D3D3D !important; }
+    &__name { color: #FFFFFF !important; }
+    &__mat { color: #AAAAAA !important; }
+  }
+
+  // Dashboard KPIs
+  .kpi-card, .stat-card { background: #2D2D2D !important; border-color: rgba(255,255,255,0.08) !important; }
+
+  // Bordes generales
+  [class*="__header"], [class*="__footer"] {
+    border-color: rgba(255,255,255,0.08) !important;
+  }
+
+  // Scrollbars
+  ::-webkit-scrollbar-track { background: #2D2D2D; }
+  ::-webkit-scrollbar-thumb { background: #4D4D4D; }
+}

@@ -162,7 +162,6 @@ const goToRegister = () => {
   }
 }
 
-// === RESPONSIVE DESIGN ===
 
 @include mobile-small {
   .welcome-image {

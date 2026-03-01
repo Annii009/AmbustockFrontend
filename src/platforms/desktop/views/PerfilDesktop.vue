@@ -11,7 +11,7 @@
 
       <div class="edit-grid">
 
-        <!-- Formulario información personal -->
+        <!-- Formulario informacion personal -->
         <div class="card">
           <h3 class="card__title">Información personal</h3>
 
@@ -80,7 +80,7 @@
 
       </div>
 
-      <!-- Botón guardar -->
+      <!-- Boton guardar -->
       <div class="actions">
         <button
           class="btn-guardar"
@@ -94,7 +94,7 @@
         </button>
       </div>
 
-      <!-- Toast éxito -->
+      <!-- Toast exito -->
       <transition name="toast">
         <div v-if="showSuccess" class="toast">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -136,7 +136,7 @@ const guardar = async () => {
   if (!nombre.value.trim() || !email.value.trim()) return
   try {
     isSaving.value = true
-    // TODO: llamada a la API para guardar cambios
+    //llamada a la API para guardar cambios
     await new Promise(r => setTimeout(r, 600))
     showSuccess.value = true
     setTimeout(() => showSuccess.value = false, 2500)

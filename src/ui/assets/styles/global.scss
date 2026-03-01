@@ -1,17 +1,11 @@
-// ============================================================
 // Google Fonts
-// ============================================================
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
 
-// ============================================================
 // Variables & Mixins
-// ============================================================
 @import './variables';
 @import './mixins';
 
-// ============================================================
 // Reset
-// ============================================================
 *,
 *::before,
 *::after {
@@ -20,9 +14,7 @@
   box-sizing: border-box;
 }
 
-// ============================================================
 // Base
-// ============================================================
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
@@ -33,23 +25,21 @@ body {
   font-family: $font-primary;
   font-weight: $font-regular;
   color: $text-dark;
-  background-color: $bg-page; // #F8F6F6 en todas las páginas
+  background-color: $bg-page;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   width: 100%;
 }
 
-// ============================================================
 // Tipografía base
-// ============================================================
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: $font-display; // Bebas Neue
+  font-family: $font-display;
   color: $text-dark;
   line-height: 1;
   letter-spacing: 0.07em;
@@ -63,7 +53,7 @@ input,
 textarea,
 select,
 button {
-  font-family: $font-primary; // Source Sans 3
+  font-family: $font-primary;
   color: $text-dark;
 }
 
@@ -77,9 +67,7 @@ a {
   }
 }
 
-// ============================================================
 // Contenedor mobile
-// ============================================================
 .mobile-container {
   width: 100%;
   max-width: $max-width-mobile;
@@ -90,9 +78,7 @@ a {
   flex-direction: column;
 }
 
-// ============================================================
 // Utilidades de color
-// ============================================================
 .text-red {
   color: $primary-red;
 }
@@ -129,9 +115,7 @@ a {
   background-color: $blue-accent;
 }
 
-// ============================================================
-// Badges de estado (compartidos mobile/desktop)
-// ============================================================
+// Badges de estado
 .badge {
   display: inline-flex;
   align-items: center;
@@ -162,9 +146,7 @@ a {
   }
 }
 
-// ============================================================
 // Spinner global
-// ============================================================
 .spinner {
   width: 40px;
   height: 40px;
@@ -181,9 +163,7 @@ a {
   }
 }
 
-// ============================================================
-// Botones base (compartidos)
-// ============================================================
+// Botones base
 .btn {
   display: inline-flex;
   align-items: center;
@@ -233,7 +213,7 @@ a {
     }
   }
 
-  // Inactivo — rojo al 50% (según spec)
+  // Inactivo — rojo al 50%
   &--inactive {
     background: $primary-red-50;
     color: $white;
@@ -272,9 +252,7 @@ a {
   }
 }
 
-// ============================================================
 // Dark theme
-// ============================================================
 body.dark-theme {
   background-color: $dark-bg;
   color: $dark-text;
@@ -295,9 +273,7 @@ body.dark-theme {
   }
 }
 
-// ============================================================
 // Animaciones globales
-// ============================================================
 @keyframes fadeIn {
   from {
     opacity: 0;

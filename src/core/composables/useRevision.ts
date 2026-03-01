@@ -1,5 +1,3 @@
-// useRevision.ts - Lógica de negocio para la revisión
-
 import type { Zona, Material } from '@/services/api'
 
 export function useRevision() {

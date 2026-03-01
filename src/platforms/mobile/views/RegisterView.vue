@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
-import { registerUser, ApiError } from '@core/services/api'
+import { registerUser, loginUser, saveAuthData, ApiError } from '@core/services/api'
 import { useValidation } from '@core/composables/useValidation'
 
 const router = useRouter()
-const { toast } = useToast()
 const { validateEmail, validateRequired } = useValidation()
 
 const nombreResponsable = ref('')
@@ -84,16 +82,12 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    const data = await registerUser(nombreResponsable.value, email.value, password.value, rol.value)
-    console.log('Registro exitoso', data)
+    await registerUser(nombreResponsable.value, email.value, password.value, rol.value)
 
-    if (data.token) {
-      localStorage.setItem('authToken', data.token)
-      localStorage.setItem('token', data.token)
-    }
+    const loginData = await loginUser(email.value, password.value)
+    saveAuthData(loginData)
 
-    const isMobile = window.innerWidth < 768
-    router.push(isMobile ? '/principal' : '/dashboard')
+    router.push('/principal')
   } catch (error) {
     if (error instanceof ApiError) {
       showError(error.message)
@@ -111,7 +105,7 @@ const goToLogin = () => {
 
 const handleSocialLogin = (provider: string) => {
   console.log(`${provider} login clicked`)
-  toast.warning('No disponible', `${provider} login no implementado aún`)
+  alert(`${provider} login no implementado aún`)
 }
 </script>
 
@@ -169,7 +163,7 @@ const handleSocialLogin = (provider: string) => {
               v-model="password"
               type="password"
               id="registerPassword"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Mínimo 8 caracteres"
               :disabled="isLoading"
               autocomplete="new-password"
             />

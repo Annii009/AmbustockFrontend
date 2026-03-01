@@ -31,7 +31,7 @@ const guardar = async () => {
   if (!nombre.value.trim() || !email.value.trim()) return
   try {
     isSaving.value = true
-    // TODO: llamada a la API para guardar cambios
+    //llamada a la API para guardar cambios
     await new Promise(r => setTimeout(r, 600)) // simular espera
     showSuccess.value = true
     setTimeout(() => showSuccess.value = false, 2500)
@@ -132,7 +132,7 @@ onMounted(() => cargarDatos())
         </div>
       </div>
 
-      <!-- Botón guardar -->
+      <!-- Boton guardar -->
       <div class="section">
         <button
           class="btn-guardar"

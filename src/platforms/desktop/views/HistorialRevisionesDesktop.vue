@@ -40,7 +40,7 @@
           <p>No se encontraron revisiones</p>
         </div>
 
-        <!-- El pintado de cada card está delegado al subcomponente RevisionCard -->
+        <!-- El pintado de cada card esta delegado al subcomponente RevisionCard -->
         <div v-else class="revision-list">
           <RevisionCard v-for="rev in revisionesFiltradas" :key="rev.idRevision" :revision="rev" />
         </div>

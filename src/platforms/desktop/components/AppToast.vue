@@ -1,5 +1,4 @@
 <template>
-    <!-- Colocar este componente una sola vez en App.vue o el layout raíz -->
     <Teleport to="body">
         <div class="toast-container">
             <TransitionGroup name="toast">
@@ -28,8 +27,7 @@
                         <p class="toast__title">{{ toast.title }}</p>
                         <p v-if="toast.message" class="toast__message">{{ toast.message }}</p>
                     </div>
-
-                    <!-- Barra de progreso que se vacía en `duration` ms -->
+                    
                     <div class="toast__progress" :style="{ animationDuration: `${toast.duration}ms` }" />
 
                     <button class="toast__close" @click="removeToast(toast.id)">

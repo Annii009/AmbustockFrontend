@@ -26,6 +26,29 @@
     <div class="sidebar__spacer" />
 
     <div class="sidebar__footer">
+
+      <!-- ── Toggle tema claro/oscuro ── -->
+      <button class="sidebar__theme-toggle" @click="toggleTheme"
+        :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+        <!-- Icono luna (modo oscuro activo) -->
+        <svg v-if="isDarkTheme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <!-- Icono sol (modo claro activo) -->
+        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <span>{{ isDarkTheme ? 'Modo oscuro' : 'Modo claro' }}</span>
+      </button>
+
       <div class="sidebar__user">
         <div class="sidebar__avatar">
           <span>{{ initials }}</span>
@@ -35,6 +58,7 @@
           <p class="sidebar__user-role">{{ userRole }}</p>
         </div>
       </div>
+
       <button class="sidebar__logout" @click="handleLogout">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -59,11 +83,14 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUsuario } from '@/core/services/api'
+import { useTheme } from '@core/composables/useTheme'
 
 defineProps<{ isOpen?: boolean }>()
 defineEmits<{ close: [] }>()
 
 const router = useRouter()
+const { isDarkTheme, toggleTheme } = useTheme()
+
 const user = computed(() => getUsuario())
 const userName = computed(() => user.value?.nombreResponsable || user.value?.nombre || 'Usuario')
 const userRole = computed(() => user.value?.rol || 'Inspector')
@@ -190,12 +217,6 @@ const handleLogout = () => {
   cursor: pointer;
   transition: opacity 0.15s;
 
-  &:hover {
-    opacity: 0.8;
-  }
-
-  cursor: pointer;
-
   img {
     height: 42px;
     width: auto;
@@ -305,6 +326,39 @@ const handleLogout = () => {
   flex-direction: column;
   gap: 0.25rem;
   flex-shrink: 0;
+}
+
+//Toggle tema
+.sidebar__theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $text-dark;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-semibold;
+  width: 100%;
+  transition: background 0.15s, color 0.15s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+  &:hover {
+    background: $bg-page;
+
+    svg {
+      opacity: 0.9;
+    }
+  }
 }
 
 .sidebar__user {

@@ -6,7 +6,7 @@ import { onMounted } from 'vue'
 const router = useRouter()
 
 // Navegación
-const nuevaRevision = () => {
+const volverAlInicio = () => {
   router.push('/principal')
 }
 
@@ -40,8 +40,8 @@ onMounted(() => {
       </p>
 
       <div class="buttons">
-        <button class="btn-primary" @click="nuevaRevision">
-          Nueva revisión
+        <button class="btn-primary" @click="volverAlInicio">
+          Volver al inicio
         </button>
         <button class="btn-secondary" @click="materialGastado">
           Material gastado en el servicio

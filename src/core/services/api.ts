@@ -1,8 +1,8 @@
-// api.ts - Configuración y funciones para llamadas al backend
+// Configuración y funciones para llamadas al backend
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// ─── Interfaces ───────────────────────────────────────────────────────────────
+//interfaces
 
 // Auth
 export interface LoginRequest {
@@ -23,7 +23,7 @@ export interface RegisterRequest {
   nombreResponsable: string;
   email: string;
   password: string;
-  rol: string; // ← AÑADIDO
+  rol: string;
 }
 
 export interface RegisterResponse {
@@ -181,8 +181,7 @@ export interface Responsable {
   fechaServicio?: string;
 }
 
-// ─── Error handling ───────────────────────────────────────────────────────────
-
+// Error handling 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -190,7 +189,7 @@ export class ApiError extends Error {
   }
 }
 
-// ─── Helper functions ─────────────────────────────────────────────────────────
+//Helper functions 
 
 function getAuthHeaders(token: string): HeadersInit {
   return {
@@ -208,7 +207,7 @@ async function handleResponse<T>(response: Response, errorMessage: string): Prom
   return response.json();
 }
 
-// ─── Autenticación ────────────────────────────────────────────────────────────
+//Autenticacion 
 
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
   try {
@@ -234,7 +233,6 @@ export async function loginUser(email: string, password: string): Promise<LoginR
   }
 }
 
-// ← ACTUALIZADO: acepta rol como cuarto parámetro
 export async function registerUser(
   nombreResponsable: string,
   email: string,
@@ -323,7 +321,7 @@ export function getNombreUsuario(): string {
   return nombre ? nombre.toUpperCase() : 'USUARIO';
 }
 
-// ─── Ambulancias ──────────────────────────────────────────────────────────────
+// Ambulancias
 
 export async function getAmbulancias(): Promise<Ambulancia[]> {
   const token = getAuthToken();
@@ -367,7 +365,7 @@ export function getAmbulanciaSeleccionada(): number | null {
   return id ? parseInt(id, 10) : null;
 }
 
-// ─── Servicios ────────────────────────────────────────────────────────────────
+// Servicios 
 
 export async function getServicios(): Promise<Servicio[]> {
   const token = getAuthToken();
@@ -395,7 +393,7 @@ export function getServicioSeleccionado(): number | null {
   return id ? parseInt(id, 10) : null;
 }
 
-// ─── Materiales ───────────────────────────────────────────────────────────────
+//Materiales 
 
 export async function getMateriales(): Promise<MaterialProducto[]> {
   const token = getAuthToken();
@@ -414,7 +412,7 @@ export async function getMateriales(): Promise<MaterialProducto[]> {
   }
 }
 
-// ─── Revisiones ───────────────────────────────────────────────────────────────
+// Revisiones
 
 export async function getRevisionAmbulancia(ambulanciaId: number): Promise<RevisionData> {
   const token = getAuthToken();
@@ -495,7 +493,7 @@ export function limpiarDatosRevision(): void {
   keysToRemove.forEach(key => localStorage.removeItem(key));
 }
 
-// ─── Reposiciones ─────────────────────────────────────────────────────────────
+// Reposiciones
 export async function guardarReposicion(reposicion: any): Promise<any> {
     const token = getAuthToken();
     if (!token) throw new ApiError(401, 'No hay token de autenticación');
@@ -630,7 +628,7 @@ export function limpiarDatosReposicion(): void {
   keysToRemove.forEach(key => localStorage.removeItem(key));
 }
 
-// ─── Usuarios / Responsables ──────────────────────────────────────────────────
+// Usuarios / Responsables 
 
 export async function getUsuarios(): Promise<UsuarioResponsable[]> {
   const token = getAuthToken();
@@ -694,7 +692,7 @@ export async function eliminarUsuario(id: number): Promise<void> {
   if (!response.ok) throw new ApiError(response.status, 'Error al eliminar usuario');
 }
 
-// ← AÑADIDO: busca responsables por nombre (para el autocomplete)
+//  busca responsables por nombre
 export async function searchResponsables(query: string): Promise<string[]> {
   const token = getAuthToken();
   if (!token) throw new ApiError(401, 'No hay token de autenticación');
@@ -709,7 +707,6 @@ export async function searchResponsables(query: string): Promise<string[]> {
     );
 
     const data = await handleResponse<Responsable[]>(response, 'Error al buscar responsables');
-    // El back devuelve [{ idResponsable: 1, nombreResponsable: "Juan..." }, ...]
     return data.map((r) => r.nombreResponsable);
   } catch (error) {
     if (error instanceof ApiError) throw error;
@@ -717,8 +714,7 @@ export async function searchResponsables(query: string): Promise<string[]> {
   }
 }
 
-// ─── Utilidades ───────────────────────────────────────────────────────────────
-
+// Utilidades
 export function saveNombreResponsable(nombre: string): void {
   localStorage.setItem('nombreResponsable', nombre);
 }

@@ -3,7 +3,6 @@
     <div v-if="sidebarOpen" class="layout__overlay" @click="sidebarOpen = false" />
     <AppSidebar :is-open="sidebarOpen" @close="sidebarOpen = false" />
     <div class="layout__main">
-      <!-- Topbar solo en mobile -->
       <header class="layout__topbar">
         <button class="layout__menu-btn" @click="sidebarOpen = true">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

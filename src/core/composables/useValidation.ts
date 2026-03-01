@@ -1,5 +1,3 @@
-
-
 export function useValidation() {
   const validateEmail = (email: string): boolean => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

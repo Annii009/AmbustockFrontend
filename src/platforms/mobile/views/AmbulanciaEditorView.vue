@@ -25,7 +25,7 @@
 
         <template v-else>
 
-            <!-- ── Datos básicos ── -->
+            <!-- Datos básicos -->
             <div class="section">
                 <p class="section__label">DATOS BÁSICOS</p>
                 <div class="card">
@@ -41,11 +41,11 @@
                 </div>
             </div>
 
-            <!-- ── Zonas ── -->
+            <!-- Zonas -->
             <div class="section">
                 <div class="section__row">
                     <p class="section__label">ZONAS Y MATERIALES</p>
-                    <button class="btn-add-small" @click="addZona">+ Zona</button>
+                    <button class="btn-add-small" @click.stop="addZona">+ Zona</button>
                 </div>
 
                 <div v-if="form.zonas.length === 0" class="zonas-empty">
@@ -86,7 +86,7 @@
                         <div class="subsection">
                             <div class="subsection__header">
                                 <span class="subsection__label">Materiales de zona</span>
-                                <button class="btn-add-tiny" @click="addMaterial(zona, null)">+ Material</button>
+                                <button class="btn-add-tiny" @click.stop="addMaterial(zona, null)">+ Material</button>
                             </div>
                             <div v-if="zona.materiales.length === 0" class="mat-empty">Sin materiales directos</div>
                             <div v-for="(mat, mi) in zona.materiales" :key="mi" class="mat-row">
@@ -95,7 +95,7 @@
                                         :all-materials="allMaterialNames" />
                                 </div>
                                 <div class="mat-row__qty">
-                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" />
+                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" @click.stop />
                                 </div>
                                 <button class="btn-icon-xs" @click="removeMaterial(zona.materiales, mi)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -110,7 +110,7 @@
                         <div class="subsection">
                             <div class="subsection__header">
                                 <span class="subsection__label">Cajones</span>
-                                <button class="btn-add-tiny" @click="addCajon(zona)">+ Cajón</button>
+                                <button class="btn-add-tiny" @click.stop="addCajon(zona)">+ Cajón</button>
                             </div>
 
                             <div v-for="(cajon, ci) in zona.cajones" :key="ci" class="cajon-block">
@@ -171,14 +171,14 @@
 
         </template>
 
-        <!-- ── Botón guardar fijo ── -->
+        <!-- Botón guardar fijo -->
         <div class="footer-btn">
             <button class="btn-save" :disabled="saving" @click="guardar">
                 {{ saving ? 'Guardando...' : (esNueva ? 'Crear ambulancia' : 'Guardar cambios') }}
             </button>
         </div>
 
-        <!-- ── Modal eliminar ── -->
+        <!--  Modal eliminar -->
         <Teleport to="body">
             <Transition name="modal">
                 <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -208,25 +208,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { useToast } from '@core/composables/useToast'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuthToken } from '@core/services/api'
 import MobileAutocomplete from './MobileAutocomplete.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { toast } = useToast()
 
 const idAmbulancia = computed(() => route.params.id ? Number(route.params.id) : null)
 const esNueva = computed(() => !idAmbulancia.value)
 
-// ── Tipos ─────────────────────────────────────────────────────
+// Tipos
 interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number }
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _editingName: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _editingName: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 
-// ── Estado ────────────────────────────────────────────────────
+// Estado
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 const loadingDetail = ref(false)
 const saving = ref(false)
@@ -251,7 +249,7 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
     return res.json()
 }
 
-// ── Cargar datos ──────────────────────────────────────────────
+//Cargar datos
 const cargarDetalle = async () => {
     if (!idAmbulancia.value) return
     loadingDetail.value = true
@@ -287,7 +285,7 @@ const cargarTodosMateriales = async () => {
     } catch { }
 }
 
-// ── Helpers árbol ─────────────────────────────────────────────
+// Helpers árbol
 const contarMateriales = (zona: ZonaForm) =>
     zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
@@ -303,10 +301,10 @@ const startEditZonaName = async (zi: number) => {
     form.value.zonas[zi]._editingName = true
 }
 
-// ── Guardar ───────────────────────────────────────────────────
+// Guardar 
 const guardar = async () => {
     if (!form.value.nombre || !form.value.matricula) {
-        toast.warning('Campos obligatorios', 'Nombre y matrícula son obligatorios'); return
+        alert('Nombre y matrícula son obligatorios'); return
     }
     saving.value = true
     try {
@@ -354,23 +352,22 @@ const guardar = async () => {
             }
         }
 
-        toast.success(esNueva.value ? 'Ambulancia creada' : 'Cambios guardados', 'Los datos se guardaron correctamente')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        toast.error('Error al guardar', e.message)
+        alert('Error al guardar: ' + e.message)
     } finally {
         saving.value = false
     }
 }
 
-// ── Eliminar ──────────────────────────────────────────────────
+//Eliminar 
 const eliminar = async () => {
     deleting.value = true
     try {
         await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
         router.push('/principal/ambulancias')
     } catch (e: any) {
-        toast.error('Error al eliminar', e.message)
+        alert('Error al eliminar: ' + e.message)
     } finally {
         deleting.value = false
     }

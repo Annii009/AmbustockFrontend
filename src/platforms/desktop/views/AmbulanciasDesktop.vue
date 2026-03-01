@@ -2,7 +2,7 @@
   <div class="page">
     <div class="layout">
 
-      <!-- ══ PANEL IZQUIERDO: lista ambulancias ══ -->
+      <!-- PANEL IZQUIERDO: lista ambulancias-->
       <aside class="panel-left">
         <div class="panel-left__header">
           <h1 class="panel-left__title">AMBULANCIAS</h1>
@@ -26,20 +26,29 @@
           <div class="spinner" />
         </div>
 
-        <!-- Cada item de ambulancia pintado por AmbulanciaItem -->
         <div v-else class="amb-list">
-          <AmbulanciaItem
-            v-for="amb in filteredAmbs"
-            :key="amb.idAmbulancia"
-            :ambulancia="amb"
-            :active="selected?.idAmbulancia === amb.idAmbulancia"
-            @select="selectAmbulancia"
-          />
+          <div v-for="amb in filteredAmbs" :key="amb.idAmbulancia" class="amb-item"
+            :class="{ 'amb-item--active': selected?.idAmbulancia === amb.idAmbulancia }" @click="selectAmbulancia(amb)">
+            <div class="amb-item__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13" rx="1" />
+                <path d="M16 8h4l3 3v5h-7V8z" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+              </svg>
+            </div>
+            <div class="amb-item__text">
+              <span class="amb-item__name">{{ amb.nombre?.trim() || `Ambulancia ${amb.matricula}` }}</span>
+              <span class="amb-item__mat">{{ amb.matricula }}</span>
+            </div>
+            <span class="amb-item__id">#{{ String(amb.idAmbulancia).padStart(3, '0') }}</span>
+          </div>
+
           <div v-if="filteredAmbs.length === 0" class="amb-empty">Sin resultados</div>
         </div>
       </aside>
 
-      <!-- ══ PANEL DERECHO: editor ══ -->
+      <!--PANEL DERECHO: editor-->
       <main class="panel-right">
 
         <!-- Estado vacío -->
@@ -54,7 +63,7 @@
         </div>
 
         <template v-else>
-          <!-- ── Header editor ── -->
+          <!-- Header editor -->
           <div class="editor-header">
             <div class="editor-header__left">
               <p class="editor-header__eyebrow">{{ creando ? 'NUEVA AMBULANCIA' : 'EDITANDO' }}</p>
@@ -77,7 +86,7 @@
             </div>
           </div>
 
-          <!-- ── Datos básicos ── -->
+          <!-- Datos básicos-->
           <div class="section-card">
             <h3 class="section-title">Datos básicos</h3>
             <div class="form-row">
@@ -92,7 +101,7 @@
             </div>
           </div>
 
-          <!-- ── Zonas y materiales ── -->
+          <!-- Zonas y materiales-->
           <div class="section-card">
             <div class="section-header">
               <h3 class="section-title">Zonas y materiales</h3>
@@ -221,7 +230,7 @@
       </main>
     </div>
 
-    <!-- ══ MODAL CONFIRMAR ELIMINAR ══ -->
+    <!-- MODAL CONFIRMAR ELIMINAR-->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -251,36 +260,19 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MaterialAutocomplete from './MaterialAutocomplete.vue'
-import AmbulanciaItem from '../components/AmbulanciaItem.vue'
-import { useAmbulanciasStore } from '@/stores/useAmbulanciasStore'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
-
-const { toast } = useToast()
-const ambStore = useAmbulanciasStore()
-
-// ── VeeValidate — schema del formulario básico de ambulancia ──
-const ambSchema = yup.object({
-  nombre:   yup.string().required('El nombre es obligatorio').min(3, 'Mínimo 3 caracteres'),
-  matricula: yup.string().required('La matrícula es obligatoria')
-    .matches(/^[A-Z0-9-]+$/i, 'Formato inválido (ej: 1234-ABC)')
-})
-
-const { validate: validateAmb, errors: ambErrors } = useForm({ validationSchema: ambSchema })
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
-// ── Tipos locales ─────────────────────────────────────────────
+// Tipos locales
 interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number; _nuevo?: boolean }
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _nuevo?: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _nuevo?: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 interface Ambulancia { idAmbulancia: number; nombre?: string; matricula?: string }
 
-// ── Estado ────────────────────────────────────────────────────
+// Estado
 const ambulancias = ref<Ambulancia[]>([])
 const selected = ref<Ambulancia | null>(null)
 const creando = ref(false)
@@ -294,7 +286,7 @@ const allMaterialNames = ref<string[]>([])
 
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 
-// ── Computed ──────────────────────────────────────────────────
+//Computed 
 const filteredAmbs = computed(() => {
   const q = search.value.toLowerCase()
   return ambulancias.value.filter(a =>
@@ -302,7 +294,7 @@ const filteredAmbs = computed(() => {
   )
 })
 
-// ── API helpers ───────────────────────────────────────────────
+// API helpers
 const headers = () => ({
   'Authorization': `Bearer ${getAuthToken()}`,
   'Content-Type': 'application/json'
@@ -318,7 +310,7 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
   return res.json()
 }
 
-// ── Cargar lista ──────────────────────────────────────────────
+// Cargar lista
 const cargarAmbulancias = async () => {
   try {
     loadingAmbs.value = true
@@ -327,7 +319,7 @@ const cargarAmbulancias = async () => {
   finally { loadingAmbs.value = false }
 }
 
-// ── Seleccionar ambulancia y cargar su estructura ─────────────
+// Seleccionar ambulancia y cargar su estructura
 const selectAmbulancia = async (amb: Ambulancia) => {
   selected.value = amb
   creando.value = false
@@ -366,7 +358,7 @@ const selectAmbulancia = async (amb: Ambulancia) => {
   finally { loadingDetail.value = false }
 }
 
-// ── Nueva ambulancia ──────────────────────────────────────────
+// Nueva ambulancia
 const nuevaAmbulancia = () => {
   selected.value = null
   creando.value = true
@@ -378,7 +370,7 @@ const cancelarEditor = () => {
   selected.value = null
 }
 
-// ── Helpers de árbol ──────────────────────────────────────────
+//Helpers de árbol
 const contarMateriales = (zona: ZonaForm) =>
   zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
@@ -398,31 +390,35 @@ const addMaterial = (zona: ZonaForm | null, cajon: CajonForm | null) => {
 }
 const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 
-// ── Guardar (crear o actualizar) ──────────────────────────────
+// Guardar (crear o actualizar)
 const guardarAmbulancia = async () => {
-  if (!form.value.nombre || !form.value.matricula) {
-    const { valid } = await validateAmb()
-    if (!valid) return
+  if (!form.value.nombre?.trim()) {
+    toast.warning('Campo obligatorio', 'El nombre es obligatorio')
+    return
+  }
+  if (!form.value.matricula?.trim()) {
+    toast.warning('Campo obligatorio', 'La matrícula es obligatoria')
+    return
   }
   saving.value = true
   try {
     let ambId: number
 
     if (creando.value) {
-      // 1. Crear ambulancia
+      // Crear ambulancia
       const nueva = await apiFetch('/api/Ambulancia', 'POST', {
         nombre: form.value.nombre, matricula: form.value.matricula
       })
       ambId = nueva.idAmbulancia
     } else {
-      // 1. Actualizar ambulancia
+      //Actualizar ambulancia
       await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', {
         nombre: form.value.nombre, matricula: form.value.matricula
       })
       ambId = selected.value!.idAmbulancia
     }
 
-    // 2. Procesar zonas
+    // Procesar zonas
     for (const zona of form.value.zonas) {
       let zonaId: number
 
@@ -485,18 +481,18 @@ const guardarAmbulancia = async () => {
 
     if (creando.value) {
       creando.value = false
-      toast.success('Ambulancia creada', 'La ambulancia se ha registrado correctamente')
+      alert('Ambulancia creada correctamente')
     } else {
-      toast.success('Cambios guardados', 'Los datos de la ambulancia se han actualizado')
+      alert('Cambios guardados correctamente')
     }
   } catch (e: any) {
-    toast.error('Error al guardar', e.message)
+    alert('Error al guardar: ' + e.message)
   } finally {
     saving.value = false
   }
 }
 
-// ── Eliminar ambulancia ───────────────────────────────────────
+// Eliminar ambulancia
 const confirmarEliminar = () => { showDeleteModal.value = true }
 
 const eliminarAmbulancia = async () => {
@@ -508,13 +504,13 @@ const eliminarAmbulancia = async () => {
     selected.value = null
     await cargarAmbulancias()
   } catch (e: any) {
-    toast.error('Error al eliminar', e.message)
+    alert('Error al eliminar: ' + e.message)
   } finally {
     deleting.value = false
   }
 }
 
-// ── Cargar todos los nombres de materiales para autocomplete ──
+// Cargar todos los nombres de materiales para autocomplete
 const cargarTodosMateriales = async () => {
   try {
     const mats: any[] = await apiFetch('/api/Material')
@@ -549,7 +545,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
-// ── Panel izquierdo ───────────────────────────────────────────
+// Panel izquierdo
 .panel-left {
   width: 280px;
   flex-shrink: 0;
@@ -754,7 +750,7 @@ onMounted(() => {
   color: $text-gray;
 }
 
-// ── Panel derecho ─────────────────────────────────────────────
+//Panel derecho
 .panel-right {
   flex: 1;
   overflow-y: auto;

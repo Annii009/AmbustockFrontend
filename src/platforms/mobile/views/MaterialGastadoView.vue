@@ -36,7 +36,7 @@ const isLoading = ref(true)
 const sugerenciasResponsable = ref<string[]>([])
 const isSearchingResponsable = ref(false)
 
-// ── Debounce igual que el desktop ─────────────────────────────────────────────
+// Debounce igual que el desktop
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(nombreResponsable, (val) => {
@@ -56,7 +56,6 @@ watch(nombreResponsable, (val) => {
     }
   }, 300)
 })
-// ─────────────────────────────────────────────────────────────────────────────
 
 const mostrarSugerenciasResponsable = computed(() =>
   sugerenciasResponsable.value.length > 0 && nombreResponsable.value.trim().length >= 2

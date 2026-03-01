@@ -54,7 +54,7 @@ const zonasPaginadas = computed(() => {
   return revisionData.value.zonas.slice(inicio, fin)
 })
 
-// Índice real de la zona en el array original (necesario para modal y cambios)
+// Índice real de la zona en el array original
 const indexRealZona = (indexPagina: number): number => {
   return (paginaActual.value - 1) * ZONAS_POR_PAGINA + indexPagina
 }
@@ -804,7 +804,7 @@ h1 {
   flex-shrink: 0;
 }
 
-// ── Paginación ──
+// Paginación
 .pagination {
   display: flex;
   align-items: center;

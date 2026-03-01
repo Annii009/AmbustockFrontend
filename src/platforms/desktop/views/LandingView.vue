@@ -37,9 +37,9 @@
           <div class="scene-bg__floor" />
         </div>
 
-        <!-- ═══ CARDS FLOTANTES ALREDEDOR ═══ -->
+        <!--CARDS FLOTANTES ALREDEDOR-->
 
-        <!-- Arriba izquierda — Nueva Revisión -->
+        <!-- Arriba izquierda — Nueva Revision -->
         <div class="scene-card scene-card--top-left"
           :style="{ opacity: dashOpacity, transform: `translateY(${dashY * 0.6}px)` }">
           <button class="scene-btn scene-btn--red" @click="router.push('/reposicion/nueva')">
@@ -57,7 +57,7 @@
           </button>
         </div>
 
-        <!-- Arriba derecha — revisión -->
+        <!-- Arriba derecha — revision -->
         <div class="scene-card scene-card--top-right"
           :style="{ opacity: dashOpacity, transform: `translateY(${dashY * 0.6}px)` }">
           <button class="scene-btn scene-btn--slate" @click="router.push('/reposicion')">
@@ -154,7 +154,7 @@
           </div>
         </div>
 
-        <!-- ═══ AMBULANCIA ═══ -->
+        <!-- AMBULANCIA -->
         <div class="ambulance"
           :style="{ opacity: truckOpacity, transform: `scale(${truckScale}) translateY(${truckY}px)` }">
 
@@ -487,9 +487,8 @@ $line: #E5E1DB;
   overflow-x: hidden;
 }
 
-// ═══════════════════════════════════
 // NAV
-// ═══════════════════════════════════
+
 .nav {
   position: sticky;
   top: 0;
@@ -660,9 +659,7 @@ $line: #E5E1DB;
   margin: 0.5rem 0;
 }
 
-// ═══════════════════════════════════
 // STICKY SCENE
-// ═══════════════════════════════════
 .ambulance-section {
   position: relative;
 }
@@ -710,9 +707,7 @@ $line: #E5E1DB;
   clip-path: polygon(0% 100%, 100% 100%, 80% 0%, 20% 0%);
 }
 
-// ═══════════════════════════════════
 // CARDS / BOTONES FLOTANTES ALREDEDOR
-// ═══════════════════════════════════
 .scene-card {
   position: absolute;
   z-index: 30;
@@ -930,9 +925,7 @@ $line: #E5E1DB;
   margin-left: 2px;
 }
 
-// ═══════════════════════════════════
 // AMBULANCIA
-// ═══════════════════════════════════
 .ambulance {
   position: relative;
   z-index: 10;
@@ -1390,7 +1383,7 @@ $line: #E5E1DB;
   border-radius: 4px;
 }
 
-// ── RUEDAS — rectángulos simples redondeados ──
+//RUEDAS
 .amb__wheels {
   width: 640px;
   display: flex;
@@ -1449,9 +1442,7 @@ $line: #E5E1DB;
   }
 }
 
-// ═══════════════════════════════════
 // FEATURES
-// ═══════════════════════════════════
 .features {
   background: $white;
   padding: 6rem 0;
@@ -1595,9 +1586,7 @@ $line: #E5E1DB;
   transition: transform 0.3s ease;
 }
 
-// ═══════════════════════════════════
 // CTA
-// ═══════════════════════════════════
 .cta-section {
   background: $primary-red;
   padding: 6rem 0;
@@ -1687,9 +1676,7 @@ $line: #E5E1DB;
   }
 }
 
-// ═══════════════════════════════════
 // FOOTER
-// ═══════════════════════════════════
 .footer {
   background: $cream;
   border-top: 1px solid $line;

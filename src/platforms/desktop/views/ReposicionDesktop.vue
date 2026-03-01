@@ -11,19 +11,22 @@
 
       <!-- Tabs -->
       <div class="tabs">
-        <button v-for="tab in tabs" :key="tab.id"
-          class="tabs__btn" :class="{ 'tabs__btn--active': activeTab === tab.id }"
-          @click="activeTab = tab.id">
+        <button v-for="tab in tabs" :key="tab.id" class="tabs__btn"
+          :class="{ 'tabs__btn--active': activeTab === tab.id }" @click="activeTab = tab.id">
           {{ tab.label }}
         </button>
       </div>
 
       <!-- Pendientes -->
       <div v-if="activeTab === 'pendientes'">
-        <div v-if="loading" class="empty-state"><div class="spinner" /></div>
+        <div v-if="loading" class="empty-state">
+          <div class="spinner" />
+        </div>
         <div v-else-if="reposicionesPendientes.length === 0" class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
           </svg>
           <p>No hay reposiciones pendientes</p>
         </div>
@@ -74,13 +77,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getHistorialRevisiones, obtenerEstadoRevision, type Revision } from '@/core/services/api'
 
-const router   = useRouter()
-const loading  = ref(true)
+const router = useRouter()
+const loading = ref(true)
 const revisiones = ref<Revision[]>([])
-const activeTab  = ref('pendientes')
+const activeTab = ref('pendientes')
 
 const tabs = [
-  { id: 'pendientes',  label: 'Pendientes' },
+  { id: 'pendientes', label: 'Pendientes' },
   { id: 'completadas', label: 'Completadas' }
 ]
 
@@ -96,7 +99,7 @@ const formatDate = (iso: string) =>
 
 onMounted(async () => {
   try { revisiones.value = await getHistorialRevisiones() }
-  catch { /* silencioso */ }
+  catch { }
   finally { loading.value = false }
 })
 </script>
@@ -105,10 +108,21 @@ onMounted(async () => {
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-.page { padding: 1.75rem 2rem; min-height: 100vh; background: $bg-page; }
-.page__inner { max-width: 1400px; margin: 0 auto; }
+.page {
+  padding: 1.75rem 2rem;
+  min-height: 100vh;
+  background: $bg-page;
+}
 
-.page__header { @include flex-between; margin-bottom: 1.5rem; }
+.page__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page__header {
+  @include flex-between;
+  margin-bottom: 1.5rem;
+}
 
 .page__title {
   font-family: $font-display;
@@ -119,7 +133,11 @@ onMounted(async () => {
   margin-bottom: 0.25rem;
 }
 
-.page__sub { font-family: $font-primary; font-size: 14px; color: $text-gray; }
+.page__sub {
+  font-family: $font-primary;
+  font-size: 14px;
+  color: $text-gray;
+}
 
 .tabs {
   display: flex;
@@ -143,8 +161,16 @@ onMounted(async () => {
   color: $text-gray;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
-  &--active { background: $primary-red; color: $white; }
-  &:not(.tabs__btn--active):hover { background: $bg-page; color: $text-dark; }
+
+  &--active {
+    background: $primary-red;
+    color: $white;
+  }
+
+  &:not(.tabs__btn--active):hover {
+    background: $bg-page;
+    color: $text-dark;
+  }
 }
 
 .empty-state {
@@ -157,15 +183,32 @@ onMounted(async () => {
   background: $white;
   border-radius: 14px;
   border: 1px solid $border-color;
-  svg { width: 40px; height: 40px; opacity: 0.3; }
-  p { font-family: $font-primary; font-size: 14px; }
+
+  svg {
+    width: 40px;
+    height: 40px;
+    opacity: 0.3;
+  }
+
+  p {
+    font-family: $font-primary;
+    font-size: 14px;
+  }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .spinner {
-  width: 28px; height: 28px;
-  border: 3px solid $border-color; border-top-color: $primary-red;
-  border-radius: 50%; animation: spin 0.8s linear infinite;
+  width: 28px;
+  height: 28px;
+  border: 3px solid $border-color;
+  border-top-color: $primary-red;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .cards-grid {
@@ -183,11 +226,19 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.75rem;
   transition: box-shadow 0.15s;
-  &:hover { box-shadow: $shadow-card; }
-  &--done { opacity: 0.8; }
+
+  &:hover {
+    box-shadow: $shadow-card;
+  }
+
+  &--done {
+    opacity: 0.8;
+  }
 }
 
-.repo-card__header { @include flex-between; }
+.repo-card__header {
+  @include flex-between;
+}
 
 .repo-card__amb {
   font-family: $font-primary;
@@ -212,7 +263,10 @@ onMounted(async () => {
   color: $primary-red;
   cursor: pointer;
   padding: 0;
-  &:hover { text-decoration: underline; }
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .badge {
@@ -222,8 +276,20 @@ onMounted(async () => {
   font-family: $font-primary;
   font-size: 11px;
   font-weight: $font-bold;
-  &--pendiente  { background: rgba(#F59E0B, 0.12); color: #C27D00; }
-  &--completada { background: rgba($green-accent, 0.12); color: $green-accent; }
-  &--urgente    { background: rgba($primary-red, 0.1);  color: $primary-red; }
+
+  &--pendiente {
+    background: rgba(#F59E0B, 0.12);
+    color: #C27D00;
+  }
+
+  &--completada {
+    background: rgba($green-accent, 0.12);
+    color: $green-accent;
+  }
+
+  &--urgente {
+    background: rgba($primary-red, 0.1);
+    color: $primary-red;
+  }
 }
 </style>

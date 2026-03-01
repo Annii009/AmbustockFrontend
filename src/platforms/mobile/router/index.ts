@@ -10,7 +10,7 @@ function adaptive(
 
 const routes = [
 
-    // ── Públicas ─────────────────────────────────────────────────────────────
+    //Públicas 
     {
         path: '/',
         name: 'welcome',
@@ -30,7 +30,7 @@ const routes = [
         component: () => import('@mobile/views/RegisterView.vue')
     },
 
-    // ── Área privada ──────────────────────────────────────────────────────────
+    //Área privada
     {
         path: '/principal',
         component: adaptive(
@@ -49,7 +49,7 @@ const routes = [
                 )
             },
 
-            // ── Flujo Nueva Inspección ────────────────────────────────────────────
+            // Flujo Nueva Inspección
             {
                 path: 'seleccion-ambulancia',
                 name: 'seleccion-ambulancia',
@@ -105,7 +105,7 @@ const routes = [
                 )
             },
 
-            // ── Material / Reposición ─────────────────────────────────────────────
+            // Material / Reposicion
             {
                 path: 'material-gastado',
                 name: 'material-gastado',
@@ -143,7 +143,7 @@ const routes = [
                 )
             },
 
-            // ── Historial ─────────────────────────────────────────────────────────
+            // Historial
             {
                 path: 'historial',
                 name: 'historial-reposiciones',
@@ -158,12 +158,12 @@ const routes = [
                 name: 'ver-revisiones',
                 meta: { requiresAuth: true },
                 component: adaptive(
-                    () => import('@mobile/views/HistorialRevisionesView.vue'),      // ← corregido
-                    () => import('@desktop/views/HistorialRevisionesDesktop.vue')   // ← corregido
+                    () => import('@mobile/views/HistorialRevisionesView.vue'),
+                    () => import('@desktop/views/HistorialRevisionesDesktop.vue') 
                 )
             },
 
-            // ── Perfil ────────────────────────────────────────────────────────────
+            //Perfil
             {
                 path: 'perfil',
                 name: 'perfil',
@@ -184,7 +184,7 @@ const routes = [
             },
 
 
-            // ── Admin only ────────────────────────────────────────────────────────
+            // Admin 
             {
                 path: 'perfil-admin',
                 name: 'perfil-admin',
@@ -218,13 +218,13 @@ const routes = [
                 meta: { requiresAuth: true, requiresAdmin: true },
                 component: adaptive(
                     () => import('@mobile/views/AmbulanciaEditorView.vue'),
-                    () => import('@desktop/views/AmbulanciasDesktop.vue')  // desktop ya lo gestiona todo en uno
+                    () => import('@desktop/views/AmbulanciasDesktop.vue')
                 )
             },
         ]
     },
 
-    // ── Redirects legacy ──────────────────────────────────────────────────────
+    // Redirects
     { path: '/seleccion-ambulancia', redirect: '/principal/seleccion-ambulancia' },
     { path: '/tipo-servicio', redirect: '/principal/tipo-servicio' },
     { path: '/nombre-responsable', redirect: '/principal/nombre-responsable' },
@@ -241,7 +241,6 @@ const routes = [
     { path: '/historial-reposiciones', redirect: '/principal/historial' },
     { path: '/ver-revisiones', redirect: '/principal/ver-revisiones' },
 
-    // ── 404 ───────────────────────────────────────────────────────────────────
     { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 

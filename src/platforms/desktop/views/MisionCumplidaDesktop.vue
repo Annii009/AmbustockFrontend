@@ -4,10 +4,10 @@
 
       <div class="success-icon">
         <svg viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="#71B48D" stroke-width="3" opacity="0.2"/>
-          <circle cx="40" cy="40" r="28" fill="none" stroke="#71B48D" stroke-width="3"/>
+          <circle cx="40" cy="40" r="36" fill="none" stroke="#71B48D" stroke-width="3" opacity="0.2" />
+          <circle cx="40" cy="40" r="28" fill="none" stroke="#71B48D" stroke-width="3" />
           <path fill="none" stroke="#71B48D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-            d="M24 40 L34 50 L56 28"/>
+            d="M24 40 L34 50 L56 28" />
         </svg>
       </div>
 
@@ -20,7 +20,7 @@
 
       <div class="success-page__actions">
         <button class="btn-primary" @click="router.push('/principal')">
-          Nueva Revisión
+          Volver al inicio
         </button>
         <button class="btn-secondary" @click="router.push('/principal/material-gastado')">
           Material Gastado en el Servicio
@@ -68,7 +68,11 @@ onMounted(() => limpiarDatosRevision())
   margin: 0 auto 1.5rem;
   width: 80px;
   height: 80px;
-  svg { width: 80px; height: 80px; }
+
+  svg {
+    width: 80px;
+    height: 80px;
+  }
 }
 
 .success-page__title {
@@ -109,8 +113,15 @@ onMounted(() => limpiarDatosRevision())
   font-weight: $font-semibold;
   cursor: pointer;
   transition: filter 0.15s;
-  svg { width: 18px; height: 18px; }
-  &:hover { filter: brightness(0.9); }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    filter: brightness(0.9);
+  }
 }
 
 .btn-secondary {
@@ -128,7 +139,16 @@ onMounted(() => limpiarDatosRevision())
   font-weight: $font-semibold;
   cursor: pointer;
   transition: border-color 0.15s;
-  svg { width: 18px; height: 18px; opacity: 0.6; }
-  &:hover { border-color: $primary-red; color: $primary-red; }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    border-color: $primary-red;
+    color: $primary-red;
+  }
 }
 </style>

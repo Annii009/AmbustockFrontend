@@ -27,7 +27,7 @@ const {
   obtenerMaterialesFaltantes
 } = useRevision()
 
-// Estado — idéntico al mobile
+// Estado
 const revisionData = ref<RevisionData | null>(null)
 const ambulanciaId = ref<number | null>(null)
 const ambulanciaNombre = ref<string>('')
@@ -36,7 +36,7 @@ const isLoading = ref(true)
 const isReloading = ref(false)
 const error = ref<string | null>(null)
 
-// Paginación — idéntica al mobile
+// Paginacion
 const ZONAS_POR_PAGINA = 10
 const paginaActual = ref(1)
 
@@ -59,19 +59,16 @@ const indexRealZona = (indexPagina: number): number => {
 const irAPagina = (pagina: number) => {
   if (pagina >= 1 && pagina <= totalPaginas.value) {
     paginaActual.value = pagina
-    // En desktop no hacemos scroll, cerramos el panel derecho
     zonaActual.value = null
     zonaActualIndex.value = null
   }
 }
 
-// Panel derecho (equivalente al modal del mobile)
-// En mobile: isModalOpen + zonaActual + zonaActualIndex
-// En desktop: zonaActual + zonaActualIndex (el panel siempre está visible)
+
 const zonaActual = ref<Zona | null>(null)
 const zonaActualIndex = ref<number | null>(null)
 
-// Estado de cajones expandidos — idéntico al mobile
+// Estado de cajones expandidos
 const cajonesExpandidos = ref<Record<string, boolean>>({})
 
 const toggleCajon = (zonaIndex: number, cajonIndex: number) => {
@@ -95,7 +92,7 @@ const inicializarCajones = (zona: Zona, zonaIndex: number) => {
   }
 }
 
-// Progreso — idéntico al mobile
+// Progreso
 const progresoTotal = computed(() => {
   if (!revisionData.value) return { porcentaje: 0, revisados: 0, total: 0 }
 
@@ -118,7 +115,7 @@ const progresoZona = (zona: Zona) => {
   return { porcentaje, revisados, total }
 }
 
-// Cargar — idéntico al mobile
+// Cargar
 const cargarRevision = async (recarga = false) => {
   try {
     if (recarga) {
@@ -203,7 +200,6 @@ const guardarEstado = () => {
   }
 }
 
-// Equivalente a abrirModalZona en el mobile
 const abrirZona = (zona: Zona, indexPagina: number) => {
   const indexReal = indexRealZona(indexPagina)
   zonaActual.value = zona
@@ -211,7 +207,6 @@ const abrirZona = (zona: Zona, indexPagina: number) => {
   inicializarCajones(zona, indexReal)
 }
 
-// Cambiar cantidad — idéntico al mobile
 const cambiarCantidad = (zonaIndex: number, cajonIndex: number | null, materialIndex: number, cambio: number) => {
   if (!revisionData.value) return
 
@@ -314,7 +309,6 @@ onMounted(() => {
 <template>
   <div class="revision-desktop">
 
-    <!-- ══ COLUMNA IZQUIERDA: lista de zonas (= pantalla mobile entera) ══ -->
     <div class="col-zonas">
       <div class="container">
 
@@ -364,13 +358,13 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Info paginación -->
+          <!-- Info paginacion -->
           <div v-if="totalPaginas > 1" class="pagination-info">
             Mostrando {{ (paginaActual - 1) * 10 + 1 }}–{{ Math.min(paginaActual * 10, revisionData.zonas.length) }}
             de {{ revisionData.zonas.length }} zonas
           </div>
 
-          <!-- Lista de zonas — mismo HTML que el mobile -->
+          <!-- Lista de zonas -->
           <div class="zonas-list">
             <div
               v-for="(zona, indexPagina) in zonasPaginadas"
@@ -401,7 +395,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Paginación -->
+          <!-- Paginacion -->
           <div v-if="totalPaginas > 1" class="pagination">
             <button class="pagination-btn" :disabled="paginaActual === 1" @click="irAPagina(paginaActual - 1)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -432,10 +426,9 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ══ COLUMNA DERECHA: el modal mobile convertido en panel fijo ══ -->
     <div class="col-modal">
 
-      <!-- Estado vacío: ninguna zona seleccionada -->
+      <!-- Estado vacio: ninguna zona seleccionada -->
       <div v-if="!zonaActual" class="panel-empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -445,7 +438,7 @@ onMounted(() => {
         <p>Selecciona una zona para ver y revisar sus materiales</p>
       </div>
 
-      <!-- Contenido zona activa — HTML exacto del modal mobile, sin el overlay ni el close -->
+      <!-- Contenido zona activa -->
       <div v-else class="modal-content">
 
         <div class="modal-header">
@@ -460,7 +453,7 @@ onMounted(() => {
 
         <div class="modal-body">
 
-          <!-- Cajones colapsables — idéntico al mobile -->
+          <!-- Cajones colapsables -->
           <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0">
             <div
               v-for="(cajon, cajonIndex) in zonaActual.cajones"
@@ -511,7 +504,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Materiales directos — idéntico al mobile -->
+          <!-- Materiales directos -->
           <div v-if="zonaActual.materiales && zonaActual.materiales.length > 0" class="materiales-directos">
             <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0" class="materiales-directos-title">
               Materiales sueltos
@@ -552,9 +545,7 @@ onMounted(() => {
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-// ════════════════════════════════════════════════════════════
 // Layout desktop: dos columnas
-// ════════════════════════════════════════════════════════════
 .revision-desktop {
   display: grid;
   grid-template-columns: 420px 1fr;
@@ -562,8 +553,6 @@ onMounted(() => {
   min-height: 100%;
 }
 
-// ── Columna izquierda ─────────────────────────────────────────
-// Copia EXACTA de .revision-view + .container del mobile
 .col-zonas {
   border-right: 1px solid #e0e0e0;
   overflow-y: auto;
@@ -574,8 +563,6 @@ onMounted(() => {
   padding: 20px;
 }
 
-// ── Columna derecha ───────────────────────────────────────────
-// Contiene el modal mobile pegado (sin overlay, sin animación de entrada)
 .col-modal {
   overflow-y: auto;
   background: #fafafa;
@@ -583,7 +570,7 @@ onMounted(() => {
   flex-direction: column;
 }
 
-// Estado vacío del panel derecho
+// Estado vacio del panel derecho
 .panel-empty {
   flex: 1;
   display: flex;
@@ -608,9 +595,6 @@ onMounted(() => {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// A partir de aquí: CSS copiado EXACTO del mobile
-// ════════════════════════════════════════════════════════════
 
 // Header
 .header {
@@ -719,7 +703,7 @@ h1 {
   transition: width 0.3s ease;
 }
 
-// Info paginación
+// Info paginacion
 .pagination-info {
   font-size: 12px;
   color: $text-gray;
@@ -727,7 +711,7 @@ h1 {
   margin-bottom: 12px;
 }
 
-// Zonas list — CSS idéntico al mobile
+// Zonas list
 .zonas-list {
   display: flex;
   flex-direction: column;
@@ -821,7 +805,7 @@ h1 {
   flex-shrink: 0;
 }
 
-// Paginación — idéntica al mobile
+// Paginación
 .pagination {
   display: flex;
   align-items: center;
@@ -865,7 +849,7 @@ h1 {
   &.active { background: $primary-red; border-color: $primary-red; color: $white; }
 }
 
-// Botón finalizar — idéntico al mobile
+// Botón finalizar
 .btn-finalizar {
   @include button-base;
   width: 100%;
@@ -876,10 +860,6 @@ h1 {
   &:hover { background-color: $primary-red-hover; }
 }
 
-// ════════════════════════════════════════════════════════════
-// CSS del modal mobile — se aplica al panel derecho
-// Copiado exacto, sin .modal ni .modal-content wrapper de overlay
-// ════════════════════════════════════════════════════════════
 
 .modal-content {
   background: $white;
@@ -929,7 +909,7 @@ h1 {
   flex: 1;
 }
 
-// Cajones — idéntico al mobile
+// Cajones
 .cajon-section { margin-bottom: 16px; }
 
 .cajon-header {
@@ -984,7 +964,7 @@ h1 {
 
 .cajon-materials { padding-left: 8px; }
 
-// Materiales — idéntico al mobile
+// Materiales
 .material-item {
   display: flex;
   align-items: center;

@@ -140,7 +140,7 @@ const highlight = (text: string) => {
 </style>
 
 <style lang="scss">
-// Global - dropdown está en body via Teleport
+// Global - dropdown esta n body via Teleport
 .ac-dropdown {
   background: white;
   border: 1.5px solid #e5e7eb;

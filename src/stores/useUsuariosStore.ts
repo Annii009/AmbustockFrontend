@@ -10,11 +10,11 @@ import {
 } from '@core/services/api'
 
 export const useUsuariosStore = defineStore('usuarios', () => {
-  // ── Estado ──────────────────────────────────────────────────
+  // Estado
   const usuarios = ref<UsuarioResponsable[]>([])
   const loading = ref(false)
 
-  // ── Obtener lista completa del backend ──────────────────────
+  // Obtener lista completa del backend
   async function cargar() {
     loading.value = true
     try {
@@ -24,26 +24,26 @@ export const useUsuariosStore = defineStore('usuarios', () => {
     }
   }
 
-  // ── Obtener un usuario por id (para edición) ────────────────
+  // Obtener un usuario por id (para edición)
   async function obtenerPorId(id: number) {
     return getUsuarioById(id)
   }
 
-  // ── Crear usuario y añadirlo al estado local ────────────────
+  // Crear usuario y añadirlo al estado local
   async function crear(datos: UsuarioResponsable) {
     const nuevo = await crearUsuario(datos)
     await cargar() // recarga para obtener el id generado
     return nuevo
   }
 
-  // ── Actualizar usuario en backend y en estado local ─────────
+  // Actualizar usuario en backend y en estado local
   async function actualizar(id: number, datos: Partial<UsuarioResponsable>) {
     await actualizarUsuario(id, datos)
     const idx = usuarios.value.findIndex(u => u.idUsuario === id)
     if (idx !== -1) usuarios.value[idx] = { ...usuarios.value[idx], ...datos }
   }
 
-  // ── Eliminar usuario del backend y del estado local ─────────
+  // Eliminar usuario del backend y del estado local
   async function eliminar(id: number) {
     await eliminarUsuario(id)
     usuarios.value = usuarios.value.filter(u => u.idUsuario !== id)

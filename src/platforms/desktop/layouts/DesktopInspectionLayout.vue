@@ -33,7 +33,6 @@
       </div>
     </header>
 
-    <!-- Progreso -->
     <div class="insp__progress">
       <div class="insp__progress-info">
         <span>Progreso de revisión</span>
@@ -44,7 +43,6 @@
       </div>
     </div>
 
-    <!-- Tabs pasos -->
     <div class="insp__steps">
       <div
         v-for="step in steps"
@@ -70,7 +68,6 @@
       </div>
     </div>
 
-    <!-- Contenido -->
     <div class="insp__body">
       <slot />
     </div>

@@ -1,21 +1,17 @@
-// ============================================================
 // COLORES — Paleta principal
-// ============================================================
-$bg-page: #F8F6F6; // fondo de todas las páginas
-$primary-red: #891D1A; // rojo principal
-$primary-red-hover: #6D1715; // rojo hover
-$primary-red-50: rgba(137, 29, 26, 0.5); // botones inactivos al 50%
+$bg-page: #F8F6F6;
+$primary-red: #891D1A;
+$primary-red-hover: #6D1715;
+$primary-red-50: rgba(137, 29, 26, 0.5);
 $primary-red-light: rgba(137, 29, 26, 0.08);
-$green-accent: #71B48D; // verde
-$blue-accent: #5E657B; // azul/gris
-$text-dark: #210706; // negro textos
+$green-accent: #71B48D;
+$blue-accent: #5E657B;
+$text-dark: #210706;
 $text-gray: rgba(33, 7, 6, 0.6);
 $white: #FFFFFF;
 $link-red: #891D1A;
 
-// ============================================================
 // COLORES — Estados / badges
-// ============================================================
 $estado-completada-bg: #D5F5E3;
 $estado-completada-text: #27AE60;
 $estado-pendiente-bg: #FCF3CF;
@@ -28,56 +24,44 @@ $stock-alert: #E74C3C;
 $success-green: #4CAF50;
 $delete-color: #E74C3C;
 
-// ============================================================
 // TIPOGRAFÍA
-// ============================================================
 $font-primary: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
 $font-display: 'Bebas Neue';
-$font-display-spacing: 0.07em; // letter-spacing para títulos Bebas Neue
+$font-display-spacing: 0.07em; 
 
 $font-light: 300;
 $font-regular: 400;
 $font-semibold: 600;
 $font-bold: 700;
 
-// ============================================================
 // LAYOUT
-// ============================================================
 $max-width-mobile: 428px;
 $sidebar-width: 272px;
 $topbar-height: 64px;
 
-// ============================================================
 // BORDER RADIUS
-// ============================================================
 $border-radius-card: 20px;
 $border-radius-button: 10px;
 $border-radius-sm: 8px;
 $border-radius-lg: 24px;
 $border-radius-pill: 999px;
 
-// ============================================================
 // SOMBRAS
-// ============================================================
 $shadow-button: 0 4px 12px rgba(137, 29, 26, 0.3);
 $shadow-button-hover: 0 6px 16px rgba(137, 29, 26, 0.4);
 $shadow-card: 0 2px 12px rgba(33, 7, 6, 0.06);
 $shadow-card-hover: 0 8px 32px rgba(33, 7, 6, 0.10);
 $shadow-sidebar: 4px 0 24px rgba(33, 7, 6, 0.08);
 $shadow-modal: 0 4px 20px rgba(0, 0, 0, 0.3);
-$modal-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); // alias para compatibilidad
+$modal-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 $shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.15);
 
-// ============================================================
 // BORDES
-// ============================================================
 $border-color: rgba(33, 7, 6, 0.1);
 $border-gray: #D0D0D0;
 $border-radius-button: 10px;
 
-// ============================================================
 // INPUTS
-// ============================================================
 $input-bg: #FFFFFF;
 $input-disabled-bg: #F5F5F5;
 $input-height: 54px;
@@ -85,25 +69,19 @@ $input-height-small: 50px;
 $input-height-large: 58px;
 $placeholder-color: #AAAAAA;
 
-// ============================================================
 // GLASSMORPHISM
-// ============================================================
 $glass-bg: rgba(255, 255, 255, 0.4);
 $glass-bg-fallback: rgba(255, 255, 255, 0.92);
 $glass-border: rgba(255, 255, 255, 0.6);
 $glass-border-top: rgba(255, 255, 255, 0.8);
 $glass-blur: 40px;
 
-// ============================================================
 // ESTADOS DE ERROR
-// ============================================================
 $error-bg: rgba(255, 229, 229, 0.95);
 $error-border: #FFB8B8;
 $error-text: #D32F2F;
 
-// ============================================================
 // BOTONES
-// ============================================================
 $btn-disabled-bg: #C3918E;
 $btn-secondary-border: 2px;
 $social-btn-bg: #5F6368;
@@ -111,9 +89,7 @@ $social-btn-hover: #4A4D52;
 $social-btn-size: 56px;
 $social-btn-size-small: 50px;
 
-// ============================================================
 // DARK THEME
-// ============================================================
 $dark-bg: #1A1A1A;
 $dark-card-bg: #2D2D2D;
 $dark-hover-bg: #3D3D3D;
@@ -121,9 +97,7 @@ $dark-text: #FFFFFF;
 $dark-text-secondary: #AAAAAA;
 $dark-red: #FF6B6B;
 
-// ============================================================
 // COMPONENTES VARIOS
-// ============================================================
 
 // Progress
 $progress-inactive: #D0D0D0;

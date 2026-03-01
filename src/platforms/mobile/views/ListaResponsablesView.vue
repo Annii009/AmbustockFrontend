@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { 
   getUsuarios,
@@ -13,7 +12,6 @@ import {
 } from '@core/services/api'
 
 const router = useRouter()
-const { toast } = useToast()
 
 // Estado
 const allResponsables = ref<UsuarioResponsable[]>([])
@@ -73,7 +71,7 @@ const cargarResponsables = async () => {
     console.log('Responsables cargados:', responsables)
   } catch (error) {
     console.error('Error al cargar responsables:', error)
-    toast.error('Error', 'Error al cargar la lista de responsables')
+    toast.error('Error de carga', 'No se pudo cargar la lista de responsables')
   } finally {
     isLoading.value = false
   }
@@ -105,23 +103,29 @@ const editarResponsable = async (idUsuario: number) => {
     showModalResponsable.value = true
   } catch (error) {
     console.error('Error al cargar responsable:', error)
-    toast.error('Error', 'Error al cargar el responsable')
+    toast.error('Error de carga', 'No se pudo obtener el responsable')
   }
 }
 
 // Guardar responsable
 const guardarResponsable = async () => {
+  if (!formData.value.nombreUsuario?.trim()) {
+    toast.warning('Campo obligatorio', 'El nombre de usuario es obligatorio')
+    return
+  }
+  if (!formData.value.rol) {
+    toast.warning('Campo obligatorio', 'Debes seleccionar un rol')
+    return
+  }
+  if (!formData.value.email?.trim()) {
+    toast.warning('Campo obligatorio', 'El email es obligatorio')
+    return
+  }
+  if (!editingResponsable.value && !formData.value.password) {
+    toast.warning('Contraseña requerida', 'La contraseña es obligatoria para nuevos usuarios')
+    return
+  }
   try {
-    if (!formData.value.nombreUsuario || !formData.value.rol || !formData.value.email) {
-      toast.warning('Campos obligatorios', 'Por favor complete todos los campos obligatorios')
-      return
-    }
-    
-    if (!editingResponsable.value && !formData.value.password) {
-      toast.warning('Contraseña requerida', 'La contraseña es obligatoria para nuevos usuarios')
-      return
-    }
-    
     const datos: any = {
       nombreUsuario: formData.value.nombreUsuario.trim(),
       rol: formData.value.rol,
@@ -132,9 +136,10 @@ const guardarResponsable = async () => {
       datos.password = formData.value.password
     }
     
-    if (editingResponsable.value) {
+    const wasEditing = !!editingResponsable.value
+    if (wasEditing) {
       // Actualizar
-      await actualizarUsuario(editingResponsable.value.idUsuario!, datos)
+      await actualizarUsuario(editingResponsable.value!.idUsuario!, datos)
     } else {
       // Crear
       await crearUsuario(datos)
@@ -142,6 +147,7 @@ const guardarResponsable = async () => {
     
     cerrarModalResponsable()
     await cargarResponsables()
+    toast.success(wasEditing ? 'Responsable actualizado' : 'Responsable creado', 'Los datos se guardaron correctamente')
   } catch (error) {
     console.error('Error al guardar responsable:', error)
     toast.error('Error al guardar', 'No se pudo guardar el responsable')

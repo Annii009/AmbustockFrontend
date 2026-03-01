@@ -36,7 +36,7 @@
         <p>No hay responsables registrados</p>
       </div>
 
-      <!-- El pintado de cada fila está delegado al subcomponente ResponsableRow -->
+      <!-- El pintado de cada fila esta delegado al subcomponente ResponsableRow -->
       <div v-else class="table-wrap">
         <table class="resp-table">
           <thead>
@@ -60,7 +60,7 @@
       </p>
     </div>
 
-    <!-- ══ MODAL CREAR / EDITAR — VeeValidate + Yup ══ -->
+    <!--MODAL CREAR / EDITAR — VeeValidate + Yup -->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="showModalResponsable" class="modal-overlay" @click.self="cerrarModalResponsable">
@@ -81,45 +81,30 @@
               </button>
             </div>
 
-            <!-- VeeValidate valida el schema Yup antes de llamar a guardarResponsable -->
-            <Form class="modal__form" :validation-schema="schema" @submit="guardarResponsable">
+            <!-- Formulario con validación manual -->
+            <form class="modal__form" @submit.prevent="guardarResponsable">
               <div class="form-grid">
                 <div class="form-field">
                   <label>Nombre de usuario</label>
-                  <Field name="nombreUsuario" v-slot="{ field, errors }">
-                    <input v-bind="field" v-model="formData.nombreUsuario" type="text" placeholder="Nombre completo"
-                      :class="{ 'input--error': errors.length }" />
-                    <span class="field-error">{{ errors[0] }}</span>
-                  </Field>
+                  <input v-model="formData.nombreUsuario" type="text" placeholder="Nombre completo" />
                 </div>
                 <div class="form-field">
                   <label>Rol</label>
-                  <Field name="rol" v-slot="{ field, errors }">
-                    <select v-bind="field" v-model="formData.rol" :class="{ 'input--error': errors.length }">
-                      <option value="">Seleccione un rol</option>
-                      <option value="Administrador">Administrador</option>
-                      <option value="Socorrista">Socorrista</option>
-                      <option value="Sanitario">Sanitario</option>
-                      <option value="Técnico de emergencias">Técnico de emergencias</option>
-                    </select>
-                    <span class="field-error">{{ errors[0] }}</span>
-                  </Field>
+                  <select v-model="formData.rol">
+                    <option value="">Seleccione un rol</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Socorrista">Socorrista</option>
+                    <option value="Sanitario">Sanitario</option>
+                    <option value="Técnico de emergencias">Técnico de emergencias</option>
+                  </select>
                 </div>
                 <div class="form-field form-field--full">
                   <label>Email</label>
-                  <Field name="email" v-slot="{ field, errors }">
-                    <input v-bind="field" v-model="formData.email" type="email" placeholder="ejemplo@correo.com"
-                      :class="{ 'input--error': errors.length }" />
-                    <span class="field-error">{{ errors[0] }}</span>
-                  </Field>
+                  <input v-model="formData.email" type="email" placeholder="ejemplo@correo.com" />
                 </div>
                 <div v-if="!editingResponsable" class="form-field form-field--full">
                   <label>Contraseña</label>
-                  <Field name="password" v-slot="{ field, errors }">
-                    <input v-bind="field" v-model="formData.password" type="password" placeholder="Mínimo 6 caracteres"
-                      :class="{ 'input--error': errors.length }" />
-                    <span class="field-error">{{ errors[0] }}</span>
-                  </Field>
+                  <input v-model="formData.password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
                 </div>
               </div>
               <div class="modal__footer">
@@ -128,13 +113,13 @@
                   {{ saving ? 'Guardando...' : (editingResponsable ? 'Guardar cambios' : 'Crear responsable') }}
                 </button>
               </div>
-            </Form>
+            </form>
           </div>
         </div>
       </Transition>
     </Teleport>
 
-    <!-- ══ MODAL ELIMINAR ══ -->
+    <!-- modal eliminar-->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="showModalEliminar" class="modal-overlay" @click.self="cerrarModalEliminar">
@@ -165,8 +150,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { Form, Field } from 'vee-validate'   // librería de validación de formularios
-import * as yup from 'yup'                   // schema de reglas de validación
 import { isAdmin, getUsuarioById, type UsuarioResponsable } from '@core/services/api'
 import { useUsuariosStore } from '@/stores/useUsuariosStore'
 import { useToast } from '@core/composables/useToast'
@@ -176,7 +159,7 @@ const router = useRouter()
 const store = useUsuariosStore()
 const { toast } = useToast()
 
-// ── Estado local de UI ────────────────────────────────────────
+// Estado local de UI
 const searchQuery = ref('')
 const showModalResponsable = ref(false)
 const showModalEliminar = ref(false)
@@ -186,20 +169,7 @@ const editingResponsable = ref<UsuarioResponsable | null>(null)
 const responsableToDelete = ref<{ id: number; nombre: string } | null>(null)
 const formData = ref<UsuarioResponsable>({ nombreUsuario: '', rol: '', email: '', password: '' })
 
-// ── Schema Yup — reglas de validación del formulario ─────────
-const schema = computed(() =>
-  yup.object({
-    nombreUsuario: yup.string().required('El nombre es obligatorio').min(3, 'Mínimo 3 caracteres'),
-    rol: yup.string().required('Selecciona un rol'),
-    email: yup.string().email('Email no válido').required('El email es obligatorio'),
-    // La contraseña solo es requerida al crear (no al editar)
-    password: editingResponsable.value
-      ? yup.string().optional()
-      : yup.string().required('La contraseña es obligatoria').min(6, 'Mínimo 6 caracteres')
-  })
-)
-
-// ── Filtrado local ────────────────────────────────────────────
+//Filtrado local
 const responsablesFiltrados = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
   if (!q) return store.usuarios
@@ -230,8 +200,24 @@ const editarResponsable = async (id: number) => {
   }
 }
 
-// VeeValidate llama a esta función solo si el schema es válido
+// VeeValidate llama a esta función solo si el schema es valido
 const guardarResponsable = async () => {
+  if (!formData.value.nombreUsuario?.trim()) {
+    toast.warning('Campo obligatorio', 'El nombre de usuario es obligatorio')
+    return
+  }
+  if (!formData.value.rol) {
+    toast.warning('Campo obligatorio', 'Debes seleccionar un rol')
+    return
+  }
+  if (!formData.value.email?.trim()) {
+    toast.warning('Campo obligatorio', 'El email es obligatorio')
+    return
+  }
+  if (!editingResponsable.value && !formData.value.password) {
+    toast.warning('Contraseña requerida', 'La contraseña es obligatoria para nuevos usuarios')
+    return
+  }
   saving.value = true
   try {
     const datos: any = {
@@ -354,10 +340,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   font-size: 14px;
   font-weight: $font-semibold;
   cursor: pointer;
+  transition: filter 0.15s, box-shadow 0.15s;
   box-shadow: 0 4px 14px rgba($primary-red, 0.3);
   white-space: nowrap;
   flex-shrink: 0;
-  transition: filter 0.15s;
 
   svg {
     width: 16px;
@@ -366,6 +352,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
 
   &:hover {
     filter: brightness(0.9);
+    box-shadow: 0 6px 20px rgba($primary-red, 0.4);
   }
 }
 
@@ -436,8 +423,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   color: $text-gray;
 
   svg {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
+    opacity: 0.3;
   }
 
   p {
@@ -446,55 +434,188 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   }
 }
 
+// Tabla
 .table-wrap {
   background: $white;
-  border-radius: 16px;
   border: 1.5px solid $border-color;
+  border-radius: 14px;
   overflow: hidden;
 }
 
 .resp-table {
   width: 100%;
   border-collapse: collapse;
+}
 
-  thead tr {
-    border-bottom: 1.5px solid $border-color;
-    background: $bg-page;
+.resp-table thead tr {
+  border-bottom: 1.5px solid $border-color;
+  background: $bg-page;
+}
+
+.resp-table th {
+  font-family: $font-primary;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-gray;
+  padding: 0.875rem 1.25rem;
+  text-align: left;
+
+  &.th-actions {
+    text-align: right;
+  }
+}
+
+.resp-row {
+  border-bottom: 1px solid $border-color;
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
   }
 
-  th {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-family: $font-primary;
-    font-size: 11.5px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    color: $text-gray;
-    text-transform: uppercase;
+  &:hover {
+    background: rgba($primary-red, 0.025);
+  }
+}
 
-    &.th-actions {
-      text-align: right;
+.resp-table td {
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: $primary-red;
+  color: $white;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: $font-bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  font-family: $font-primary;
+  font-size: 14px;
+  font-weight: $font-semibold;
+  color: $text-dark;
+}
+
+.rol-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-family: $font-primary;
+  font-size: 12px;
+  font-weight: $font-bold;
+
+  &.rol--admin {
+    background: rgba($primary-red, 0.1);
+    color: $primary-red;
+  }
+
+  &.rol--socorrista {
+    background: rgba($blue-accent, 0.1);
+    color: $blue-accent;
+  }
+
+  &.rol--tecnico {
+    background: rgba($green-accent, 0.12);
+    color: darken($green-accent, 12%);
+  }
+
+  &.rol--sanitario {
+    background: rgba(#F59E0B, 0.12);
+    color: #B45309;
+  }
+}
+
+.td-email {
+  font-family: $font-primary;
+  font-size: 13.5px;
+  color: $text-gray;
+}
+
+.td-actions {
+  text-align: right;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.375rem;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &--edit {
+    background: rgba($primary-red, 0.08);
+    color: $primary-red;
+
+    &:hover {
+      background: rgba($primary-red, 0.16);
+    }
+  }
+
+  &--delete {
+    background: $primary-red;
+    color: #e74c3c;
+
+    &:hover {
+      background: $primary-red;
     }
   }
 }
 
 .table-count {
   font-family: $font-primary;
-  font-size: 12.5px;
+  font-size: 12px;
   color: $text-gray;
-  margin-top: 0.875rem;
+  margin-top: 0.75rem;
+  text-align: right;
 }
 
-// ── Modal ──────────────────────────────────────────────────────
+// Modales
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 200;
   padding: 1rem;
 }
 
@@ -502,13 +623,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   background: $white;
   border-radius: 20px;
   width: 100%;
-  max-width: 520px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  max-width: 560px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 
   &--sm {
     max-width: 400px;
-    padding: 2rem;
   }
 }
 
@@ -516,22 +636,43 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid $border-color;
+  padding: 1.5rem 1.75rem 0;
+}
+
+.modal__header-text {
+  flex: 1;
 }
 
 .modal__avatar {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba($primary-red, 0.1);
-  color: $primary-red;
+  flex-shrink: 0;
+  background: $primary-red;
+  color: $white;
+  font-family: $font-primary;
+  font-size: 16px;
+  font-weight: $font-bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: $font-display;
-  font-size: 16px;
-  flex-shrink: 0;
+}
+
+.modal__danger-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 1.75rem auto 0;
+  background: rgba(#e74c3c, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #e74c3c;
+  }
 }
 
 .modal__eyebrow {
@@ -541,34 +682,47 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   letter-spacing: 0.1em;
   color: $text-gray;
   text-transform: uppercase;
-  margin-bottom: 2px;
 }
 
 .modal__title {
   font-family: $font-display;
-  font-size: 26px;
+  font-size: 24px;
   letter-spacing: $font-display-spacing;
   color: $text-dark;
-  line-height: 1;
+  line-height: 1.1;
 
   &--center {
     text-align: center;
+    margin-top: 0.75rem;
+    padding: 0 1.75rem;
   }
 }
 
+.modal__name {
+  color: $primary-red;
+}
+
+.modal__sub {
+  font-family: $font-primary;
+  font-size: 13px;
+  color: $text-gray;
+  text-align: center;
+  padding: 0.375rem 1.75rem 0;
+}
+
 .modal__close {
+  margin-left: auto;
+  flex-shrink: 0;
   width: 32px;
   height: 32px;
-  margin-left: auto;
-  border: none;
-  background: transparent;
   border-radius: 8px;
+  border: none;
+  background: $bg-page;
+  color: $text-gray;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: $text-gray;
-  flex-shrink: 0;
   transition: background 0.15s;
 
   svg {
@@ -577,18 +731,18 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
   }
 
   &:hover {
-    background: $bg-page;
+    background: $border-color;
   }
 }
 
 .modal__form {
-  padding: 1.5rem;
+  padding: 1.25rem 1.75rem 0;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem 1.25rem;
+  gap: 1rem;
 }
 
 .form-field {
@@ -602,156 +756,119 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
 
   label {
     font-family: $font-primary;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: $text-dark;
-    letter-spacing: 0.02em;
+    font-size: 12px;
+    font-weight: $font-bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $text-gray;
   }
 
   input,
   select {
-    padding: 0.625rem 0.875rem;
+    padding: 0.75rem 1rem;
     border: 1.5px solid $border-color;
-    border-radius: 9px;
+    border-radius: 10px;
+    background: $white;
     font-family: $font-primary;
     font-size: 14px;
     color: $text-dark;
-    background: $white;
     outline: none;
     transition: border-color 0.15s;
+    width: 100%;
 
     &::placeholder {
-      color: $text-gray;
+      color: lighten($text-gray, 15%);
     }
 
     &:focus {
       border-color: $primary-red;
     }
-
-    &.input--error {
-      border-color: $primary-red;
-      background: rgba($primary-red, 0.03);
-    }
   }
-}
 
-// Mensaje de error inline de VeeValidate
-.field-error {
-  font-family: $font-primary;
-  font-size: 11.5px;
-  color: $primary-red;
-  min-height: 16px;
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235E657B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+  }
 }
 
 .modal__footer {
   display: flex;
-  justify-content: flex-end;
   gap: 0.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid $border-color;
-  margin-top: 1.25rem;
+  justify-content: flex-end;
+  padding: 1.25rem 1.75rem 1.75rem;
 
   &--center {
     justify-content: center;
   }
 }
 
-.modal__sub {
-  font-family: $font-primary;
-  font-size: 14px;
-  color: $text-gray;
-  text-align: center;
-  margin: 0.875rem 0 1.5rem;
-}
-
-.modal__name {
-  color: $primary-red;
-}
-
-.modal__danger-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: rgba($primary-red, 0.1);
-  color: $primary-red;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-
-  svg {
-    width: 24px;
-    height: 24px;
-  }
-}
-
 .btn-cancel {
-  padding: 0.625rem 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
   border: 1.5px solid $border-color;
-  border-radius: 9px;
   background: $white;
   font-family: $font-primary;
   font-size: 14px;
+  font-weight: $font-semibold;
+  color: $text-gray;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 
   &:hover {
-    background: $bg-page;
+    border-color: $primary-red;
+    color: $primary-red;
   }
 }
 
 .btn-confirm {
-  padding: 0.625rem 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  border: none;
   background: $primary-red;
   color: $white;
-  border: none;
-  border-radius: 9px;
   font-family: $font-primary;
   font-size: 14px;
   font-weight: $font-semibold;
   cursor: pointer;
   transition: filter 0.15s;
+  box-shadow: 0 4px 14px rgba($primary-red, 0.3);
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &:hover:not(:disabled) {
+  &:hover {
     filter: brightness(0.9);
   }
 }
 
 .btn-delete {
-  padding: 0.625rem 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  border: none;
   background: $primary-red;
   color: $white;
-  border: none;
-  border-radius: 9px;
   font-family: $font-primary;
   font-size: 14px;
   font-weight: $font-semibold;
   cursor: pointer;
   transition: filter 0.15s;
+  box-shadow: 0 4px 14px rgba(#e74c3c, 0.25);
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &:hover:not(:disabled) {
+  &:hover {
     filter: brightness(0.9);
   }
 }
 
+// Transición modal
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s ease;
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-  transform: scale(0.96) translateY(8px);
 }
 </style>
