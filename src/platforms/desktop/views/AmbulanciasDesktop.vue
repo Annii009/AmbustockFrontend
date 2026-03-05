@@ -47,11 +47,7 @@
         </div>
       </aside>
 
-<<<<<<< HEAD
       <!-- PANEL DERECHO: editor -->
-=======
-      <!--  PANEL DERECHO: editor -->
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
       <main class="panel-right">
 
         <!-- Estado vacío -->
@@ -89,11 +85,7 @@
             </div>
           </div>
 
-<<<<<<< HEAD
           <!-- Datos básicos -->
-=======
-          <!--Datos básicos -->
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
           <div class="section-card">
             <h3 class="section-title">Datos básicos</h3>
             <div class="form-row">
@@ -108,11 +100,7 @@
             </div>
           </div>
 
-<<<<<<< HEAD
           <!-- Zonas y materiales -->
-=======
-          <!-- ── Zonas y materiales ── -->
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
           <div class="section-card">
             <div class="section-header">
               <h3 class="section-title">Zonas y materiales</h3>
@@ -315,7 +303,6 @@
       </main>
     </div>
 
-<<<<<<< HEAD
     <!-- MODAL VER FOTO -->
     <Teleport to="body">
       <Transition name="modal">
@@ -333,8 +320,6 @@
       </Transition>
     </Teleport>
 
-=======
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
     <!-- MODAL CONFIRMAR ELIMINAR -->
     <Teleport to="body">
       <Transition name="modal">
@@ -365,15 +350,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MaterialAutocomplete from './MaterialAutocomplete.vue'
 
-const { toast } = useToast()
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
-<<<<<<< HEAD
 interface MatForm {
   idMaterial?: number
   nombreProducto: string
@@ -383,19 +364,11 @@ interface MatForm {
   _fotoPreview?: string | null
   _nuevo?: boolean
 }
-=======
-// Tipos locales 
-interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number; _nuevo?: boolean }
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _nuevo?: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _nuevo?: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 interface Ambulancia { idAmbulancia: number; nombre?: string; matricula?: string }
 
-<<<<<<< HEAD
-=======
-// estado
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 const ambulancias = ref<Ambulancia[]>([])
 const selected = ref<Ambulancia | null>(null)
 const creando = ref(false)
@@ -409,10 +382,6 @@ const fotoViewer = ref<string | null>(null)
 
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 
-<<<<<<< HEAD
-=======
-//  Computed
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 const filteredAmbs = computed(() => {
   const q = search.value.toLowerCase()
   return ambulancias.value.filter(a =>
@@ -481,10 +450,6 @@ const cargarAmbulancias = async () => {
   finally { loadingAmbs.value = false }
 }
 
-<<<<<<< HEAD
-=======
-// Seleccionar ambulancia y cargar su estructura 
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 const selectAmbulancia = async (amb: Ambulancia) => {
   selected.value = amb
   creando.value = false
@@ -522,10 +487,6 @@ const nuevaAmbulancia = () => {
 
 const cancelarEditor = () => { creando.value = false; selected.value = null }
 
-<<<<<<< HEAD
-=======
-//  Helpers de árbol
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 const contarMateriales = (zona: ZonaForm) =>
   zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
@@ -540,17 +501,8 @@ const addMaterial = (zona: ZonaForm | null, cajon: CajonForm | null) => {
 const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 
 const guardarAmbulancia = async () => {
-<<<<<<< HEAD
   if (!form.value.nombre?.trim() || !form.value.matricula?.trim()) return
 
-=======
-  if (!form.value.nombre?.trim()) {
-    toast.warning('Campo obligatorio', 'El nombre es obligatorio'); return
-  }
-  if (!form.value.matricula?.trim()) {
-    toast.warning('Campo obligatorio', 'La matrícula es obligatoria'); return
-  }
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
   saving.value = true
   try {
     let ambId: number
@@ -558,14 +510,7 @@ const guardarAmbulancia = async () => {
       const nueva = await apiFetch('/api/Ambulancia', 'POST', { nombre: form.value.nombre, matricula: form.value.matricula })
       ambId = nueva.idAmbulancia
     } else {
-<<<<<<< HEAD
       await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', { nombre: form.value.nombre, matricula: form.value.matricula })
-=======
-      // Actualizar ambulancia
-      await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', {
-        nombre: form.value.nombre, matricula: form.value.matricula
-      })
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
       ambId = selected.value!.idAmbulancia
     }
 
@@ -622,19 +567,8 @@ const guardarAmbulancia = async () => {
     await cargarAmbulancias()
     if (creando.value) creando.value = false
 
-<<<<<<< HEAD
   } catch (e) {
     console.error('Error al guardar:', e)
-=======
-    if (creando.value) {
-      creando.value = false
-      toast.success('Ambulancia creada', 'La ambulancia se ha registrado correctamente')
-    } else {
-      toast.success('Cambios guardados', 'Los datos de la ambulancia se han actualizado')
-    }
-  } catch (e: any) {
-    toast.error('Error al guardar', e.message)
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
   } finally {
     saving.value = false
   }
@@ -650,13 +584,8 @@ const eliminarAmbulancia = async () => {
     showDeleteModal.value = false
     selected.value = null
     await cargarAmbulancias()
-<<<<<<< HEAD
   } catch (e) {
     console.error('Error al eliminar:', e)
-=======
-  } catch (e: any) {
-    toast.error('Error al eliminar', e.message)
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
   } finally {
     deleting.value = false
   }
@@ -690,10 +619,6 @@ onMounted(() => { cargarAmbulancias(); cargarTodosMateriales() })
   overflow: hidden;
 }
 
-<<<<<<< HEAD
-=======
-// Panel izquierdo 
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 .panel-left {
   width: 280px;
   flex-shrink: 0;
@@ -898,10 +823,6 @@ onMounted(() => { cargarAmbulancias(); cargarTodosMateriales() })
   color: $text-gray;
 }
 
-<<<<<<< HEAD
-=======
-// Panel derecho
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 .panel-right {
   flex: 1;
   overflow-y: auto;
@@ -1519,11 +1440,7 @@ onMounted(() => { cargarAmbulancias(); cargarTodosMateriales() })
   background: $bg-page;
 }
 
-<<<<<<< HEAD
 // MODALES
-=======
-// Modal
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 .modal-overlay {
   position: fixed;
   inset: 0;

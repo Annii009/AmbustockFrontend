@@ -91,12 +91,8 @@
                                         :all-materials="allMaterialNames" />
                                 </div>
                                 <div class="mat-row__qty">
-<<<<<<< HEAD
                                     <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input"
                                         @click.stop />
-=======
-                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" />
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
                                 </div>
 
                                 <!-- FOTO MATERIAL (móvil) -->
@@ -256,7 +252,6 @@
             </button>
         </div>
 
-<<<<<<< HEAD
         <!-- Visor foto -->
         <Teleport to="body">
             <Transition name="modal">
@@ -266,8 +261,6 @@
             </Transition>
         </Teleport>
 
-=======
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
         <!-- Modal eliminar -->
         <Teleport to="body">
             <Transition name="modal">
@@ -299,13 +292,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useToast } from '@core/composables/useToast'
 import { getAuthToken } from '@core/services/api'
 import MobileAutocomplete from './MobileAutocomplete.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { toast } = useToast()
 
 const idAmbulancia = computed(() => route.params.id ? Number(route.params.id) : null)
 const esNueva = computed(() => !idAmbulancia.value)
@@ -347,7 +338,6 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
   return res.json()
 }
 
-<<<<<<< HEAD
 const subirFotoMaterial = async (idMaterial: number, file: File): Promise<string> => {
   const formData = new FormData()
   formData.append('foto', file)
@@ -360,16 +350,6 @@ const subirFotoMaterial = async (idMaterial: number, file: File): Promise<string
   const data = await res.json()
   return data.fotoUrl
 }
-=======
-// Cargar datos
-const cargarDetalle = async () => {
-    if (!idAmbulancia.value) return
-    loadingDetail.value = true
-    try {
-        const amb = await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`)
-        form.value.nombre = amb.nombre || ''
-        form.value.matricula = amb.matricula || ''
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 
 const seleccionarFoto = (event: Event, mat: MatForm) => {
   const input = event.target as HTMLInputElement
@@ -445,7 +425,6 @@ const addMaterial = (zona: ZonaForm | null, cajon: CajonForm | null) =>
 const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 const startEditZonaName = (zi: number) => { form.value.zonas[zi]._editingName = true }
 
-<<<<<<< HEAD
 const guardar = async () => {
   if (!form.value.nombre?.trim() || !form.value.matricula?.trim()) return
 
@@ -458,19 +437,6 @@ const guardar = async () => {
     } else {
       await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'PUT', { nombre: form.value.nombre, matricula: form.value.matricula })
       ambId = idAmbulancia.value!
-=======
-const startEditZonaName = async (zi: number) => {
-    form.value.zonas[zi]._editingName = true
-}
-
-// ── Guardar ───────────────────────────────────────────────────
-const guardar = async () => {
-    if (!form.value.nombre?.trim()) {
-        toast.warning('Campo obligatorio', 'El nombre es obligatorio'); return
-    }
-    if (!form.value.matricula?.trim()) {
-        toast.warning('Campo obligatorio', 'La matrícula es obligatoria'); return
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
     }
 
     for (const zona of form.value.zonas) {
@@ -520,17 +486,7 @@ const guardar = async () => {
             if (mat._fotoPreview) { URL.revokeObjectURL(mat._fotoPreview); mat._fotoPreview = null }
           }
         }
-<<<<<<< HEAD
       }
-=======
-
-        toast.success(esNueva.value ? 'Ambulancia creada' : 'Cambios guardados', 'Los datos se guardaron correctamente')
-        router.push('/principal/ambulancias')
-    } catch (e: any) {
-        toast.error('Error al guardar', e.message)
-    } finally {
-        saving.value = false
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
     }
 
     router.push('/principal/ambulancias')
@@ -542,7 +498,6 @@ const guardar = async () => {
   }
 }
 
-<<<<<<< HEAD
 const eliminar = async () => {
   deleting.value = true
   try {
@@ -553,19 +508,6 @@ const eliminar = async () => {
   } finally {
     deleting.value = false
   }
-=======
-// Eliminar 
-const eliminar = async () => {
-    deleting.value = true
-    try {
-        await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
-        router.push('/principal/ambulancias')
-    } catch (e: any) {
-        toast.error('Error al eliminar', e.message)
-    } finally {
-        deleting.value = false
-    }
->>>>>>> 9a575a61014939800250cb40094ba616620563fd
 }
 
 const goBack = () => router.push('/principal/ambulancias')
