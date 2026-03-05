@@ -18,7 +18,6 @@
             <div v-else style="width:36px" />
         </div>
 
-        <!-- Loading detalle -->
         <div v-if="loadingDetail" class="loading">
             <div class="spinner" />
         </div>
@@ -53,8 +52,6 @@
                 </div>
 
                 <div v-for="(zona, zi) in form.zonas" :key="zi" class="zona-card">
-
-                    <!-- Header zona -->
                     <div class="zona-card__header" @click="zona._open = !zona._open">
                         <div class="zona-card__header-left">
                             <svg class="zona-chevron" :class="{ 'zona-chevron--open': zona._open }" viewBox="0 0 24 24"
@@ -79,7 +76,6 @@
                         </div>
                     </div>
 
-                    <!-- Body zona expandido -->
                     <div v-if="zona._open" class="zona-card__body">
 
                         <!-- Materiales directos -->
@@ -95,8 +91,48 @@
                                         :all-materials="allMaterialNames" />
                                 </div>
                                 <div class="mat-row__qty">
-                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input" @click.stop />
+                                    <input v-model.number="mat.cantidad" type="number" min="0" class="qty-input"
+                                        @click.stop />
                                 </div>
+
+                                <!-- FOTO MATERIAL (móvil) -->
+                                <div class="mat-foto-mobile">
+                                    <template v-if="mat.fotoUrl && !mat._fotoPreview">
+                                        <img :src="mat.fotoUrl" class="mat-foto-mobile__thumb"
+                                            @click="fotoViewer = mat.fotoUrl" />
+                                        <button class="mat-foto-mobile__remove" @click="quitarFoto(mat)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2.5">
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                            </svg>
+                                        </button>
+                                    </template>
+                                    <template v-else-if="mat._fotoPreview">
+                                        <img :src="mat._fotoPreview"
+                                            class="mat-foto-mobile__thumb mat-foto-mobile__thumb--new" />
+                                        <button class="mat-foto-mobile__remove" @click="quitarFoto(mat)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2.5">
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                            </svg>
+                                        </button>
+                                    </template>
+                                    <template v-else>
+                                        <label class="mat-foto-mobile__btn">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                                <polyline points="21 15 16 10 5 21" />
+                                            </svg>
+                                            <input type="file" accept="image/jpeg,image/png,image/webp"
+                                                style="display:none" :disabled="!mat.idMaterial"
+                                                @change="seleccionarFoto($event, mat)" />
+                                        </label>
+                                    </template>
+                                </div>
+
                                 <button class="btn-icon-xs" @click="removeMaterial(zona.materiales, mi)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <line x1="18" y1="6" x2="6" y2="18" />
@@ -149,6 +185,46 @@
                                             <input v-model.number="mat.cantidad" type="number" min="0"
                                                 class="qty-input" />
                                         </div>
+
+                                        <!-- FOTO MATERIAL cajón (móvil) -->
+                                        <div class="mat-foto-mobile">
+                                            <template v-if="mat.fotoUrl && !mat._fotoPreview">
+                                                <img :src="mat.fotoUrl" class="mat-foto-mobile__thumb"
+                                                    @click="fotoViewer = mat.fotoUrl" />
+                                                <button class="mat-foto-mobile__remove" @click="quitarFoto(mat)">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2.5">
+                                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                            <template v-else-if="mat._fotoPreview">
+                                                <img :src="mat._fotoPreview"
+                                                    class="mat-foto-mobile__thumb mat-foto-mobile__thumb--new" />
+                                                <button class="mat-foto-mobile__remove" @click="quitarFoto(mat)">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2.5">
+                                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                            <template v-else>
+                                                <label class="mat-foto-mobile__btn">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2">
+                                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                                        <polyline points="21 15 16 10 5 21" />
+                                                    </svg>
+                                                    <input type="file" accept="image/jpeg,image/png,image/webp"
+                                                        style="display:none" :disabled="!mat.idMaterial"
+                                                        @change="seleccionarFoto($event, mat)" />
+                                                </label>
+                                            </template>
+                                        </div>
+
                                         <button class="btn-icon-xs" @click="removeMaterial(cajon.materiales, mi)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -166,9 +242,7 @@
                 </div>
             </div>
 
-            <!-- Spacer para el botón fijo -->
             <div style="height: 100px" />
-
         </template>
 
         <!-- Botón guardar fijo -->
@@ -178,7 +252,16 @@
             </button>
         </div>
 
-        <!--  Modal eliminar -->
+        <!-- Visor foto -->
+        <Teleport to="body">
+            <Transition name="modal">
+                <div v-if="fotoViewer" class="modal-overlay foto-overlay" @click="fotoViewer = null">
+                    <img :src="fotoViewer" class="foto-overlay__img" @click.stop />
+                </div>
+            </Transition>
+        </Teleport>
+
+        <!-- Modal eliminar -->
         <Teleport to="body">
             <Transition name="modal">
                 <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -207,7 +290,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuthToken } from '@core/services/api'
 import MobileAutocomplete from './MobileAutocomplete.vue'
@@ -218,167 +301,218 @@ const route = useRoute()
 const idAmbulancia = computed(() => route.params.id ? Number(route.params.id) : null)
 const esNueva = computed(() => !idAmbulancia.value)
 
-// Tipos
-interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number }
+interface MatForm {
+  idMaterial?: number
+  nombreProducto: string
+  cantidad: number
+  fotoUrl?: string | null
+  _fotoFile?: File | null
+  _fotoPreview?: string | null
+}
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _editingName: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _editingName: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 
-// Estado
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 const loadingDetail = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
 const showDeleteModal = ref(false)
 const allMaterialNames = ref<string[]>([])
+const fotoViewer = ref<string | null>(null)
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
 const headers = () => ({
-    'Authorization': `Bearer ${getAuthToken()}`,
-    'Content-Type': 'application/json'
+  'Authorization': `Bearer ${getAuthToken()}`,
+  'Content-Type': 'application/json'
 })
 
 const apiFetch = async (path: string, method = 'GET', body?: any) => {
-    const res = await fetch(`${API_URL}${path}`, {
-        method, headers: headers(),
-        body: body ? JSON.stringify(body) : undefined
-    })
-    if (!res.ok) throw new Error(`${method} ${path} → ${res.status}`)
-    if (res.status === 204) return null
-    return res.json()
+  const res = await fetch(`${API_URL}${path}`, {
+    method, headers: headers(),
+    body: body ? JSON.stringify(body) : undefined
+  })
+  if (!res.ok) throw new Error(`${method} ${path} → ${res.status}`)
+  if (res.status === 204) return null
+  return res.json()
 }
 
-//Cargar datos
-const cargarDetalle = async () => {
-    if (!idAmbulancia.value) return
-    loadingDetail.value = true
-    try {
-        const amb = await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`)
-        form.value.nombre = amb.nombre || ''
-        form.value.matricula = amb.matricula || ''
+const subirFotoMaterial = async (idMaterial: number, file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('foto', file)
+  const res = await fetch(`${API_URL}/api/Material/${idMaterial}/foto`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+    body: formData
+  })
+  if (!res.ok) throw new Error(`Error subiendo foto: ${res.status}`)
+  const data = await res.json()
+  return data.fotoUrl
+}
 
-        const zonas: any[] = await apiFetch(`/api/Zona/ambulancia/${idAmbulancia.value}`)
-        form.value.zonas = await Promise.all(zonas.map(async z => {
-            const mats: any[] = await apiFetch(`/api/Material/zona/${z.idZona}`)
-            const matsSinCajon = mats.filter(m => !m.idCajon).map(m => ({
-                idMaterial: m.idMaterial, nombreProducto: m.nombreProducto, cantidad: m.cantidad
-            }))
-            const cajones: any[] = await apiFetch(`/api/Cajon/zona/${z.idZona}`)
-            const cajonesForm: CajonForm[] = await Promise.all(cajones.map(async c => {
-                const cMats: any[] = await apiFetch(`/api/Material/cajon/${c.idCajon}`)
-                return {
-                    idCajon: c.idCajon, nombreCajon: c.nombreCajon, _open: false, _editingName: false,
-                    materiales: cMats.map(m => ({ idMaterial: m.idMaterial, nombreProducto: m.nombreProducto, cantidad: m.cantidad }))
-                }
-            }))
-            return { idZona: z.idZona, nombreZona: z.nombreZona, materiales: matsSinCajon, cajones: cajonesForm, _open: false, _editingName: false }
-        }))
-    } catch (e) { console.error(e) }
-    finally { loadingDetail.value = false }
+const seleccionarFoto = (event: Event, mat: MatForm) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  mat._fotoFile = file
+  mat._fotoPreview = URL.createObjectURL(file)
+  input.value = ''
+}
+
+const quitarFoto = (mat: MatForm) => {
+  if (mat._fotoPreview) {
+    URL.revokeObjectURL(mat._fotoPreview)
+    mat._fotoPreview = null
+    mat._fotoFile = null
+  } else if (mat.fotoUrl && mat.idMaterial) {
+    fetch(`${API_URL}/api/Material/${mat.idMaterial}/foto`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+    })
+    mat.fotoUrl = null
+  }
+}
+
+const cargarDetalle = async () => {
+  if (!idAmbulancia.value) return
+  loadingDetail.value = true
+  try {
+    const amb = await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`)
+    form.value.nombre = amb.nombre || ''
+    form.value.matricula = amb.matricula || ''
+
+    const zonas: any[] = await apiFetch(`/api/Zona/ambulancia/${idAmbulancia.value}`)
+    form.value.zonas = await Promise.all(zonas.map(async z => {
+      const mats: any[] = await apiFetch(`/api/Material/zona/${z.idZona}`)
+      const matsSinCajon = mats.filter(m => !m.idCajon).map(m => ({
+        idMaterial: m.idMaterial, nombreProducto: m.nombreProducto,
+        cantidad: m.cantidad, fotoUrl: m.fotoUrl || null
+      }))
+      const cajones: any[] = await apiFetch(`/api/Cajon/zona/${z.idZona}`)
+      const cajonesForm: CajonForm[] = await Promise.all(cajones.map(async c => {
+        const cMats: any[] = await apiFetch(`/api/Material/cajon/${c.idCajon}`)
+        return {
+          idCajon: c.idCajon, nombreCajon: c.nombreCajon, _open: false, _editingName: false,
+          materiales: cMats.map(m => ({
+            idMaterial: m.idMaterial, nombreProducto: m.nombreProducto,
+            cantidad: m.cantidad, fotoUrl: m.fotoUrl || null
+          }))
+        }
+      }))
+      return { idZona: z.idZona, nombreZona: z.nombreZona, materiales: matsSinCajon, cajones: cajonesForm, _open: false, _editingName: false }
+    }))
+  } catch (e) { console.error(e) }
+  finally { loadingDetail.value = false }
 }
 
 const cargarTodosMateriales = async () => {
-    try {
-        const mats: any[] = await apiFetch('/api/Material')
-        allMaterialNames.value = [...new Set(mats.map(m => m.nombreProducto as string).filter(Boolean).map(n => n.trim()))].sort((a, b) => a.localeCompare(b))
-    } catch { }
+  try {
+    const mats: any[] = await apiFetch('/api/Material')
+    allMaterialNames.value = [...new Set(mats.map(m => m.nombreProducto as string).filter(Boolean).map(n => n.trim()))].sort((a, b) => a.localeCompare(b))
+  } catch (e) { console.error(e) }
 }
 
-// Helpers árbol
 const contarMateriales = (zona: ZonaForm) =>
-    zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
+  zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
 const addZona = () => form.value.zonas.push({ nombreZona: '', materiales: [], cajones: [], _open: true, _editingName: true })
 const removeZona = (zi: number) => form.value.zonas.splice(zi, 1)
 const addCajon = (zona: ZonaForm) => zona.cajones.push({ nombreCajon: '', materiales: [], _open: true, _editingName: true })
 const removeCajon = (zona: ZonaForm, ci: number) => zona.cajones.splice(ci, 1)
 const addMaterial = (zona: ZonaForm | null, cajon: CajonForm | null) =>
-    (cajon ? cajon.materiales : zona!.materiales).push({ nombreProducto: '', cantidad: 1 })
+  (cajon ? cajon.materiales : zona!.materiales).push({ nombreProducto: '', cantidad: 1 })
 const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
+const startEditZonaName = (zi: number) => { form.value.zonas[zi]._editingName = true }
 
-const startEditZonaName = async (zi: number) => {
-    form.value.zonas[zi]._editingName = true
-}
-
-// Guardar 
 const guardar = async () => {
-    if (!form.value.nombre || !form.value.matricula) {
-        alert('Nombre y matrícula son obligatorios'); return
+  if (!form.value.nombre?.trim() || !form.value.matricula?.trim()) return
+
+  saving.value = true
+  try {
+    let ambId: number
+    if (esNueva.value) {
+      const nueva = await apiFetch('/api/Ambulancia', 'POST', { nombre: form.value.nombre, matricula: form.value.matricula })
+      ambId = nueva.idAmbulancia
+    } else {
+      await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'PUT', { nombre: form.value.nombre, matricula: form.value.matricula })
+      ambId = idAmbulancia.value!
     }
-    saving.value = true
-    try {
-        let ambId: number
-        if (esNueva.value) {
-            const nueva = await apiFetch('/api/Ambulancia', 'POST', { nombre: form.value.nombre, matricula: form.value.matricula })
-            ambId = nueva.idAmbulancia
+
+    for (const zona of form.value.zonas) {
+      let zonaId: number
+      if (!zona.idZona) {
+        const nz = await apiFetch('/api/Zona', 'POST', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
+        zonaId = nz.idZona; zona.idZona = zonaId
+      } else {
+        await apiFetch(`/api/Zona/${zona.idZona}`, 'PUT', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
+        zonaId = zona.idZona
+      }
+
+      for (const mat of zona.materiales) {
+        if (!mat.idMaterial) {
+          const nm = await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null })
+          mat.idMaterial = nm.idMaterial
         } else {
-            await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'PUT', { nombre: form.value.nombre, matricula: form.value.matricula })
-            ambId = idAmbulancia.value!
+          await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null })
+        }
+        if (mat._fotoFile && mat.idMaterial) {
+          mat.fotoUrl = await subirFotoMaterial(mat.idMaterial, mat._fotoFile)
+          mat._fotoFile = null
+          if (mat._fotoPreview) { URL.revokeObjectURL(mat._fotoPreview); mat._fotoPreview = null }
+        }
+      }
+
+      for (const cajon of zona.cajones) {
+        let cajonId: number
+        if (!cajon.idCajon) {
+          const nc = await apiFetch('/api/Cajon', 'POST', { nombreCajon: cajon.nombreCajon, idZona: zonaId })
+          cajonId = nc.idCajon; cajon.idCajon = cajonId
+        } else {
+          await apiFetch(`/api/Cajon/${cajon.idCajon}`, 'PUT', { nombreCajon: cajon.nombreCajon })
+          cajonId = cajon.idCajon
         }
 
-        for (const zona of form.value.zonas) {
-            let zonaId: number
-            if (!zona.idZona) {
-                const nz = await apiFetch('/api/Zona', 'POST', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
-                zonaId = nz.idZona; zona.idZona = zonaId
-            } else {
-                await apiFetch(`/api/Zona/${zona.idZona}`, 'PUT', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
-                zonaId = zona.idZona
-            }
-            for (const mat of zona.materiales) {
-                if (!mat.idMaterial) {
-                    await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null })
-                } else {
-                    await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad })
-                }
-            }
-            for (const cajon of zona.cajones) {
-                let cajonId: number
-                if (!cajon.idCajon) {
-                    const nc = await apiFetch('/api/Cajon', 'POST', { nombreCajon: cajon.nombreCajon, idZona: zonaId })
-                    cajonId = nc.idCajon; cajon.idCajon = cajonId
-                } else {
-                    await apiFetch(`/api/Cajon/${cajon.idCajon}`, 'PUT', { nombreCajon: cajon.nombreCajon })
-                    cajonId = cajon.idCajon
-                }
-                for (const mat of cajon.materiales) {
-                    if (!mat.idMaterial) {
-                        await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: cajonId })
-                    } else {
-                        await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad })
-                    }
-                }
-            }
+        for (const mat of cajon.materiales) {
+          if (!mat.idMaterial) {
+            const nm = await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: cajonId })
+            mat.idMaterial = nm.idMaterial
+          } else {
+            await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: cajonId })
+          }
+          if (mat._fotoFile && mat.idMaterial) {
+            mat.fotoUrl = await subirFotoMaterial(mat.idMaterial, mat._fotoFile)
+            mat._fotoFile = null
+            if (mat._fotoPreview) { URL.revokeObjectURL(mat._fotoPreview); mat._fotoPreview = null }
+          }
         }
-
-        router.push('/principal/ambulancias')
-    } catch (e: any) {
-        alert('Error al guardar: ' + e.message)
-    } finally {
-        saving.value = false
+      }
     }
+
+    router.push('/principal/ambulancias')
+
+  } catch (e) {
+    console.error('Error al guardar:', e)
+  } finally {
+    saving.value = false
+  }
 }
 
-//Eliminar 
 const eliminar = async () => {
-    deleting.value = true
-    try {
-        await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
-        router.push('/principal/ambulancias')
-    } catch (e: any) {
-        alert('Error al eliminar: ' + e.message)
-    } finally {
-        deleting.value = false
-    }
+  deleting.value = true
+  try {
+    await apiFetch(`/api/Ambulancia/${idAmbulancia.value}`, 'DELETE')
+    router.push('/principal/ambulancias')
+  } catch (e) {
+    console.error('Error al eliminar:', e)
+  } finally {
+    deleting.value = false
+  }
 }
 
 const goBack = () => router.push('/principal/ambulancias')
 
-onMounted(() => {
-    cargarDetalle()
-    cargarTodosMateriales()
-})
+onMounted(() => { cargarDetalle(); cargarTodosMateriales() })
 </script>
 
 <style scoped lang="scss">
@@ -393,7 +527,6 @@ onMounted(() => {
     padding-bottom: 100px;
 }
 
-// Header
 .header {
     display: flex;
     align-items: center;
@@ -449,7 +582,6 @@ onMounted(() => {
     color: $text-dark;
 }
 
-// Loading
 .loading {
     display: flex;
     justify-content: center;
@@ -471,7 +603,6 @@ onMounted(() => {
     animation: spin 0.8s linear infinite;
 }
 
-// Sections
 .section {
     padding: 14px 16px 0;
 }
@@ -493,7 +624,6 @@ onMounted(() => {
     margin-bottom: 8px;
 }
 
-// Card básicos
 .card {
     background: $white;
     border-radius: 14px;
@@ -536,7 +666,6 @@ onMounted(() => {
     margin: 0 16px;
 }
 
-// Botones pequeños
 .btn-add-small {
     padding: 5px 12px;
     border-radius: 8px;
@@ -564,7 +693,6 @@ onMounted(() => {
     font-weight: $font-semibold;
     color: $text-gray;
     cursor: pointer;
-    transition: all 0.12s;
 
     &:active {
         color: $primary-red;
@@ -610,7 +738,6 @@ onMounted(() => {
     font-style: italic;
 }
 
-// Zona card
 .zona-card {
     background: $white;
     border-radius: 14px;
@@ -719,7 +846,6 @@ onMounted(() => {
     background: $bg-page;
 }
 
-// Subsection
 .subsection {
     margin-bottom: 12px;
 
@@ -744,7 +870,6 @@ onMounted(() => {
     color: $text-gray;
 }
 
-// Materiales
 .mat-empty {
     font-family: $font-primary;
     font-size: 12px;
@@ -789,7 +914,84 @@ onMounted(() => {
     }
 }
 
-// Cajones
+//FOTO MÓVIL
+.mat-foto-mobile {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.mat-foto-mobile__btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1.5px dashed $border-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $text-gray;
+    background: $bg-page;
+
+    svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    &:active {
+        border-color: $primary-red;
+        color: $primary-red;
+    }
+}
+
+.mat-foto-mobile__thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1.5px solid $border-color;
+
+    &--new {
+        border-color: $primary-red;
+    }
+}
+
+.mat-foto-mobile__remove {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(#e74c3c, 0.12);
+    color: #e74c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+
+    svg {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+// VISOR FOTO MÓVIL
+.foto-overlay {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.foto-overlay__img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 12px;
+    object-fit: contain;
+}
+
+// CAJONES
 .cajon-block {
     background: $white;
     border-radius: 10px;
@@ -835,7 +1037,7 @@ onMounted(() => {
     background: $bg-page;
 }
 
-// Footer botón
+// FOOTER
 .footer-btn {
     position: fixed;
     bottom: 0;
@@ -872,7 +1074,7 @@ onMounted(() => {
     }
 }
 
-// Modal
+//MODAL
 .modal-overlay {
     position: fixed;
     inset: 0;

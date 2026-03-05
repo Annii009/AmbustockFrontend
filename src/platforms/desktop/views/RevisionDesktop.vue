@@ -379,7 +379,7 @@ onMounted(() => {
               <div class="zona-content">
                 <div class="zona-name">{{ zona.nombreZona }}</div>
                 <div class="zona-progress-text">
-                  {{ progresoZona(zona).revisados }}/{{ progresoZona(zona).total }} cajones revisados
+                  {{ progresoZona(zona).revisados }}/{{ progresoZona(zona).total }} materiales revisados
                 </div>
                 <div class="zona-mini-bar">
                   <div class="zona-mini-fill" :style="{ width: progresoZona(zona).porcentaje + '%' }" />

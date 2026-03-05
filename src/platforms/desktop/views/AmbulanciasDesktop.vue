@@ -43,12 +43,11 @@
             </div>
             <span class="amb-item__id">#{{ String(amb.idAmbulancia).padStart(3, '0') }}</span>
           </div>
-
           <div v-if="filteredAmbs.length === 0" class="amb-empty">Sin resultados</div>
         </div>
       </aside>
 
-      <!--PANEL DERECHO: editor-->
+      <!-- PANEL DERECHO: editor -->
       <main class="panel-right">
 
         <!-- Estado vacío -->
@@ -86,7 +85,7 @@
             </div>
           </div>
 
-          <!-- Datos básicos-->
+          <!-- Datos básicos -->
           <div class="section-card">
             <h3 class="section-title">Datos básicos</h3>
             <div class="form-row">
@@ -101,7 +100,7 @@
             </div>
           </div>
 
-          <!-- Zonas y materiales-->
+          <!-- Zonas y materiales -->
           <div class="section-card">
             <div class="section-header">
               <h3 class="section-title">Zonas y materiales</h3>
@@ -132,9 +131,7 @@
                     @click.stop />
                 </div>
                 <div class="zona-block__right">
-                  <span class="zona-count">
-                    {{ contarMateriales(zona) }} mat.
-                  </span>
+                  <span class="zona-count">{{ contarMateriales(zona) }} mat.</span>
                   <button class="btn-icon-sm btn-icon-sm--delete" @click="removeZona(zi)" title="Eliminar zona">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="18" y1="6" x2="6" y2="18" />
@@ -147,7 +144,7 @@
               <!-- Contenido expandido -->
               <div v-if="zona._open" class="zona-block__body">
 
-                <!-- Materiales directos de zona (sin cajón) -->
+                <!-- Materiales directos de zona -->
                 <div class="materials-section">
                   <div class="materials-section__header">
                     <span class="materials-section__label">Materiales de zona</span>
@@ -162,6 +159,46 @@
                         <label>Cant.</label>
                         <input v-model.number="mat.cantidad" type="number" min="0" class="mat-input mat-input--qty" />
                       </div>
+
+                      <!-- FOTO DEL MATERIAL -->
+                      <div class="mat-foto">
+                        <!-- Si ya tiene foto guardada -->
+                        <template v-if="mat.fotoUrl && !mat._fotoPreview">
+                          <img :src="mat.fotoUrl" class="mat-foto__thumb" :alt="mat.nombreProducto"
+                            @click="verFoto(mat.fotoUrl)" title="Ver foto" />
+                          <button class="mat-foto__remove" @click="quitarFoto(mat)" title="Quitar foto">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </template>
+                        <!-- Preview de foto nueva (aún no guardada) -->
+                        <template v-else-if="mat._fotoPreview">
+                          <img :src="mat._fotoPreview" class="mat-foto__thumb mat-foto__thumb--new"
+                            :alt="mat.nombreProducto" />
+                          <button class="mat-foto__remove" @click="quitarFoto(mat)" title="Quitar foto">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </template>
+                        <!-- Sin foto: botón subir -->
+                        <template v-else>
+                          <label class="mat-foto__btn"
+                            :title="mat.idMaterial ? 'Subir foto' : 'Guarda primero el material'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect x="3" y="3" width="18" height="18" rx="2" />
+                              <circle cx="8.5" cy="8.5" r="1.5" />
+                              <polyline points="21 15 16 10 5 21" />
+                            </svg>
+                            <input type="file" accept="image/jpeg,image/png,image/webp" class="mat-foto__input"
+                              :disabled="!mat.idMaterial" @change="seleccionarFoto($event, mat)" />
+                          </label>
+                        </template>
+                      </div>
+
                       <button class="btn-icon-sm btn-icon-sm--delete" @click="removeMaterial(zona.materiales, mi)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <line x1="18" y1="6" x2="6" y2="18" />
@@ -209,6 +246,42 @@
                             <input v-model.number="mat.cantidad" type="number" min="0"
                               class="mat-input mat-input--qty" />
                           </div>
+
+                          <!-- FOTO DEL MATERIAL (cajón) -->
+                          <div class="mat-foto">
+                            <template v-if="mat.fotoUrl && !mat._fotoPreview">
+                              <img :src="mat.fotoUrl" class="mat-foto__thumb" :alt="mat.nombreProducto"
+                                @click="verFoto(mat.fotoUrl)" title="Ver foto" />
+                              <button class="mat-foto__remove" @click="quitarFoto(mat)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                            </template>
+                            <template v-else-if="mat._fotoPreview">
+                              <img :src="mat._fotoPreview" class="mat-foto__thumb mat-foto__thumb--new"
+                                :alt="mat.nombreProducto" />
+                              <button class="mat-foto__remove" @click="quitarFoto(mat)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                            </template>
+                            <template v-else>
+                              <label class="mat-foto__btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                                  <circle cx="8.5" cy="8.5" r="1.5" />
+                                  <polyline points="21 15 16 10 5 21" />
+                                </svg>
+                                <input type="file" accept="image/jpeg,image/png,image/webp" class="mat-foto__input"
+                                  :disabled="!mat.idMaterial" @change="seleccionarFoto($event, mat)" />
+                              </label>
+                            </template>
+                          </div>
+
                           <button class="btn-icon-sm btn-icon-sm--delete" @click="removeMaterial(cajon.materiales, mi)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <line x1="18" y1="6" x2="6" y2="18" />
@@ -230,7 +303,24 @@
       </main>
     </div>
 
-    <!-- MODAL CONFIRMAR ELIMINAR-->
+    <!-- MODAL VER FOTO -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="fotoViewer" class="modal-overlay" @click="fotoViewer = null">
+          <div class="foto-viewer" @click.stop>
+            <button class="foto-viewer__close" @click="fotoViewer = null">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <img :src="fotoViewer" class="foto-viewer__img" />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- MODAL CONFIRMAR ELIMINAR -->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
@@ -265,28 +355,33 @@ import MaterialAutocomplete from './MaterialAutocomplete.vue'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002'
 
-// Tipos locales
-interface MatForm { idMaterial?: number; nombreProducto: string; cantidad: number; _nuevo?: boolean }
+interface MatForm {
+  idMaterial?: number
+  nombreProducto: string
+  cantidad: number
+  fotoUrl?: string | null
+  _fotoFile?: File | null
+  _fotoPreview?: string | null
+  _nuevo?: boolean
+}
 interface CajonForm { idCajon?: number; nombreCajon: string; materiales: MatForm[]; _open: boolean; _nuevo?: boolean }
 interface ZonaForm { idZona?: number; nombreZona: string; materiales: MatForm[]; cajones: CajonForm[]; _open: boolean; _nuevo?: boolean }
 interface AmbForm { nombre: string; matricula: string; zonas: ZonaForm[] }
 interface Ambulancia { idAmbulancia: number; nombre?: string; matricula?: string }
 
-// Estado
 const ambulancias = ref<Ambulancia[]>([])
 const selected = ref<Ambulancia | null>(null)
 const creando = ref(false)
 const loadingAmbs = ref(true)
-const loadingDetail = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
 const showDeleteModal = ref(false)
 const search = ref('')
 const allMaterialNames = ref<string[]>([])
+const fotoViewer = ref<string | null>(null)
 
 const form = ref<AmbForm>({ nombre: '', matricula: '', zonas: [] })
 
-//Computed 
 const filteredAmbs = computed(() => {
   const q = search.value.toLowerCase()
   return ambulancias.value.filter(a =>
@@ -294,7 +389,6 @@ const filteredAmbs = computed(() => {
   )
 })
 
-// API helpers
 const headers = () => ({
   'Authorization': `Bearer ${getAuthToken()}`,
   'Content-Type': 'application/json'
@@ -310,7 +404,44 @@ const apiFetch = async (path: string, method = 'GET', body?: any) => {
   return res.json()
 }
 
-// Cargar lista
+const subirFotoMaterial = async (idMaterial: number, file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('foto', file)
+  const res = await fetch(`${API_URL}/api/Material/${idMaterial}/foto`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+    body: formData
+  })
+  if (!res.ok) throw new Error(`Error subiendo foto: ${res.status}`)
+  const data = await res.json()
+  return data.fotoUrl
+}
+
+const seleccionarFoto = (event: Event, mat: MatForm) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  mat._fotoFile = file
+  mat._fotoPreview = URL.createObjectURL(file)
+  input.value = ''
+}
+
+const quitarFoto = (mat: MatForm) => {
+  if (mat._fotoPreview) {
+    URL.revokeObjectURL(mat._fotoPreview)
+    mat._fotoPreview = null
+    mat._fotoFile = null
+  } else if (mat.fotoUrl && mat.idMaterial) {
+    fetch(`${API_URL}/api/Material/${mat.idMaterial}/foto`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+    })
+    mat.fotoUrl = null
+  }
+}
+
+const verFoto = (url: string) => { fotoViewer.value = url }
+
 const cargarAmbulancias = async () => {
   try {
     loadingAmbs.value = true
@@ -319,180 +450,130 @@ const cargarAmbulancias = async () => {
   finally { loadingAmbs.value = false }
 }
 
-// Seleccionar ambulancia y cargar su estructura
 const selectAmbulancia = async (amb: Ambulancia) => {
   selected.value = amb
   creando.value = false
-  loadingDetail.value = true
   form.value = { nombre: amb.nombre || '', matricula: amb.matricula || '', zonas: [] }
 
   try {
-    // Cargar zonas
     const zonas: any[] = await apiFetch(`/api/Zona/ambulancia/${amb.idAmbulancia}`)
-
     form.value.zonas = await Promise.all(zonas.map(async z => {
-      // Materiales directos de zona (sin cajón)
       const mats: any[] = await apiFetch(`/api/Material/zona/${z.idZona}`)
       const matsSinCajon = mats.filter(m => !m.idCajon).map(m => ({
-        idMaterial: m.idMaterial, nombreProducto: m.nombreProducto, cantidad: m.cantidad
+        idMaterial: m.idMaterial, nombreProducto: m.nombreProducto,
+        cantidad: m.cantidad, fotoUrl: m.fotoUrl || null
       }))
-
-      // Cajones de la zona
       const cajones: any[] = await apiFetch(`/api/Cajon/zona/${z.idZona}`)
       const cajonesForm: CajonForm[] = await Promise.all(cajones.map(async c => {
         const cMats: any[] = await apiFetch(`/api/Material/cajon/${c.idCajon}`)
         return {
-          idCajon: c.idCajon,
-          nombreCajon: c.nombreCajon,
-          _open: false,
-          materiales: cMats.map(m => ({ idMaterial: m.idMaterial, nombreProducto: m.nombreProducto, cantidad: m.cantidad }))
+          idCajon: c.idCajon, nombreCajon: c.nombreCajon, _open: false,
+          materiales: cMats.map(m => ({
+            idMaterial: m.idMaterial, nombreProducto: m.nombreProducto,
+            cantidad: m.cantidad, fotoUrl: m.fotoUrl || null
+          }))
         }
       }))
-
-      return {
-        idZona: z.idZona, nombreZona: z.nombreZona,
-        materiales: matsSinCajon, cajones: cajonesForm, _open: false
-      }
+      return { idZona: z.idZona, nombreZona: z.nombreZona, materiales: matsSinCajon, cajones: cajonesForm, _open: false }
     }))
   } catch (e) { console.error(e) }
-  finally { loadingDetail.value = false }
 }
 
-// Nueva ambulancia
 const nuevaAmbulancia = () => {
   selected.value = null
   creando.value = true
   form.value = { nombre: '', matricula: '', zonas: [] }
 }
 
-const cancelarEditor = () => {
-  creando.value = false
-  selected.value = null
-}
+const cancelarEditor = () => { creando.value = false; selected.value = null }
 
-//Helpers de árbol
 const contarMateriales = (zona: ZonaForm) =>
   zona.materiales.length + zona.cajones.reduce((acc, c) => acc + c.materiales.length, 0)
 
-const addZona = () => form.value.zonas.push(
-  { nombreZona: '', materiales: [], cajones: [], _open: true, _nuevo: true }
-)
+const addZona = () => form.value.zonas.push({ nombreZona: '', materiales: [], cajones: [], _open: true, _nuevo: true })
 const removeZona = (zi: number) => form.value.zonas.splice(zi, 1)
-
-const addCajon = (zona: ZonaForm) => zona.cajones.push(
-  { nombreCajon: '', materiales: [], _open: true, _nuevo: true }
-)
+const addCajon = (zona: ZonaForm) => zona.cajones.push({ nombreCajon: '', materiales: [], _open: true, _nuevo: true })
 const removeCajon = (zona: ZonaForm, ci: number) => zona.cajones.splice(ci, 1)
-
 const addMaterial = (zona: ZonaForm | null, cajon: CajonForm | null) => {
   const list = cajon ? cajon.materiales : zona!.materiales
   list.push({ nombreProducto: '', cantidad: 1, _nuevo: true })
 }
 const removeMaterial = (list: MatForm[], mi: number) => list.splice(mi, 1)
 
-// Guardar (crear o actualizar)
 const guardarAmbulancia = async () => {
-  if (!form.value.nombre?.trim()) {
-    toast.warning('Campo obligatorio', 'El nombre es obligatorio')
-    return
-  }
-  if (!form.value.matricula?.trim()) {
-    toast.warning('Campo obligatorio', 'La matrícula es obligatoria')
-    return
-  }
+  if (!form.value.nombre?.trim() || !form.value.matricula?.trim()) return
+
   saving.value = true
   try {
     let ambId: number
-
     if (creando.value) {
-      // Crear ambulancia
-      const nueva = await apiFetch('/api/Ambulancia', 'POST', {
-        nombre: form.value.nombre, matricula: form.value.matricula
-      })
+      const nueva = await apiFetch('/api/Ambulancia', 'POST', { nombre: form.value.nombre, matricula: form.value.matricula })
       ambId = nueva.idAmbulancia
     } else {
-      //Actualizar ambulancia
-      await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', {
-        nombre: form.value.nombre, matricula: form.value.matricula
-      })
+      await apiFetch(`/api/Ambulancia/${selected.value!.idAmbulancia}`, 'PUT', { nombre: form.value.nombre, matricula: form.value.matricula })
       ambId = selected.value!.idAmbulancia
     }
 
-    // Procesar zonas
     for (const zona of form.value.zonas) {
       let zonaId: number
-
       if (!zona.idZona) {
-        const nz = await apiFetch('/api/Zona', 'POST', {
-          nombreZona: zona.nombreZona, idAmbulancia: ambId
-        })
-        zonaId = nz.idZona
-        zona.idZona = zonaId
+        const nz = await apiFetch('/api/Zona', 'POST', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
+        zonaId = nz.idZona; zona.idZona = zonaId
       } else {
         await apiFetch(`/api/Zona/${zona.idZona}`, 'PUT', { nombreZona: zona.nombreZona, idAmbulancia: ambId })
         zonaId = zona.idZona
       }
 
-      // Materiales directos de zona
       for (const mat of zona.materiales) {
         if (!mat.idMaterial) {
-          await apiFetch('/api/Material', 'POST', {
-            nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null
-          })
+          const nm = await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null })
+          mat.idMaterial = nm.idMaterial
         } else {
-          await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', {
-            nombreProducto: mat.nombreProducto, cantidad: mat.cantidad
-          })
+          await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: null })
+        }
+        if (mat._fotoFile && mat.idMaterial) {
+          mat.fotoUrl = await subirFotoMaterial(mat.idMaterial, mat._fotoFile)
+          mat._fotoFile = null
+          if (mat._fotoPreview) { URL.revokeObjectURL(mat._fotoPreview); mat._fotoPreview = null }
         }
       }
 
-      // Cajones
       for (const cajon of zona.cajones) {
         let cajonId: number
-
         if (!cajon.idCajon) {
-          const nc = await apiFetch('/api/Cajon', 'POST', {
-            nombreCajon: cajon.nombreCajon, idZona: zonaId
-          })
-          cajonId = nc.idCajon
-          cajon.idCajon = cajonId
+          const nc = await apiFetch('/api/Cajon', 'POST', { nombreCajon: cajon.nombreCajon, idZona: zonaId })
+          cajonId = nc.idCajon; cajon.idCajon = cajonId
         } else {
           await apiFetch(`/api/Cajon/${cajon.idCajon}`, 'PUT', { nombreCajon: cajon.nombreCajon })
           cajonId = cajon.idCajon
         }
 
-        // Materiales del cajón
         for (const mat of cajon.materiales) {
           if (!mat.idMaterial) {
-            await apiFetch('/api/Material', 'POST', {
-              nombreProducto: mat.nombreProducto, cantidad: mat.cantidad,
-              idZona: zonaId, idCajon: cajonId
-            })
+            const nm = await apiFetch('/api/Material', 'POST', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: cajonId })
+            mat.idMaterial = nm.idMaterial
           } else {
-            await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', {
-              nombreProducto: mat.nombreProducto, cantidad: mat.cantidad
-            })
+            await apiFetch(`/api/Material/${mat.idMaterial}`, 'PUT', { nombreProducto: mat.nombreProducto, cantidad: mat.cantidad, idZona: zonaId, idCajon: cajonId })
+          }
+          if (mat._fotoFile && mat.idMaterial) {
+            mat.fotoUrl = await subirFotoMaterial(mat.idMaterial, mat._fotoFile)
+            mat._fotoFile = null
+            if (mat._fotoPreview) { URL.revokeObjectURL(mat._fotoPreview); mat._fotoPreview = null }
           }
         }
       }
     }
 
     await cargarAmbulancias()
+    if (creando.value) creando.value = false
 
-    if (creando.value) {
-      creando.value = false
-      alert('Ambulancia creada correctamente')
-    } else {
-      alert('Cambios guardados correctamente')
-    }
-  } catch (e: any) {
-    alert('Error al guardar: ' + e.message)
+  } catch (e) {
+    console.error('Error al guardar:', e)
   } finally {
     saving.value = false
   }
 }
 
-// Eliminar ambulancia
 const confirmarEliminar = () => { showDeleteModal.value = true }
 
 const eliminarAmbulancia = async () => {
@@ -503,28 +584,21 @@ const eliminarAmbulancia = async () => {
     showDeleteModal.value = false
     selected.value = null
     await cargarAmbulancias()
-  } catch (e: any) {
-    alert('Error al eliminar: ' + e.message)
+  } catch (e) {
+    console.error('Error al eliminar:', e)
   } finally {
     deleting.value = false
   }
 }
 
-// Cargar todos los nombres de materiales para autocomplete
 const cargarTodosMateriales = async () => {
   try {
     const mats: any[] = await apiFetch('/api/Material')
-    const nombres = mats.map(m => m.nombreProducto as string).filter(Boolean)
-    // Deduplicar e ignorar mayúsculas/minúsculas
-    allMaterialNames.value = [...new Set(nombres.map(n => n.trim()))]
-      .sort((a, b) => a.localeCompare(b))
-  } catch (e) { console.error('Error cargando materiales para autocomplete', e) }
+    allMaterialNames.value = [...new Set(mats.map(m => m.nombreProducto as string).filter(Boolean).map(n => n.trim()))].sort((a, b) => a.localeCompare(b))
+  } catch (e) { console.error(e) }
 }
 
-onMounted(() => {
-  cargarAmbulancias()
-  cargarTodosMateriales()
-})
+onMounted(() => { cargarAmbulancias(); cargarTodosMateriales() })
 </script>
 
 <style scoped lang="scss">
@@ -545,7 +619,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-// Panel izquierdo
 .panel-left {
   width: 280px;
   flex-shrink: 0;
@@ -750,7 +823,6 @@ onMounted(() => {
   color: $text-gray;
 }
 
-//Panel derecho
 .panel-right {
   flex: 1;
   overflow-y: auto;
@@ -787,7 +859,6 @@ onMounted(() => {
   }
 }
 
-// Editor header
 .editor-header {
   display: flex;
   align-items: flex-start;
@@ -889,7 +960,6 @@ onMounted(() => {
   }
 }
 
-// Secciones
 .section-card {
   background: $white;
   border: 1.5px solid $border-color;
@@ -992,7 +1062,6 @@ onMounted(() => {
   color: $text-gray;
 }
 
-// Zona block
 .zona-block {
   border: 1.5px solid $border-color;
   border-radius: 10px;
@@ -1112,7 +1181,6 @@ onMounted(() => {
   border-top: 1px solid $border-color;
 }
 
-// Materiales
 .materials-section {
   margin-bottom: 0.875rem;
 }
@@ -1223,7 +1291,125 @@ onMounted(() => {
   }
 }
 
-// Cajones
+//FOTO DEL MATERIAL
+.mat-foto {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mat-foto__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1.5px dashed $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: $text-gray;
+  background: $white;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    border-color: $primary-red;
+    color: $primary-red;
+    background: rgba($primary-red, 0.04);
+  }
+}
+
+.mat-foto__input {
+  display: none;
+}
+
+.mat-foto__thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1.5px solid $border-color;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &--new {
+    border-color: $primary-red;
+    box-shadow: 0 0 0 2px rgba($primary-red, 0.2);
+  }
+}
+
+.mat-foto__remove {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(#e74c3c, 0.12);
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s;
+  flex-shrink: 0;
+
+  svg {
+    width: 9px;
+    height: 9px;
+  }
+
+  &:hover {
+    background: rgba(#e74c3c, 0.25);
+  }
+}
+
+//VISOR DE FOTO
+.foto-viewer {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.foto-viewer__close {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: $white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: $text-dark;
+  }
+}
+
+.foto-viewer__img {
+  max-width: 80vw;
+  max-height: 80vh;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+
+//CAJONES
 .cajones-section {}
 
 .cajones-section__header {
@@ -1254,7 +1440,7 @@ onMounted(() => {
   background: $bg-page;
 }
 
-// ── Modal ─────────────────────────────────────────────────────
+// MODALES
 .modal-overlay {
   position: fixed;
   inset: 0;
