@@ -18,7 +18,7 @@
           <h3 class="action__title">NUEVA REVISIÓN</h3>
           <p class="action__text">Iniciar revisión completa de ambulancia</p>
         </button>
-        <button @click="go('/principal/reposicion')" class="action action--blue">
+        <button @click="go('/principal/material-gastado')" class="action action--blue">
           <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2">
@@ -31,7 +31,7 @@
           <h3 class="action__title">MATERIAL GASTADO</h3>
           <p class="action__text">Gestionar material gastado y pedidos</p>
         </button>
-        <button @click="go('/principal/historial')" class="action action--green">
+        <button @click="go('/principal/ver-revisiones')" class="action action--green">
           <div class="action__icon-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2">
