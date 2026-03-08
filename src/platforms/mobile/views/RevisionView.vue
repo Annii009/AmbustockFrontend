@@ -38,6 +38,9 @@ const isLoading = ref(true)
 const isReloading = ref(false)
 const error = ref<string | null>(null)
 
+// Modal salir
+const mostrarModalSalir = ref(false)
+
 // Paginación
 const ZONAS_POR_PAGINA = 10
 const paginaActual = ref(1)
@@ -54,7 +57,6 @@ const zonasPaginadas = computed(() => {
   return revisionData.value.zonas.slice(inicio, fin)
 })
 
-// Índice real de la zona en el array original
 const indexRealZona = (indexPagina: number): number => {
   return (paginaActual.value - 1) * ZONAS_POR_PAGINA + indexPagina
 }
@@ -66,7 +68,7 @@ const irAPagina = (pagina: number) => {
   }
 }
 
-// Modal
+// Modal zona
 const isModalOpen = ref(false)
 const zonaActual = ref<Zona | null>(null)
 const zonaActualIndex = ref<number | null>(null)
@@ -152,7 +154,6 @@ const cargarRevision = async (recarga = false) => {
       mergeEstadoGuardado(estadoGuardado)
     }
 
-    // Al recargar vuelve a la primera página
     if (recarga) paginaActual.value = 1
 
   } catch (err) {
@@ -269,10 +270,18 @@ const seleccionarZonaCompleta = () => {
   guardarEstado()
 }
 
+// Modal salir
 const goBack = () => {
-  if (confirm('¿Estás seguro de que quieres salir? El progreso se guardará automáticamente.')) {
-    router.push('/nombre-responsable')
-  }
+  mostrarModalSalir.value = true
+}
+
+const confirmarSalir = () => {
+  mostrarModalSalir.value = false
+  router.push('/nombre-responsable')
+}
+
+const cancelarSalir = () => {
+  mostrarModalSalir.value = false
 }
 
 const finalizarRevision = async () => {
@@ -325,7 +334,6 @@ onMounted(() => {
           </svg>
         </button>
 
-        <!-- Botón recargar -->
         <button
           class="reload-button"
           @click="cargarRevision(true)"
@@ -361,20 +369,17 @@ onMounted(() => {
             <span>{{ progresoTotal.porcentaje }}%</span>
           </div>
           <div class="progress-bar-container">
-            <div
-              class="progress-bar-fill"
-              :style="{ width: progresoTotal.porcentaje + '%' }"
-            ></div>
+            <div class="progress-bar-fill" :style="{ width: progresoTotal.porcentaje + '%' }"></div>
           </div>
         </div>
 
-        <!-- Info de paginación -->
+        <!-- Info paginación -->
         <div v-if="totalPaginas > 1" class="pagination-info">
           Mostrando {{ (paginaActual - 1) * 10 + 1 }}–{{ Math.min(paginaActual * 10, revisionData.zonas.length) }}
           de {{ revisionData.zonas.length }} zonas
         </div>
 
-        <!-- Lista de zonas (paginada) -->
+        <!-- Lista de zonas -->
         <div class="zonas-list">
           <div
             v-for="(zona, indexPagina) in zonasPaginadas"
@@ -389,16 +394,11 @@ onMounted(() => {
                 {{ progresoZona(zona).revisados }}/{{ progresoZona(zona).total }} cajones revisados
               </div>
               <div class="zona-mini-bar">
-                <div
-                  class="zona-mini-fill"
-                  :style="{ width: progresoZona(zona).porcentaje + '%' }"
-                ></div>
+                <div class="zona-mini-fill" :style="{ width: progresoZona(zona).porcentaje + '%' }"></div>
               </div>
             </div>
 
-            <div v-if="progresoZona(zona).porcentaje === 100 && progresoZona(zona).total > 0" class="zona-check">
-              ✓
-            </div>
+            <div v-if="progresoZona(zona).porcentaje === 100 && progresoZona(zona).total > 0" class="zona-check">✓</div>
             <div v-else class="zona-arrow">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -409,16 +409,11 @@ onMounted(() => {
 
         <!-- Paginación -->
         <div v-if="totalPaginas > 1" class="pagination">
-          <button
-            class="pagination-btn"
-            :disabled="paginaActual === 1"
-            @click="irAPagina(paginaActual - 1)"
-          >
+          <button class="pagination-btn" :disabled="paginaActual === 1" @click="irAPagina(paginaActual - 1)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
           </button>
-
           <div class="pagination-pages">
             <button
               v-for="pagina in totalPaginas"
@@ -426,29 +421,20 @@ onMounted(() => {
               class="pagination-page"
               :class="{ active: pagina === paginaActual }"
               @click="irAPagina(pagina)"
-            >
-              {{ pagina }}
-            </button>
+            >{{ pagina }}</button>
           </div>
-
-          <button
-            class="pagination-btn"
-            :disabled="paginaActual === totalPaginas"
-            @click="irAPagina(paginaActual + 1)"
-          >
+          <button class="pagination-btn" :disabled="paginaActual === totalPaginas" @click="irAPagina(paginaActual + 1)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
         </div>
 
-        <button class="btn-finalizar" @click="finalizarRevision">
-          Finalizar
-        </button>
+        <button class="btn-finalizar" @click="finalizarRevision">Finalizar</button>
       </template>
     </div>
 
-    <!-- ── Modal de zona ── -->
+    <!-- Modal de zona -->
     <div v-if="isModalOpen && zonaActual" class="modal show" @click.self="cerrarModal">
       <div class="modal-content">
 
@@ -463,24 +449,15 @@ onMounted(() => {
         </div>
 
         <div class="modal-actions">
-          <button class="btn-select-all" @click="seleccionarZonaCompleta">
-            Seleccionar toda la zona
-          </button>
+          <button class="btn-select-all" @click="seleccionarZonaCompleta">Seleccionar toda la zona</button>
         </div>
 
         <div class="modal-body">
 
-          <!-- Cajones colapsables -->
+          <!-- Cajones -->
           <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0">
-            <div
-              v-for="(cajon, cajonIndex) in zonaActual.cajones"
-              :key="cajonIndex"
-              class="cajon-section"
-            >
-              <div
-                class="cajon-header"
-                @click="toggleCajon(zonaActualIndex!, cajonIndex)"
-              >
+            <div v-for="(cajon, cajonIndex) in zonaActual.cajones" :key="cajonIndex" class="cajon-section">
+              <div class="cajon-header" @click="toggleCajon(zonaActualIndex!, cajonIndex)">
                 <div class="cajon-header-left">
                   <svg
                     class="cajon-chevron"
@@ -491,40 +468,21 @@ onMounted(() => {
                   </svg>
                   <h3>{{ cajon.nombreCajon }}</h3>
                 </div>
-
-                <button
-                  class="btn-select-cajon"
-                  @click.stop="seleccionarCajon(zonaActualIndex!, cajonIndex)"
-                >
+                <button class="btn-select-cajon" @click.stop="seleccionarCajon(zonaActualIndex!, cajonIndex)">
                   Seleccionar cajón
                 </button>
               </div>
 
-              <div
-                v-show="isCajonExpandido(zonaActualIndex!, cajonIndex)"
-                class="cajon-materials"
-              >
-                <div
-                  v-for="(material, materialIndex) in cajon.materiales"
-                  :key="materialIndex"
-                  class="material-item"
-                >
+              <div v-show="isCajonExpandido(zonaActualIndex!, cajonIndex)" class="cajon-materials">
+                <div v-for="(material, materialIndex) in cajon.materiales" :key="materialIndex" class="material-item">
                   <div class="material-info">
                     <div class="material-name">{{ material.nombreProducto }}</div>
                     <div class="material-cantidad">Cantidad esperada: {{ material.cantidad }}</div>
                   </div>
                   <div class="quantity-controls">
-                    <button
-                      class="btn-quantity minus"
-                      :disabled="(material.cantidadRevisada || 0) === 0"
-                      @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, -1)"
-                    >−</button>
+                    <button class="btn-quantity minus" :disabled="(material.cantidadRevisada || 0) === 0" @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, -1)">−</button>
                     <span class="quantity-value">{{ material.cantidadRevisada || 0 }}</span>
-                    <button
-                      class="btn-quantity plus"
-                      :disabled="(material.cantidadRevisada || 0) >= material.cantidad"
-                      @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, 1)"
-                    >+</button>
+                    <button class="btn-quantity plus" :disabled="(material.cantidadRevisada || 0) >= material.cantidad" @click="cambiarCantidad(zonaActualIndex!, cajonIndex, materialIndex, 1)">+</button>
                   </div>
                 </div>
               </div>
@@ -533,31 +491,16 @@ onMounted(() => {
 
           <!-- Materiales directos -->
           <div v-if="zonaActual.materiales && zonaActual.materiales.length > 0" class="materiales-directos">
-            <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0" class="materiales-directos-title">
-              Materiales sueltos
-            </div>
-
-            <div
-              v-for="(material, materialIndex) in zonaActual.materiales"
-              :key="materialIndex"
-              class="material-item"
-            >
+            <div v-if="zonaActual.cajones && zonaActual.cajones.length > 0" class="materiales-directos-title">Materiales sueltos</div>
+            <div v-for="(material, materialIndex) in zonaActual.materiales" :key="materialIndex" class="material-item">
               <div class="material-info">
                 <div class="material-name">{{ material.nombreProducto }}</div>
                 <div class="material-cantidad">Cantidad esperada: {{ material.cantidad }}</div>
               </div>
               <div class="quantity-controls">
-                <button
-                  class="btn-quantity minus"
-                  :disabled="(material.cantidadRevisada || 0) === 0"
-                  @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, -1)"
-                >−</button>
+                <button class="btn-quantity minus" :disabled="(material.cantidadRevisada || 0) === 0" @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, -1)">−</button>
                 <span class="quantity-value">{{ material.cantidadRevisada || 0 }}</span>
-                <button
-                  class="btn-quantity plus"
-                  :disabled="(material.cantidadRevisada || 0) >= material.cantidad"
-                  @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, 1)"
-                >+</button>
+                <button class="btn-quantity plus" :disabled="(material.cantidadRevisada || 0) >= material.cantidad" @click="cambiarCantidad(zonaActualIndex!, null, materialIndex, 1)">+</button>
               </div>
             </div>
           </div>
@@ -565,6 +508,19 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Modal confirmar salir -->
+    <div v-if="mostrarModalSalir" class="modal-overlay">
+      <div class="modal-confirm">
+        <p>¿Estás seguro de que quieres salir?</p>
+        <p class="modal-sub">El progreso se guardará automáticamente.</p>
+        <div class="modal-buttons">
+          <button class="btn-cancelar" @click="cancelarSalir">Cancelar</button>
+          <button class="btn-aceptar" @click="confirmarSalir">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -582,7 +538,6 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-// Header
 .header {
   display: flex;
   align-items: center;
@@ -609,22 +564,14 @@ onMounted(() => {
   }
 
   &:hover { background: $menu-item-hover; }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
-.reload-button {
-  &.spinning svg {
-    animation: spin 0.8s linear infinite;
-  }
+.reload-button.spinning svg {
+  animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 h1 {
   font-size: 20px;
@@ -648,7 +595,6 @@ h1 {
   color: $text-gray;
 }
 
-// Error con botón reintentar
 .error-box {
   display: flex;
   flex-direction: column;
@@ -669,15 +615,10 @@ h1 {
   font-size: 14px;
   font-weight: $font-semibold;
   cursor: pointer;
-  transition: background 0.2s;
-
   &:hover { background: $primary-red-hover; }
 }
 
-// Progreso total
-.progress-section {
-  margin-bottom: 16px;
-}
+.progress-section { margin-bottom: 16px; }
 
 .progress-label {
   display: flex;
@@ -702,7 +643,6 @@ h1 {
   transition: width 0.3s ease;
 }
 
-// Info paginación
 .pagination-info {
   font-size: 12px;
   color: $text-gray;
@@ -710,7 +650,6 @@ h1 {
   margin-bottom: 12px;
 }
 
-// Zonas list
 .zonas-list {
   display: flex;
   flex-direction: column;
@@ -740,11 +679,7 @@ h1 {
     .zona-progress-text { color: rgba(255, 255, 255, 0.8); }
     .zona-mini-bar { background: rgba(255,255,255,0.3); }
     .zona-mini-fill { background: $white; }
-
-    .zona-check {
-      background-color: $white;
-      color: $zona-completed-bg;
-    }
+    .zona-check { background-color: $white; color: $zona-completed-bg; }
   }
 }
 
@@ -782,12 +717,7 @@ h1 {
   display: flex;
   align-items: center;
   margin-left: 12px;
-
-  svg {
-    width: 20px;
-    height: 20px;
-    stroke: $text-gray;
-  }
+  svg { width: 20px; height: 20px; stroke: $text-gray; }
 }
 
 .zona-check {
@@ -804,7 +734,6 @@ h1 {
   flex-shrink: 0;
 }
 
-// Paginación
 .pagination {
   display: flex;
   align-items: center;
@@ -825,27 +754,12 @@ h1 {
   justify-content: center;
   transition: all 0.2s;
 
-  svg {
-    width: 18px;
-    height: 18px;
-    stroke: $text-dark;
-  }
-
-  &:hover:not(:disabled) {
-    background: $menu-item-hover;
-    border-color: $text-gray;
-  }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
+  svg { width: 18px; height: 18px; stroke: $text-dark; }
+  &:hover:not(:disabled) { background: $menu-item-hover; border-color: $text-gray; }
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
 }
 
-.pagination-pages {
-  display: flex;
-  gap: 4px;
-}
+.pagination-pages { display: flex; gap: 4px; }
 
 .pagination-page {
   width: 36px;
@@ -859,18 +773,10 @@ h1 {
   color: $text-dark;
   transition: all 0.2s;
 
-  &:hover:not(.active) {
-    background: $menu-item-hover;
-  }
-
-  &.active {
-    background: $primary-red;
-    border-color: $primary-red;
-    color: $white;
-  }
+  &:hover:not(.active) { background: $menu-item-hover; }
+  &.active { background: $primary-red; border-color: $primary-red; color: $white; }
 }
 
-// Botón finalizar
 .btn-finalizar {
   @include button-base;
   width: 100%;
@@ -878,11 +784,10 @@ h1 {
   background-color: $primary-red;
   color: $white;
   font-size: 16px;
-
   &:hover { background-color: $primary-red-hover; }
 }
 
-// Modal
+// Modal zona
 .modal {
   display: none;
   position: fixed;
@@ -938,12 +843,7 @@ h1 {
   align-items: center;
   justify-content: center;
 
-  svg {
-    width: 24px;
-    height: 24px;
-    stroke: $text-gray;
-  }
-
+  svg { width: 24px; height: 24px; stroke: $text-gray; }
   &:hover { opacity: 0.7; }
 }
 
@@ -963,7 +863,6 @@ h1 {
   font-weight: $font-semibold;
   cursor: pointer;
   transition: opacity 0.2s;
-
   &:hover { opacity: 0.9; }
 }
 
@@ -973,10 +872,7 @@ h1 {
   flex: 1;
 }
 
-// Cajón colapsable
-.cajon-section {
-  margin-bottom: 16px;
-}
+.cajon-section { margin-bottom: 16px; }
 
 .cajon-header {
   display: flex;
@@ -988,7 +884,6 @@ h1 {
   cursor: pointer;
   user-select: none;
   transition: background 0.2s;
-
   &:hover { background-color: #eeeeee; }
 }
 
@@ -998,11 +893,7 @@ h1 {
   gap: 8px;
   flex: 1;
 
-  h3 {
-    font-size: 15px;
-    font-weight: $font-semibold;
-    color: $text-dark;
-  }
+  h3 { font-size: 15px; font-weight: $font-semibold; color: $text-dark; }
 }
 
 .cajon-chevron {
@@ -1011,7 +902,6 @@ h1 {
   stroke: $text-gray;
   transition: transform 0.25s ease;
   flex-shrink: 0;
-
   &.rotated { transform: rotate(180deg); }
 }
 
@@ -1027,13 +917,10 @@ h1 {
   margin-left: 8px;
   transition: opacity 0.2s;
   white-space: nowrap;
-
   &:hover { opacity: 0.9; }
 }
 
-.cajon-materials {
-  padding-left: 8px;
-}
+.cajon-materials { padding-left: 8px; }
 
 .material-item {
   display: flex;
@@ -1041,7 +928,6 @@ h1 {
   justify-content: space-between;
   padding: 12px;
   border-bottom: 1px solid #f0f0f0;
-
   &:last-child { border-bottom: none; }
 }
 
@@ -1080,16 +966,8 @@ h1 {
   color: $primary-red;
   transition: all 0.2s;
 
-  &:hover:not(:disabled) {
-    background-color: $primary-red;
-    color: $white;
-  }
-
-  &:disabled {
-    border-color: $progress-inactive;
-    color: $progress-inactive;
-    cursor: not-allowed;
-  }
+  &:hover:not(:disabled) { background-color: $primary-red; color: $white; }
+  &:disabled { border-color: $progress-inactive; color: $progress-inactive; cursor: not-allowed; }
 }
 
 .quantity-value {
@@ -1107,6 +985,69 @@ h1 {
   font-weight: $font-semibold;
   margin-bottom: 12px;
   color: $text-dark;
+}
+
+// Modal confirmar salir
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-confirm {
+  background: $white;
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  p {
+    font-size: 16px;
+    font-weight: $font-semibold;
+    color: $text-dark;
+    margin-bottom: 8px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    font-weight: $font-regular;
+    color: $text-gray;
+    margin-bottom: 24px;
+  }
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+
+  button {
+    padding: 12px 28px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: $font-semibold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cancelar {
+    background: #f0f0f0;
+    color: $text-dark;
+    &:hover { background: #e0e0e0; }
+  }
+
+  .btn-aceptar {
+    background: $primary-red;
+    color: $white;
+    &:hover { background: $primary-red-hover; }
+  }
 }
 
 @media (max-width: 480px) {
