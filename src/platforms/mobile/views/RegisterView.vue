@@ -16,11 +16,10 @@ const isLoading = ref(false)
 
 // Roles hardcodeados hasta que el back tenga el endpoint
 const roles = ref<string[]>([
+  'Administrador',
+  'Socorrista',
   'Sanitario',
-  'Técnico de emergencias',
-  'Operador',
-  'Supervisor',
-  'Administrador'
+  'Técnico de emergencias'
 ])
 
 const showError = (message: string) => {
