@@ -36,6 +36,13 @@ const isLoading = ref(true)
 const isReloading = ref(false)
 const error = ref<string | null>(null)
 
+// Modal salir
+const mostrarModalSalir = ref(false)
+
+// Modal error finalizar
+const mostrarModalError = ref(false)
+const mensajeError = ref('')
+
 // Paginacion
 const ZONAS_POR_PAGINA = 10
 const paginaActual = ref(1)
@@ -63,7 +70,6 @@ const irAPagina = (pagina: number) => {
     zonaActualIndex.value = null
   }
 }
-
 
 const zonaActual = ref<Zona | null>(null)
 const zonaActualIndex = ref<number | null>(null)
@@ -128,7 +134,6 @@ const cargarRevision = async (recarga = false) => {
     ambulanciaId.value = getAmbulanciaSeleccionada()
 
     if (!ambulanciaId.value) {
-      alert('No se ha seleccionado ninguna ambulancia')
       router.push('/principal/seleccion-ambulancia')
       return
     }
@@ -262,10 +267,18 @@ const seleccionarZonaCompleta = () => {
   guardarEstado()
 }
 
+// Modal salir
 const goBack = () => {
-  if (confirm('¿Estás seguro de que quieres salir? El progreso se guardará automáticamente.')) {
-    router.push('/principal/nombre-responsable')
-  }
+  mostrarModalSalir.value = true
+}
+
+const confirmarSalir = () => {
+  mostrarModalSalir.value = false
+  router.push('/principal/nombre-responsable')
+}
+
+const cancelarSalir = () => {
+  mostrarModalSalir.value = false
 }
 
 const finalizarRevision = async () => {
@@ -276,7 +289,8 @@ const finalizarRevision = async () => {
     const nombreResponsable = getNombreResponsable()
 
     if (!servicioId || !nombreResponsable) {
-      alert('Faltan datos para finalizar la revisión')
+      mensajeError.value = 'Faltan datos para finalizar la revisión'
+      mostrarModalError.value = true
       return
     }
 
@@ -297,7 +311,8 @@ const finalizarRevision = async () => {
 
   } catch (err) {
     console.error('Error:', err)
-    alert('Error al guardar la revisión: ' + (err instanceof Error ? err.message : 'Error desconocido'))
+    mensajeError.value = 'Error al guardar la revisión: ' + (err instanceof Error ? err.message : 'Error desconocido')
+    mostrarModalError.value = true
   }
 }
 
@@ -538,6 +553,29 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Modal confirmar salir -->
+    <div v-if="mostrarModalSalir" class="modal-overlay">
+      <div class="modal-confirm">
+        <p>¿Estás seguro de que quieres salir?</p>
+        <p class="modal-sub">El progreso se guardará automáticamente.</p>
+        <div class="modal-buttons">
+          <button class="btn-cancelar" @click="cancelarSalir">Cancelar</button>
+          <button class="btn-aceptar" @click="confirmarSalir">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal error -->
+    <div v-if="mostrarModalError" class="modal-overlay">
+      <div class="modal-confirm">
+        <p>⚠️ Error</p>
+        <p class="modal-sub">{{ mensajeError }}</p>
+        <div class="modal-buttons">
+          <button class="btn-aceptar" @click="mostrarModalError = false">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -545,7 +583,6 @@ onMounted(() => {
 @import '@ui/assets/styles/variables';
 @import '@ui/assets/styles/mixins';
 
-// Layout desktop: dos columnas
 .revision-desktop {
   display: grid;
   grid-template-columns: 420px 1fr;
@@ -570,7 +607,6 @@ onMounted(() => {
   flex-direction: column;
 }
 
-// Estado vacio del panel derecho
 .panel-empty {
   flex: 1;
   display: flex;
@@ -595,8 +631,6 @@ onMounted(() => {
   }
 }
 
-
-// Header
 .header {
   display: flex;
   align-items: center;
@@ -677,7 +711,6 @@ h1 {
   &:hover { background: $primary-red-hover; }
 }
 
-// Progreso total
 .progress-section { margin-bottom: 16px; }
 
 .progress-label {
@@ -703,7 +736,6 @@ h1 {
   transition: width 0.3s ease;
 }
 
-// Info paginacion
 .pagination-info {
   font-size: 12px;
   color: $text-gray;
@@ -711,7 +743,6 @@ h1 {
   margin-bottom: 12px;
 }
 
-// Zonas list
 .zonas-list {
   display: flex;
   flex-direction: column;
@@ -732,7 +763,6 @@ h1 {
 
   &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
 
-  // Zona seleccionada actualmente en el panel derecho
   &.active {
     border-color: $primary-red;
     box-shadow: 0 0 0 2px rgba($primary-red, 0.15);
@@ -805,7 +835,6 @@ h1 {
   flex-shrink: 0;
 }
 
-// Paginación
 .pagination {
   display: flex;
   align-items: center;
@@ -849,7 +878,6 @@ h1 {
   &.active { background: $primary-red; border-color: $primary-red; color: $white; }
 }
 
-// Botón finalizar
 .btn-finalizar {
   @include button-base;
   width: 100%;
@@ -859,7 +887,6 @@ h1 {
   font-size: 16px;
   &:hover { background-color: $primary-red-hover; }
 }
-
 
 .modal-content {
   background: $white;
@@ -909,7 +936,6 @@ h1 {
   flex: 1;
 }
 
-// Cajones
 .cajon-section { margin-bottom: 16px; }
 
 .cajon-header {
@@ -964,7 +990,6 @@ h1 {
 
 .cajon-materials { padding-left: 8px; }
 
-// Materiales
 .material-item {
   display: flex;
   align-items: center;
@@ -1028,5 +1053,68 @@ h1 {
   font-weight: $font-semibold;
   margin-bottom: 12px;
   color: $text-dark;
+}
+
+// Modales
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-confirm {
+  background: $white;
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  p {
+    font-size: 16px;
+    font-weight: $font-semibold;
+    color: $text-dark;
+    margin-bottom: 8px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    font-weight: $font-regular;
+    color: $text-gray;
+    margin-bottom: 24px;
+  }
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+
+  button {
+    padding: 12px 28px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: $font-semibold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cancelar {
+    background: #f0f0f0;
+    color: $text-dark;
+    &:hover { background: #e0e0e0; }
+  }
+
+  .btn-aceptar {
+    background: $primary-red;
+    color: $white;
+    &:hover { background: $primary-red-hover; }
+  }
 }
 </style>
