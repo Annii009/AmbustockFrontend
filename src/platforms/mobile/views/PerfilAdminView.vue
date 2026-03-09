@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onBeforeUnmount } from 'vue'
 import { useToast } from '@core/composables/useToast'
 import { useRouter } from 'vue-router'
 import { 
@@ -74,7 +75,6 @@ onMounted(() => {
 })
 
 // Cleanup
-import { onBeforeUnmount } from 'vue'
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeyDown)
 })
@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
       <div class="section">
         <h2 class="section-title">Operaciones</h2>
         <div class="menu-list">
-          <a class="menu-item" @click="irA('/lista-responsables')">
+          <a class="menu-item" @click="irA('/principal/responsables')">
             <div class="menu-icon" style="background-color: #ffe5e5">
               <svg viewBox="0 0 24 24" fill="none" stroke="#8B2E2E" stroke-width="2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -118,7 +118,7 @@ onBeforeUnmount(() => {
             </svg>
           </a>
 
-          <a class="menu-item" @click="irA('/ver-revisiones')">
+          <a class="menu-item" @click="irA('/principal/ver-revisiones')">
             <div class="menu-icon" style="background-color: #ffe5e5">
               <svg viewBox="0 0 24 24" fill="none" stroke="#8B2E2E" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
             </svg>
           </a>
 
-          <a class="menu-item" @click="irA('/historial-reposiciones')">
+          <a class="menu-item" @click="irA('/principal/historial')">
             <div class="menu-icon" style="background-color: #ffe5e5">
               <svg viewBox="0 0 24 24" fill="none" stroke="#8B2E2E" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -148,7 +148,7 @@ onBeforeUnmount(() => {
             </svg>
           </a>
 
-          <a class="menu-item" @click="irA('/editar-ambulancias')">
+          <a class="menu-item" @click="irA('/principal/ambulancias')">
             <div class="menu-icon" style="background-color: #ffe5e5">
               <svg viewBox="0 0 24 24" fill="none" stroke="#8B2E2E" stroke-width="2">
                 <rect x="1" y="3" width="15" height="13"></rect>
